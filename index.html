@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIVER LAND — by Next Level Consulting</title>
+<meta name="description" content="Στρατηγική Ευκαιρία Ανάπτυξης Γης στη Λεμεσό. Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0E1A0E;
+  --bg-primary: #1B2E1B;
+  --bg-card: #243524;
+  --bg-accent: #2C4A2C;
+  --gold: #C4A86B;
+  --gold-light: #D4BE8A;
+  --cream: #E8DFC4;
+  --cream-light: #F2EDDF;
+  --text-primary: #E8DFC4;
+  --text-secondary: #A09878;
+  --text-muted: #6B6B5A;
+  --green-glow: rgba(100, 160, 100, 0.08);
+  --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ==================== TYPOGRAPHY ==================== */
+h1, h2, h3, .display { font-family: 'Cormorant Garamond', serif; font-weight: 500; }
+h1 { font-size: clamp(2.8rem, 6vw, 5rem); line-height: 1.1; letter-spacing: -0.02em; }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.2; }
+h3 { font-size: clamp(1.2rem, 2vw, 1.6rem); line-height: 1.3; }
+.label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.body-text { font-size: 0.95rem; color: var(--text-secondary); font-weight: 300; }
+
+/* ==================== LAYOUT ==================== */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+.section { padding: 8rem 0; position: relative; }
+.section--dark { background: var(--bg-deep); }
+.section--mid { background: var(--bg-primary); }
+
+/* ==================== NAVIGATION ==================== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 1.2rem 2rem;
+  transition: var(--transition);
+  backdrop-filter: blur(0px);
+}
+nav.scrolled {
+  background: rgba(14, 26, 14, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(196, 168, 107, 0.1);
+  padding: 0.8rem 2rem;
+}
+nav .nav-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+nav .nav-brand {
+  display: flex; align-items: center; gap: 0.8rem;
+  text-decoration: none; color: var(--cream);
+}
+nav .nav-brand-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em;
+}
+nav .nav-brand-sub {
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-secondary); display: block;
+}
+nav .nav-links { display: flex; gap: 2rem; list-style: none; }
+nav .nav-links a {
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em;
+  text-transform: uppercase; transition: color 0.3s;
+  position: relative;
+}
+nav .nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 1px; background: var(--gold);
+  transition: width 0.3s;
+}
+nav .nav-links a:hover { color: var(--gold); }
+nav .nav-links a:hover::after { width: 100%; }
+
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+.nav-toggle span {
+  display: block; width: 24px; height: 2px; background: var(--cream);
+  margin: 5px 0; transition: 0.3s;
+}
+
+/* ==================== HERO ==================== */
+.hero {
+  height: 100vh; min-height: 700px;
+  display: flex; align-items: center;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(14,26,14,0.95) 0%, rgba(14,26,14,0.7) 40%, rgba(14,26,14,0.3) 100%);
+  z-index: 1;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: url('assets/forest-pano.jpg') center/cover no-repeat;
+  transform: scale(1.05);
+  animation: heroZoom 20s ease-in-out infinite alternate;
+}
+@keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.12); } }
+
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 700px; padding: 0 2rem;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow .line { width: 40px; height: 1px; background: var(--gold); }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero h1 em {
+  font-style: italic; color: var(--gold);
+  font-weight: 400;
+}
+.hero .hero-sub {
+  font-size: 1.05rem; color: var(--text-secondary);
+  font-weight: 300; max-width: 520px; margin-bottom: 2.5rem;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  padding: 0.9rem 2rem; border: 1px solid var(--gold);
+  color: var(--gold); text-decoration: none;
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; transition: var(--transition);
+}
+.hero-cta:hover {
+  background: var(--gold); color: var(--bg-deep);
+}
+.hero-scroll {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  z-index: 2; color: var(--text-muted); font-size: 0.7rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.hero-scroll .scroll-line {
+  width: 1px; height: 40px; background: var(--gold); opacity: 0.5;
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
+  50% { opacity: 0.8; transform: scaleY(1); }
+}
+
+/* ==================== GOLD DIVIDER ==================== */
+.gold-divider {
+  width: 60px; height: 1px; background: var(--gold); margin: 1.2rem 0;
+}
+
+/* ==================== STATS SECTION ==================== */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  margin-top: 3rem;
+}
+.stat-card {
+  background: var(--bg-card); padding: 2rem; border-top: 2px solid var(--gold);
+  transition: var(--transition);
+}
+.stat-card:hover { transform: translateY(-4px); background: var(--bg-accent); }
+.stat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem; font-weight: 600; color: var(--gold);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.85rem; color: var(--cream); font-weight: 500;
+  margin: 0.5rem 0;
+}
+.stat-desc { font-size: 0.8rem; color: var(--text-muted); font-weight: 300; }
+
+/* ==================== PILLARS (VISION) ==================== */
+.pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 3rem; }
+.pillar {
+  border-top: 2px solid var(--gold); padding-top: 1.5rem;
+}
+.pillar h3 { color: var(--cream); margin-bottom: 0.8rem; }
+.pillar p { color: var(--text-secondary); font-size: 0.9rem; font-weight: 300; }
+
+/* ==================== PHOTO STRIP ==================== */
+.photo-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  margin-top: 3rem; overflow: hidden;
+}
+.photo-strip img {
+  width: 100%; height: 200px; object-fit: cover;
+  transition: var(--transition);
+  filter: saturate(0.8);
+}
+.photo-strip img:hover { filter: saturate(1.1); transform: scale(1.02); }
+
+/* ==================== INTERACTIVE MASTERPLAN ==================== */
+.masterplan-section { padding: 6rem 0; background: var(--bg-deep); }
+.masterplan-wrapper {
+  position: relative; max-width: 1100px; margin: 3rem auto 0;
+  background: #fff; border-radius: 4px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.masterplan-wrapper img {
+  width: 100%; height: auto; display: block;
+}
+.masterplan-svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.zone {
+  fill: transparent; stroke: transparent; stroke-width: 1.5;
+  cursor: pointer; transition: all 0.3s;
+}
+.zone:hover {
+  fill: rgba(196, 168, 107, 0.2);
+  stroke: var(--gold); stroke-width: 2;
+}
+.zone-tooltip {
+  position: absolute; pointer-events: none;
+  background: rgba(14, 26, 14, 0.95); border: 1px solid var(--gold);
+  padding: 1rem 1.4rem; border-radius: 2px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.25s ease;
+  max-width: 260px; z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.zone-tooltip.visible { opacity: 1; transform: translateY(0); }
+.zone-tooltip .zt-label { color: var(--gold); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.zone-tooltip .zt-title { font-family: 'Cormorant Garamond', serif; color: var(--cream); font-size: 1.1rem; margin-bottom: 0.4rem; }
+.zone-tooltip .zt-desc { color: var(--text-secondary); font-size: 0.78rem; font-weight: 300; line-height: 1.5; }
+
+.masterplan-legend {
+  display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem;
+  justify-content: center;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.78rem; color: var(--text-secondary);
+}
+.legend-dot {
+  width: 12px; height: 12px; border-radius: 2px;
+}
+
+/* ==================== DIFFERENCE SECTION ==================== */
+.diff-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+  margin-top: 3rem; align-items: start;
+}
+.diff-card {
+  padding: 2.5rem; background: var(--bg-card);
+  border-left: 3px solid var(--gold);
+}
+.diff-card h3 { color: var(--cream); margin-bottom: 1rem; }
+.diff-card p { color: var(--text-secondary); font-size: 0.9rem; font-weight: 300; }
+
+.diff-images {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
+}
+.diff-images img {
+  width: 100%; height: 150px; object-fit: cover;
+  filter: saturate(0.7); transition: var(--transition);
+}
+.diff-images img:hover { filter: saturate(1); }
+
+/* ==================== NUMBERS ==================== */
+.numbers-split {
+  display: grid; grid-template-columns: 1fr 1px 1fr; gap: 3rem;
+  margin-top: 3rem;
+}
+.numbers-divider { background: var(--gold); opacity: 0.3; }
+.big-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4.5rem; font-weight: 700; color: var(--gold);
+  line-height: 1;
+}
+.number-row { margin-bottom: 1.5rem; }
+.number-row h4 { color: var(--cream); font-size: 0.95rem; font-weight: 500; margin-bottom: 0.3rem; }
+.number-row p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 300; }
+
+/* ==================== LOCATION MAP ==================== */
+.location-section { padding: 6rem 0; background: var(--bg-primary); overflow: hidden; }
+.location-map-container {
+  position: relative; margin-top: 3rem;
+  border-radius: 4px; overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.location-map-container img {
+  width: 100%; height: auto; display: block;
+  filter: saturate(0.85) brightness(0.95);
+}
+.location-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(14,26,14,0.1) 0%, rgba(14,26,14,0.5) 100%);
+}
+.location-info {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
+  margin-top: 2rem;
+}
+.loc-card {
+  text-align: center; padding: 1.5rem 1rem;
+  background: var(--bg-card); border-top: 2px solid var(--gold);
+}
+.loc-card .loc-time {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; color: var(--gold); font-weight: 600;
+}
+.loc-card .loc-place { font-size: 0.8rem; color: var(--cream); margin-top: 0.3rem; }
+.loc-card .loc-dist { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+/* ==================== FOOTER ==================== */
+footer {
+  background: var(--bg-deep);
+  border-top: 1px solid rgba(196, 168, 107, 0.15);
+  padding: 4rem 0 2rem;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem;
+  margin-bottom: 3rem;
+}
+.footer-brand h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; color: var(--cream); margin-bottom: 0.5rem;
+}
+.footer-brand p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 300; max-width: 380px; }
+.footer-col h4 {
+  color: var(--gold); font-size: 0.7rem; letter-spacing: 0.15em;
+  text-transform: uppercase; margin-bottom: 1rem;
+}
+.footer-col a, .footer-col p {
+  display: block; color: var(--text-secondary); text-decoration: none;
+  font-size: 0.85rem; margin-bottom: 0.5rem; transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--gold); }
+.footer-bottom {
+  border-top: 1px solid rgba(196, 168, 107, 0.1);
+  padding-top: 1.5rem; display: flex; justify-content: space-between;
+  font-size: 0.75rem; color: var(--text-muted);
+}
+
+/* ==================== REVEAL ANIMATION ==================== */
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.15s; }
+.reveal-delay-2 { transition-delay: 0.3s; }
+.reveal-delay-3 { transition-delay: 0.45s; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 900px) {
+  .stats-grid, .pillars { grid-template-columns: 1fr; }
+  .diff-grid { grid-template-columns: 1fr; }
+  .numbers-split { grid-template-columns: 1fr; gap: 2rem; }
+  .numbers-divider { display: none; }
+  .location-info { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr; }
+  nav .nav-links { display: none; }
+  .nav-toggle { display: block; }
+  .hero-content { padding: 0 1.5rem; }
+}
+@media (max-width: 600px) {
+  .photo-strip { grid-template-columns: 1fr; }
+  .location-info { grid-template-columns: 1fr; }
+  .diff-images { grid-template-columns: 1fr; }
+  .section { padding: 5rem 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== NAVIGATION ==================== -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#home" class="nav-brand">
+      <div>
+        <span class="nav-brand-text">RIVER LAND</span>
+        <span class="nav-brand-sub">by Next Level Consulting</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#opportunity">Ευκαιρία</a></li>
+      <li><a href="#vision">Όραμα</a></li>
+      <li><a href="#masterplan">Masterplan</a></li>
+      <li><a href="#difference">Διαφορά</a></li>
+      <li><a href="#location">Τοποθεσία</a></li>
+      <li><a href="#contact">Επικοινωνία</a></li>
+    </ul>
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-content container">
+    <div class="hero-eyebrow">
+      <span class="line"></span>
+      <span class="label">Στρατηγική Ευκαιρία Ανάπτυξης Γης</span>
+    </div>
+    <h1>RIVER<br><em>LAND</em></h1>
+    <p class="hero-sub">Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό — στην καρδιά της Λεμεσού.</p>
+    <a href="#opportunity" class="hero-cta">
+      Ανακαλύψτε το Έργο
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <span>Κύλιση</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ==================== OPPORTUNITY ==================== -->
+<section class="section section--dark" id="opportunity">
+  <div class="container">
+    <span class="label reveal">Η Ευκαιρία</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Μια Στρατηγική Ευκαιρία<br><em style="color:var(--gold);font-style:italic;">Μετασχηματισμού Γης</em></h2>
+    <div class="gold-divider reveal"></div>
+    <p class="body-text reveal" style="max-width:720px;">
+      Η παρούσα πρόταση αξιοποιεί ένα ειδικό κυβερνητικό πολεοδομικό πρόγραμμα που επιτρέπει τη μετατροπή γεωργικής και δασικής γης σε περιοχές οικιστικής και εμπορικής ανάπτυξης, υπό συγκεκριμένες προϋποθέσεις.
+    </p>
+    <div class="stats-grid">
+      <div class="stat-card reveal">
+        <div class="stat-number">40κ</div>
+        <div class="stat-label">τ.μ. ελάχιστη έκταση πρασίνου</div>
+        <div class="stat-desc">Στα οποία θα προστεθούν επιπλέον 30κ τμ, δημιουργώντας τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</div>
+      </div>
+      <div class="stat-card reveal reveal-delay-1">
+        <div class="stat-number">30%</div>
+        <div class="stat-label">στρατηγικές αναπτύξεις</div>
+        <div class="stat-desc">Κλινικές, Κέντρα Αποκατάστασης, Ιδιωτικές Σχολές, Ερευνητικά Ινστιτούτα — χωρίς χωροταξικούς περιορισμούς.</div>
+      </div>
+      <div class="stat-card reveal reveal-delay-2">
+        <div class="stat-number">100κ</div>
+        <div class="stat-label">τ.μ. οικιστικός σχεδιασμός</div>
+        <div class="stat-desc">Πρωτοποριακός σχεδιασμός με απόλυτη ανεξαρτησία στον χώρο — μια πρωτοποριακή κοινότητα που δένει το έργο.</div>
+      </div>
+    </div>
+    <div class="photo-strip reveal" style="margin-top:3rem;">
+      <img src="assets/grid1.jpg" alt="Nature" loading="lazy">
+      <img src="assets/grid2.jpg" alt="Nature" loading="lazy">
+      <img src="assets/grid4.jpg" alt="Nature" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ==================== VISION ==================== -->
+<section class="section section--mid" id="vision">
+  <div class="container">
+    <span class="label reveal">Το Όραμα</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Δημιουργούμε μια Νέα<br><em style="color:var(--gold);font-style:italic;">Ποιοτική Ολιστική Ταυτότητα</em></h2>
+    <div class="gold-divider reveal"></div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <h3>Οικιστική Ανάπτυξη</h3>
+        <p>Πέραν των 100κ τμ γης παρέχονται ως αντιπαροχή στον επενδυτή με 28,5κ τμ συντελεστή δόμησης. Πέραν των 210 οικιστικών μονάδων μπορούν να διατεθούν στην αγορά, με δικαίωμα σταδιακής κατασκευής και παράδοσης.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-1">
+        <h3>Στρατηγικές Αναπτύξεις</h3>
+        <p>Σε έκταση 25κ τμ η κάθε μια και με συντελεστή δόμησης 7,5κ τμ, κάθε στρατηγική ανάπτυξη δένει άμεσα στον σχεδιασμό, τοποθετημένη σε αμφιθεατρικό χωροταξικό σχεδιασμό που αναδεικνύει τα προνόμια της τοποθεσίας.</p>
+      </div>
+      <div class="pillar reveal reveal-delay-2">
+        <h3>Περιβάλλοντες Χώροι</h3>
+        <p>Διπλασιάζουμε την απαιτούμενη ποσότητα πρασίνου: δίκτυο ποδηλατοδρόμων, πεζοδρόμων, υπαίθριων αμφιθεάτρων και ανοικτών γηπέδων σε έκταση που υπερβαίνει τις 70κ τμ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MASTERPLAN ==================== -->
+<section class="masterplan-section" id="masterplan">
+  <div class="container">
+    <span class="label reveal">Ο Σχεδιασμός</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em></h2>
+    <div class="gold-divider reveal"></div>
+    <p class="body-text reveal" style="max-width:600px;">Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.</p>
+  </div>
+  <div class="masterplan-wrapper reveal" id="masterplan-container">
+    <img src="assets/masterplan.jpg" alt="RIVERLAND Masterplan" id="masterplan-img">
+    <svg class="masterplan-svg" viewBox="0 0 1000 742" preserveAspectRatio="xMidYMid meet" id="masterplan-svg">
+      <!-- Zone 1: Strategic Development 1 (top-right, blue outlined area) -->
+      <polygon class="zone" data-zone="strat1"
+        points="540,80 680,30 740,60 750,200 680,240 600,220 550,180"/>
+      <!-- Zone 2: Strategic Development 2 (right middle) -->
+      <polygon class="zone" data-zone="strat2"
+        points="560,240 680,250 730,320 720,400 640,430 560,380 540,300"/>
+      <!-- Zone 3: Private Green Space (center, near river) -->
+      <polygon class="zone" data-zone="private-green"
+        points="400,180 480,170 520,200 530,280 520,360 490,440 440,500 400,480 380,380 370,280"/>
+      <!-- Zone 4: Public Green / Linear Park (along river belt) -->
+      <polygon class="zone" data-zone="public-green"
+        points="340,100 400,90 410,170 395,260 380,370 400,470 420,540 380,560 320,520 300,430 310,320 320,210"/>
+      <!-- Zone 5: Residential 1 (upper left cluster) -->
+      <polygon class="zone" data-zone="res1"
+        points="200,140 320,110 340,130 330,210 310,240 230,250 190,220"/>
+      <!-- Zone 6: Residential 2 (mid-left cluster) -->
+      <polygon class="zone" data-zone="res2"
+        points="190,260 290,250 320,270 330,340 300,370 210,380 175,340"/>
+      <!-- Zone 7: Residential 3 (lower-left cluster) -->
+      <polygon class="zone" data-zone="res3"
+        points="175,390 280,380 320,400 340,460 310,510 230,530 170,490"/>
+      <!-- Zone 8: Residential 4 (top cluster) -->
+      <polygon class="zone" data-zone="res4"
+        points="240,80 330,60 350,80 340,120 310,140 250,140 220,120"/>
+    </svg>
+    <div class="zone-tooltip" id="zone-tooltip">
+      <div class="zt-label"></div>
+      <div class="zt-title"></div>
+      <div class="zt-desc"></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="masterplan-legend reveal">
+      <div class="legend-item"><div class="legend-dot" style="background:#A8D08D;"></div> Οικιστικές Ζώνες</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4472C4;"></div> Στρατηγικές Αναπτύξεις</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#70AD47;"></div> Πράσινο & Πάρκα</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4EA0D6;"></div> Ποταμός</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E8B960;"></div> Οδικό Δίκτυο</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DIFFERENCE ==================== -->
+<section class="section section--mid" id="difference">
+  <div class="container">
+    <span class="label reveal">Η Διαφορά Μας</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em></h2>
+    <div class="gold-divider reveal"></div>
+    <p class="body-text reveal" style="max-width:600px;margin-bottom:2rem;">Δεν θέλουμε να σχεδιάσουμε ένα ακόμα έργο οικιστικής ανάπτυξης. Δημιουργούμε αποτύπωμα.</p>
+    <div class="diff-grid">
+      <div class="diff-card reveal">
+        <h3>Αποτύπωμα στον Χώρο</h3>
+        <p>Δεν σταματάμε στα πρέπει. Προσθέτουμε στα απαιτούμενα 40κ τμ πρασίνου, επιπλέον 30κ, για να φτιάξουμε τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</p>
+      </div>
+      <div class="diff-card reveal reveal-delay-1">
+        <h3>Υψηλή Εσωτερική Αξία</h3>
+        <p>Δεν μετασχηματίζουμε για να πωλήσουμε. Η ολιστική μας προσέγγιση δένει τις Στρατηγικές Αναπτύξεις με όλες τις πτυχές του έργου, προσθέτοντας στην ήδη υψηλή αξία του.</p>
+      </div>
+    </div>
+    <div class="diff-images reveal" style="margin-top:2rem;">
+      <img src="assets/accent1.jpg" alt="Detail" loading="lazy">
+      <img src="assets/accent2.jpg" alt="Detail" loading="lazy">
+      <img src="assets/accent3.jpg" alt="Detail" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ==================== NUMBERS ==================== -->
+<section class="section section--dark" id="numbers">
+  <div class="container">
+    <span class="label reveal">Σε Αριθμούς & Χρόνο</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Η Διαφορά Μας <em style="color:var(--gold);font-style:italic;">σε Βάθος</em></h2>
+    <div class="gold-divider reveal"></div>
+    <div class="numbers-split reveal">
+      <div>
+        <div class="big-number">30%+</div>
+        <p style="color:var(--text-secondary);font-size:1rem;margin:0.5rem 0 2rem;">πιθανότητες κερδοφορίας</p>
+        <div class="number-row">
+          <h4>Μηδενικό κόστος επένδυσης σε γη</h4>
+          <p>Η εταιρεία διατηρεί ρευστότητα μέχρι την έναρξη του έργου.</p>
+        </div>
+        <div class="number-row">
+          <h4>Μοναδικός σχεδιασμός</h4>
+          <p>Στρατηγικές Αναπτύξεις + μεγαλύτερος χώρος πρασίνου = υψηλή υπεραξία.</p>
+        </div>
+        <div class="number-row">
+          <h4>Εγγύτητα & Τοποθεσία</h4>
+          <p>10 λεπτά από αυτοκινητόδρομο, θάλασσα, κέντρο πόλης.</p>
+        </div>
+      </div>
+      <div class="numbers-divider"></div>
+      <div>
+        <div style="margin-bottom:2rem;">
+          <span class="label">Σε Χρόνο</span>
+        </div>
+        <div class="number-row">
+          <h4>Η αδειοδότηση</h4>
+          <p>Αναλαμβάνουμε και τα 3 στάδια υποβολής και επίβλεψης στη διαδικασία έγκρισης.</p>
+        </div>
+        <div class="number-row">
+          <h4>Το διάστημα έγκρισης</h4>
+          <p>Προπαρασκευαστικές εργασίες και προώθηση καθόλη τη διάρκεια αδειοδότησης.</p>
+        </div>
+        <div class="number-row">
+          <h4>Οι φάσεις υλοποίησης</h4>
+          <p>Υλοποίηση σε φάσεις με δικαίωμα διακοπής από τον επενδυτή τηρουμένων των διατάξεων.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LOCATION ==================== -->
+<section class="location-section" id="location">
+  <div class="container">
+    <span class="label reveal">Τοποθεσία</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Πύργος Λεμεσού — <em style="color:var(--gold);font-style:italic;">Στο Κέντρο Όλων</em></h2>
+    <div class="gold-divider reveal"></div>
+    <p class="body-text reveal" style="max-width:600px;">Στρατηγικά τοποθετημένο ανάμεσα σε αυτοκινητόδρομο, θάλασσα και κέντρο πόλης — μακριά από τον θόρυβο, κοντά σε ό,τι χρειάζεστε.</p>
+    <div class="location-map-container reveal">
+      <img src="assets/location-map.jpg" alt="RIVERLAND Location Map — Λεμεσός">
+      <div class="location-overlay"></div>
+    </div>
+    <div class="location-info">
+      <div class="loc-card reveal">
+        <div class="loc-time">10'</div>
+        <div class="loc-place">Κέντρο Λεμεσού</div>
+        <div class="loc-dist">~8 km μέσω A1</div>
+      </div>
+      <div class="loc-card reveal reveal-delay-1">
+        <div class="loc-time">5'</div>
+        <div class="loc-place">Αυτοκινητόδρομος A1</div>
+        <div class="loc-dist">Άμεση πρόσβαση</div>
+      </div>
+      <div class="loc-card reveal reveal-delay-2">
+        <div class="loc-time">12'</div>
+        <div class="loc-place">Παραλία Δασούδι</div>
+        <div class="loc-dist">~10 km</div>
+      </div>
+      <div class="loc-card reveal reveal-delay-3">
+        <div class="loc-time">15'</div>
+        <div class="loc-place">Μαρίνα Λεμεσού</div>
+        <div class="loc-dist">~12 km</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>RIVER LAND</h3>
+        <div class="gold-divider"></div>
+        <p>Ένα ολιστικό έργο ανάπτυξης γης στον Πύργο Λεμεσού, σχεδιασμένο από τη Next Level Consulting.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Πλοήγηση</h4>
+        <a href="#opportunity">Ευκαιρία</a>
+        <a href="#vision">Όραμα</a>
+        <a href="#masterplan">Master Plan</a>
+        <a href="#difference">Διαφορά</a>
+        <a href="#location">Τοποθεσία</a>
+      </div>
+      <div class="footer-col">
+        <h4>Επικοινωνία</h4>
+        <p>Next Level Consulting</p>
+        <p>Αγίου Ιωάννη 3, Λεμεσός</p>
+        <p>70008017</p>
+        <a href="mailto:nlc@nlc-consulting.org">nlc@nlc-consulting.org</a>
+        <a href="https://nlc-consulting.org" target="_blank">nlc-consulting.org</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 RIVER LAND by NLC. All rights reserved.</span>
+      <span>riverlandbynlc.org</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+// ---- NAV SCROLL ----
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ---- REVEAL ON SCROLL ----
+const reveals = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.15 });
+reveals.forEach(el => revealObserver.observe(el));
+
+// ---- MASTERPLAN INTERACTIVE ZONES ----
+const zoneData = {
+  'strat1': {
+    label: 'Στρατηγική Ανάπτυξη',
+    title: '1η Στρατηγική Ανάπτυξη',
+    desc: 'Έκταση 25.000 τ.μ. με συντελεστή δόμησης 7.500 τ.μ. Κλινικές, ερευνητικά ινστιτούτα ή εκπαιδευτικοί φορείς.'
+  },
+  'strat2': {
+    label: 'Στρατηγική Ανάπτυξη',
+    title: '2η Στρατηγική Ανάπτυξη',
+    desc: 'Έκταση 25.000 τ.μ. Κέντρα αποκατάστασης, ιδιωτικές σχολές ή κέντρα φροντίδας — αμφιθεατρικός σχεδιασμός.'
+  },
+  'private-green': {
+    label: 'Ιδιωτικός Χώρος',
+    title: 'Ιδιωτικός Χώρος Πρασίνου',
+    desc: 'Γήπεδα, κατασκηνωτικοί χώροι και δίκτυα ποδηλατοδρόμων — μέρος του μεγαλύτερου οργανωμένου πρασίνου στην πόλη.'
+  },
+  'public-green': {
+    label: 'Δημόσιος Χώρος',
+    title: 'Γραμμικό Πάρκο Ποταμού',
+    desc: 'Δημόσιος χώρος πρασίνου κατά μήκος του ποταμού με πεζοδρόμους, ποδηλατοδρόμους και υπαίθρια αμφιθέατρα. 30.000+ τ.μ.'
+  },
+  'res1': {
+    label: 'Οικιστική Ζώνη',
+    title: 'Πρώτο Οικιστικό',
+    desc: 'Οικιστική ανάπτυξη με αυτόνομες μονάδες, πρωτοποριακός σχεδιασμός που εξασφαλίζει ιδιωτικότητα.'
+  },
+  'res2': {
+    label: 'Οικιστική Ζώνη',
+    title: 'Δεύτερο Οικιστικό',
+    desc: 'Ισόγειες κατοικίες ≥100 τ.μ. σε οικόπεδα 250 τ.μ. — σταδιακή κατασκευή και παράδοση.'
+  },
+  'res3': {
+    label: 'Οικιστική Ζώνη',
+    title: 'Τρίτο Οικιστικό',
+    desc: 'Τοποθετημένο με απόλυτη ανεξαρτησία στον χώρο — μια κοινότητα που δένει και συμπληρώνει το έργο.'
+  },
+  'res4': {
+    label: 'Οικιστική Ζώνη',
+    title: 'Τέταρτο Οικιστικό',
+    desc: 'Πέραν των 210 οικιστικών μονάδων συνολικά, με 28.500 τ.μ. συντελεστή δόμησης.'
+  }
+};
+
+const container = document.getElementById('masterplan-container');
+const tooltip = document.getElementById('zone-tooltip');
+const zones = document.querySelectorAll('.zone');
+
+zones.forEach(zone => {
+  zone.addEventListener('mouseenter', (e) => {
+    const data = zoneData[zone.dataset.zone];
+    if (!data) return;
+    tooltip.querySelector('.zt-label').textContent = data.label;
+    tooltip.querySelector('.zt-title').textContent = data.title;
+    tooltip.querySelector('.zt-desc').textContent = data.desc;
+    tooltip.classList.add('visible');
+  });
+  zone.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    let x = e.clientX - rect.left + 16;
+    let y = e.clientY - rect.top - 10;
+    if (x + 260 > rect.width) x = e.clientX - rect.left - 270;
+    if (y + 140 > rect.height) y = e.clientY - rect.top - 140;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  });
+  zone.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+  });
+});
+
+// ---- SMOOTH NAV ----
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
