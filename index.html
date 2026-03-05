@@ -299,34 +299,181 @@ nav .nav-links a:hover::after { width: 100%; }
 .number-row p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 300; }
 
 /* ==================== LOCATION MAP ==================== */
-.location-section { padding: 6rem 0; background: var(--bg-primary); overflow: hidden; }
-.location-map-container {
-  position: relative; margin-top: 3rem;
-  border-radius: 4px; overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+.location-section { padding: 8rem 0; background: var(--bg-deep); overflow: hidden; }
+.map-canvas {
+  position: relative; width: 100%; max-width: 1100px;
+  margin: 3rem auto 0; aspect-ratio: 16 / 9;
 }
-.location-map-container img {
-  width: 100%; height: auto; display: block;
-  filter: saturate(0.85) brightness(0.95);
+.map-canvas svg { width: 100%; height: 100%; }
+
+/* Sea texture */
+.map-sea { fill: #0a1a12; }
+.map-sea-shimmer { fill: url(#seaGradient); opacity: 0; }
+.map-sea-shimmer.active { animation: seaFadeIn 1.5s ease forwards; }
+@keyframes seaFadeIn { to { opacity: 1; } }
+
+/* Coastline draw */
+.map-coastline {
+  fill: none; stroke: var(--gold); stroke-width: 2;
+  stroke-dasharray: 5000; stroke-dashoffset: 5000;
+  opacity: 0.9;
 }
-.location-overlay {
+.map-coastline.draw { animation: drawCoast 3s ease-in-out forwards; }
+@keyframes drawCoast { to { stroke-dashoffset: 0; } }
+
+/* Land mass */
+.map-land { fill: #162416; opacity: 0; }
+.map-land.active { animation: landReveal 1.5s ease forwards 0.8s; }
+@keyframes landReveal { to { opacity: 1; } }
+
+/* Terrain contours */
+.map-terrain { fill: none; stroke: #1e3a1e; stroke-width: 0.5; opacity: 0; }
+.map-terrain.active { animation: terrainIn 1s ease forwards; }
+@keyframes terrainIn { to { opacity: 0.6; } }
+
+/* Highway */
+.map-highway {
+  fill: none; stroke: #3a6a4a; stroke-width: 2.5;
+  stroke-dasharray: 6 3; opacity: 0;
+  stroke-linecap: round;
+}
+.map-highway.active { animation: hwIn 1s ease forwards; }
+@keyframes hwIn { to { opacity: 0.7; } }
+.map-hw-label {
+  font-family: 'Outfit', sans-serif; font-size: 9px;
+  font-weight: 600; fill: #3a6a4a; opacity: 0;
+}
+.map-hw-label.active { animation: hwIn 0.6s ease forwards; }
+
+/* Place labels */
+.map-place-label {
+  font-family: 'Outfit', sans-serif; font-size: 10px;
+  fill: var(--text-secondary); letter-spacing: 0.05em;
+  opacity: 0; font-weight: 400;
+}
+.map-place-label.major { font-size: 12px; fill: var(--cream); font-weight: 500; }
+.map-place-label.active { animation: labelIn 0.5s ease forwards; }
+@keyframes labelIn { to { opacity: 1; } }
+
+/* Place dots */
+.map-dot { fill: var(--text-muted); opacity: 0; }
+.map-dot.active { animation: dotIn 0.4s ease forwards; }
+@keyframes dotIn { to { opacity: 0.7; } }
+
+/* Sea label */
+.map-sea-label {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px;
+  fill: #1a3a2a; font-style: italic; letter-spacing: 0.25em;
+  opacity: 0; font-weight: 400;
+}
+.map-sea-label.active { animation: seaLabelIn 1.5s ease forwards; }
+@keyframes seaLabelIn { to { opacity: 0.5; } }
+
+/* Project pin */
+.map-pin-group { opacity: 0; transform-origin: center bottom; transform-box: fill-box; }
+.map-pin-group.active { animation: pinDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes pinDrop {
+  0% { opacity: 0; transform: translateY(-40px) scale(0.3); }
+  60% { opacity: 1; transform: translateY(2px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.map-pin-ring {
+  fill: none; stroke: var(--gold); stroke-width: 1.5;
+  opacity: 0; transform-origin: center;
+  transform-box: fill-box;
+}
+.map-pin-ring.active { animation: ringPulse 2s ease-in-out infinite 0.6s; }
+@keyframes ringPulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+.map-pin-label {
+  font-family: 'Outfit', sans-serif; font-size: 8px;
+  font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; fill: var(--gold); opacity: 0;
+}
+.map-pin-label.active { animation: labelIn 0.5s ease forwards 0.3s; }
+
+/* Distance arcs */
+.map-dist-line {
+  fill: none; stroke: var(--gold); stroke-width: 0.8;
+  stroke-dasharray: 4 3; opacity: 0;
+}
+.map-dist-line.active { animation: distLineIn 0.6s ease forwards; }
+@keyframes distLineIn { to { opacity: 0.4; } }
+
+/* Distance badges on map */
+.map-dist-badge { opacity: 0; }
+.map-dist-badge.active { animation: badgeIn 0.4s ease forwards; }
+@keyframes badgeIn { to { opacity: 1; } }
+.map-dist-badge rect { fill: rgba(14,26,14,0.85); stroke: var(--gold); stroke-width: 0.6; rx: 3; }
+.map-dist-badge .badge-time {
+  font-family: 'Cormorant Garamond', serif; font-size: 13px;
+  fill: var(--gold); font-weight: 600;
+}
+.map-dist-badge .badge-label {
+  font-family: 'Outfit', sans-serif; font-size: 7px;
+  fill: var(--text-secondary); font-weight: 300;
+}
+
+/* Legend bar below map */
+.map-legend {
+  display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;
+  margin-top: 2.5rem; opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.map-legend.active { opacity: 1; }
+.map-legend-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.75rem; color: var(--text-secondary); font-weight: 300;
+}
+.map-legend-line { width: 20px; height: 2px; }
+.map-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ==================== PORTFOLIO ==================== */
+.portfolio-section { padding: 8rem 0; background: var(--bg-primary); }
+.portfolio-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem; margin-top: 3rem;
+}
+.portfolio-tile {
+  position: relative; overflow: hidden;
+  aspect-ratio: 16 / 11; cursor: pointer;
+}
+.portfolio-tile.tile-wide { grid-column: span 2; }
+.portfolio-tile img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(0.88) saturate(0.9);
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.portfolio-tile:hover img {
+  transform: scale(1.06);
+  filter: brightness(1) saturate(1);
+}
+.portfolio-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(14,26,14,0.1) 0%, rgba(14,26,14,0.5) 100%);
+  background: linear-gradient(transparent 30%, rgba(14, 26, 14, 0.92) 100%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 1.5rem; opacity: 0;
+  transition: opacity 0.4s ease;
 }
-.location-info {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;
-  margin-top: 2rem;
+.portfolio-tile:hover .portfolio-overlay { opacity: 1; }
+.portfolio-overlay .po-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.65rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.3rem;
 }
-.loc-card {
-  text-align: center; padding: 1.5rem 1rem;
-  background: var(--bg-card); border-top: 2px solid var(--gold);
-}
-.loc-card .loc-time {
+.portfolio-overlay .po-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2rem; color: var(--gold); font-weight: 600;
+  font-size: 1.15rem; color: var(--cream);
+  line-height: 1.3;
 }
-.loc-card .loc-place { font-size: 0.8rem; color: var(--cream); margin-top: 0.3rem; }
-.loc-card .loc-dist { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; }
+.portfolio-overlay .po-desc {
+  font-size: 0.78rem; color: var(--text-secondary);
+  font-weight: 300; margin-top: 0.3rem; line-height: 1.4;
+}
 
 /* ==================== FOOTER ==================== */
 footer {
@@ -369,12 +516,18 @@ footer {
 .reveal-delay-3 { transition-delay: 0.45s; }
 
 /* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .portfolio-grid { grid-template-columns: repeat(3, 1fr); }
+  .portfolio-tile.tile-wide { grid-column: span 2; }
+}
 @media (max-width: 900px) {
   .stats-grid, .pillars { grid-template-columns: 1fr; }
   .diff-grid { grid-template-columns: 1fr; }
   .numbers-split { grid-template-columns: 1fr; gap: 2rem; }
   .numbers-divider { display: none; }
-  .location-info { grid-template-columns: repeat(2, 1fr); }
+  .map-legend { gap: 1rem; }
+  .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+  .portfolio-tile.tile-wide { grid-column: span 2; }
   .footer-grid { grid-template-columns: 1fr; }
   nav .nav-links { display: none; }
   .nav-toggle { display: block; }
@@ -382,8 +535,10 @@ footer {
 }
 @media (max-width: 600px) {
   .photo-strip { grid-template-columns: 1fr; }
-  .location-info { grid-template-columns: 1fr; }
+  .map-legend { gap: 0.8rem; flex-direction: column; align-items: center; }
   .diff-images { grid-template-columns: 1fr; }
+  .portfolio-grid { grid-template-columns: 1fr; }
+  .portfolio-tile.tile-wide { grid-column: span 1; }
   .section { padding: 5rem 0; }
 }
 </style>
@@ -405,6 +560,7 @@ footer {
       <li><a href="#masterplan">Masterplan</a></li>
       <li><a href="#difference">Διαφορά</a></li>
       <li><a href="#location">Τοποθεσία</a></li>
+      <li><a href="#portfolio">Χαρτοφυλάκιο</a></li>
       <li><a href="#contact">Επικοινωνία</a></li>
     </ul>
     <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')" aria-label="Menu">
@@ -621,30 +777,268 @@ footer {
     <h2 class="reveal" style="margin-top:0.5rem;">Πύργος Λεμεσού — <em style="color:var(--gold);font-style:italic;">Στο Κέντρο Όλων</em></h2>
     <div class="gold-divider reveal"></div>
     <p class="body-text reveal" style="max-width:600px;">Στρατηγικά τοποθετημένο ανάμεσα σε αυτοκινητόδρομο, θάλασσα και κέντρο πόλης — μακριά από τον θόρυβο, κοντά σε ό,τι χρειάζεστε.</p>
-    <div class="location-map-container reveal">
-      <img src="assets/location-map.jpg" alt="RIVERLAND Location Map — Λεμεσός">
-      <div class="location-overlay"></div>
+  </div>
+  <div class="map-canvas" id="map-canvas">
+    <svg viewBox="0 0 1000 562" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="seaGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0d2218" />
+          <stop offset="100%" stop-color="#081a10" />
+        </linearGradient>
+        <radialGradient id="pinGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#C4A86B" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#C4A86B" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="landShadow" x="-5%" y="-5%" width="110%" height="110%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+
+      <!-- Sea background -->
+      <rect class="map-sea" x="0" y="0" width="1000" height="562"/>
+      <rect class="map-sea-shimmer" x="0" y="0" width="1000" height="562"/>
+
+      <!-- Land mass — from OpenStreetMap coastline data (Overpass API) -->
+      <path class="map-land" filter="url(#landShadow)"
+        d="M 0,0 L 1000,0 L 1000,97.6 L 999.1,97.6 L 977.5,107.7 L 955.6,114.5 L 937.0,127.7 L 931.2,138.5 L 923.2,145.7 L 897.8,150.2 L 877.3,162.8 L 860.4,175.4 L 846.5,184.9 L 820.6,185.2 L 807.3,192.2 L 804.0,195.4 L 802.7,194.0 L 783.9,209.5 L 770.8,214.6 L 767.9,216.8 L 753.0,205.4 L 734.2,201.6 L 726.4,198.7 L 712.6,207.1 L 714.6,208.9 L 701.8,213.0 L 697.3,222.8 L 693.0,233.7 L 675.6,237.9 L 654.7,238.7 L 636.5,236.6 L 634.2,237.4 L 617.7,236.8 L 585.7,235.4 L 571.1,236.7 L 555.4,231.9 L 538.5,227.5 L 523.9,229.9 L 519.0,223.9 L 496.9,223.7 L 478.5,232.0 L 472.7,233.2 L 469.1,232.4 L 452.5,236.8 L 433.3,244.4 L 418.8,251.9 L 409.6,257.5 L 406.7,260.2 L 404.9,262.1 L 398.4,264.8 L 388.6,267.1 L 374.9,273.8 L 372.2,274.2 L 355.7,282.7 L 341.9,296.0 L 326.5,314.9 L 326.6,317.4 L 320.3,323.3 L 324.0,317.4 L 321.4,313.1 L 320.0,313.5 L 317.5,318.1 L 314.4,314.6 L 305.7,324.4 L 297.8,330.5 L 291.7,342.5 L 291.7,362.3 L 303.6,354.8 L 300.8,356.8 L 267.4,427.7 L 281.5,478.3 L 292.7,496.1 L 301.7,502.9 L 309.6,515.9 L 311.4,516.7 L 316.7,525.4 L 307.8,532.9 L 304.4,535.7 L 295.3,533.3 L 289.6,530.4 L 285.2,528.7 L 272.4,527.4 L 258.1,522.3 L 253.4,521.7 L 244.1,520.7 L 232.9,517.4 L 215.5,513.5 L 203.1,524.3 L 192.3,523.9 L 184.8,522.8 L 168.5,521.4 L 160.5,521.3 L 149.6,524.8 L 159.3,505.7 L 156.6,485.9 L 153.8,471.7 L 144.6,443.7 L 132.8,415.4 L 122.2,394.5 L 111.8,377.2 L 94.9,364.3 L 84.4,347.4 L 68.8,329.5 L 48.6,317.7 L 37.9,320.6 L 21.8,314.4 L 1.8,324.6 L 0,324.6 Z"/>
+
+      <!-- Terrain contour lines -->
+      <path class="map-terrain" data-delay="2200" d="M 0,50 Q 250,45 500,48 Q 750,42 1000,46"/>
+      <path class="map-terrain" data-delay="2400" d="M 0,95 Q 250,88 500,92 Q 750,85 1000,80"/>
+      <path class="map-terrain" data-delay="2600" d="M 0,140 Q 200,132 400,138 Q 600,132 800,135"/>
+
+      <!-- Coastline stroke — animated west→east, from OSM geodata -->
+      <path class="map-coastline" id="coastline"
+        d="M 1.8,324.6 L 21.8,314.4 L 37.9,320.6 L 48.6,317.7 L 68.8,329.5 L 84.4,347.4 L 94.9,364.3 L 111.8,377.2 L 122.2,394.5 L 132.8,415.4 L 144.6,443.7 L 153.8,471.7 L 156.6,485.9 L 159.3,505.7 L 149.6,524.8 L 160.5,521.3 L 168.5,521.4 L 184.8,522.8 L 192.3,523.9 L 203.1,524.3 L 215.5,513.5 L 232.9,517.4 L 244.1,520.7 L 253.4,521.7 L 258.1,522.3 L 272.4,527.4 L 285.2,528.7 L 289.6,530.4 L 295.3,533.3 L 304.4,535.7 L 307.8,532.9 L 316.7,525.4 L 311.4,516.7 L 309.6,515.9 L 301.7,502.9 L 292.7,496.1 L 281.5,478.3 L 267.4,427.7 L 300.8,356.8 L 303.6,354.8 L 291.7,362.3 L 291.7,342.5 L 297.8,330.5 L 305.7,324.4 L 314.4,314.6 L 317.5,318.1 L 320.0,313.5 L 321.4,313.1 L 324.0,317.4 L 320.3,323.3 L 326.6,317.4 L 326.5,314.9 L 341.9,296.0 L 355.7,282.7 L 372.2,274.2 L 374.9,273.8 L 388.6,267.1 L 398.4,264.8 L 404.9,262.1 L 406.7,260.2 L 409.6,257.5 L 418.8,251.9 L 433.3,244.4 L 452.5,236.8 L 469.1,232.4 L 472.7,233.2 L 478.5,232.0 L 496.9,223.7 L 519.0,223.9 L 523.9,229.9 L 538.5,227.5 L 555.4,231.9 L 571.1,236.7 L 585.7,235.4 L 617.7,236.8 L 634.2,237.4 L 636.5,236.6 L 654.7,238.7 L 675.6,237.9 L 693.0,233.7 L 697.3,222.8 L 701.8,213.0 L 714.6,208.9 L 712.6,207.1 L 726.4,198.7 L 734.2,201.6 L 753.0,205.4 L 767.9,216.8 L 770.8,214.6 L 783.9,209.5 L 802.7,194.0 L 804.0,195.4 L 807.3,192.2 L 820.6,185.2 L 846.5,184.9 L 860.4,175.4 L 877.3,162.8 L 897.8,150.2 L 923.2,145.7 L 931.2,138.5 L 937.0,127.7 L 955.6,114.5 L 977.5,107.7 L 999.1,97.6"/>
+
+      <!-- Scale bar: map spans ~57km (0.62° lon at lat 34.7°), 5km ≈ 88 SVG units -->
+      <g data-delay="6400" class="map-dist-badge">
+        <line x1="860" y1="540" x2="948" y2="540" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+        <line x1="860" y1="536" x2="860" y2="544" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+        <line x1="948" y1="536" x2="948" y2="544" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+        <text x="904" y="534" text-anchor="middle" font-family="Outfit, sans-serif" font-size="9" fill="#A09878" font-weight="300">5 km</text>
+      </g>
+
+      <!-- A1 Highway — runs inland from Limassol area to past Zygi -->
+      <path class="map-highway" data-delay="3000"
+        d="M 290,210 Q 350,195 420,180 Q 500,168 580,160 Q 660,155 740,150 Q 800,146 870,140"/>
+
+      <!-- A1 label badges -->
+      <g class="map-hw-label" data-delay="3200">
+        <rect x="415" y="172" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
+        <text x="426" y="181" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
+      </g>
+      <g class="map-hw-label" data-delay="3300">
+        <rect x="735" y="143" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
+        <text x="746" y="152" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
+      </g>
+
+      <!-- Place dots + labels — positioned from OSM coordinate projection -->
+      <!-- Akrotiri (cape tip) -->
+      <circle class="map-dot" data-delay="3400" cx="190" cy="516" r="3"/>
+      <text class="map-place-label" data-delay="3500" x="175" y="540" text-anchor="middle">Ακρωτήρι</text>
+
+      <!-- Lady's Mile -->
+      <circle class="map-dot" data-delay="3600" cx="266" cy="406" r="2.5"/>
+      <text class="map-place-label" data-delay="3700" x="248" y="398" text-anchor="end" font-size="8">Lady's Mile</text>
+
+      <!-- Limassol City Center -->
+      <circle class="map-dot" data-delay="3800" cx="323" cy="312" r="4" style="fill:var(--cream)"/>
+      <text class="map-place-label major" data-delay="3900" x="323" y="302" text-anchor="middle">Λεμεσός</text>
+
+      <!-- Limassol Marina -->
+      <circle class="map-dot" data-delay="3950" cx="339" cy="319" r="2"/>
+      <text class="map-place-label" data-delay="4000" x="355" y="329" text-anchor="start" font-size="8">Μαρίνα</text>
+
+      <!-- Dasoudi Beach -->
+      <circle class="map-dot" data-delay="4100" cx="398" cy="271" r="2.5"/>
+      <text class="map-place-label" data-delay="4200" x="398" y="285" text-anchor="middle" font-size="9">Δασούδι</text>
+
+      <!-- Germasogeia -->
+      <circle class="map-dot" data-delay="4300" cx="436" cy="250" r="2.5"/>
+      <text class="map-place-label" data-delay="4400" x="436" y="264" text-anchor="middle" font-size="9">Γερμασόγεια</text>
+
+      <!-- Ag. Tychonas -->
+      <circle class="map-dot" data-delay="4500" cx="484" cy="239" r="2.5"/>
+      <text class="map-place-label" data-delay="4600" x="484" y="232" text-anchor="middle" font-size="8">Αγ. Τύχωνας</text>
+
+      <!-- Governor's Beach -->
+      <circle class="map-dot" data-delay="4700" cx="629" cy="229" r="2.5"/>
+      <text class="map-place-label" data-delay="4750" x="629" y="222" text-anchor="middle" font-size="8">Gov. Beach</text>
+
+      <!-- Mari -->
+      <circle class="map-dot" data-delay="4800" cx="742" cy="204" r="2.5"/>
+      <text class="map-place-label" data-delay="4900" x="742" y="196" text-anchor="middle" font-size="9">Μαρί</text>
+
+      <!-- Zygi (east end) -->
+      <circle class="map-dot" data-delay="5000" cx="802" cy="198" r="3"/>
+      <text class="map-place-label" data-delay="5100" x="802" y="190" text-anchor="middle">Ζύγι</text>
+
+      <!-- Episkopi Bay label -->
+      <text class="map-place-label" data-delay="3600" x="55" y="365" text-anchor="middle" font-size="8" style="font-style:italic;">Κόλπος</text>
+      <text class="map-place-label" data-delay="3600" x="55" y="377" text-anchor="middle" font-size="8" style="font-style:italic;">Επισκοπής</text>
+
+      <!-- Mediterranean Sea label -->
+      <text class="map-sea-label" data-delay="3800" x="520" y="460" text-anchor="middle">Μ ε σ ό γ ε ι ο ς &nbsp; Θ ά λ α σ σ α</text>
+
+      <!-- ===== RIVERLAND PIN (Pyrgos — inland, OSM coords: 33.120°E, 34.735°N) ===== -->
+      <g id="map-pin-group" class="map-pin-group" data-delay="5400">
+        <circle cx="452" cy="177" r="30" fill="url(#pinGlow)"/>
+        <circle class="map-pin-ring" cx="452" cy="177" r="12"/>
+        <g transform="translate(452,157)">
+          <path d="M0,0 C-8,0 -14,6 -14,14 C-14,24 0,36 0,36 C0,36 14,24 14,14 C14,6 8,0 0,0 Z"
+                fill="var(--gold)" stroke="#0E1A0E" stroke-width="1.5"/>
+          <circle cx="0" cy="13" r="5" fill="#0E1A0E"/>
+        </g>
+        <text class="map-pin-label" x="452" y="147" text-anchor="middle">RIVER LAND</text>
+        <text class="map-place-label" data-delay="5600" x="452" y="205" text-anchor="middle" font-size="9" style="fill:var(--gold)">Πύργος Λεμεσού</text>
+      </g>
+
+      <!-- ===== DISTANCE LINES + BADGES ===== -->
+      <!-- To City Center: 10' -->
+      <line class="map-dist-line" data-delay="5800" x1="440" y1="190" x2="328" y2="308"/>
+      <g class="map-dist-badge" data-delay="6000">
+        <rect x="345" y="248" width="56" height="28" rx="3"/>
+        <text class="badge-time" x="373" y="262" text-anchor="middle">10'</text>
+        <text class="badge-label" x="373" y="272" text-anchor="middle">Κέντρο</text>
+      </g>
+
+      <!-- To A1 Highway: 5' -->
+      <line class="map-dist-line" data-delay="5900" x1="452" y1="172" x2="440" y2="175"/>
+      <g class="map-dist-badge" data-delay="6100">
+        <rect x="480" y="150" width="48" height="28" rx="3"/>
+        <text class="badge-time" x="504" y="164" text-anchor="middle">5'</text>
+        <text class="badge-label" x="504" y="174" text-anchor="middle">A1</text>
+      </g>
+
+      <!-- To Dasoudi: 12' -->
+      <line class="map-dist-line" data-delay="6000" x1="445" y1="192" x2="402" y2="268"/>
+      <g class="map-dist-badge" data-delay="6200">
+        <rect x="415" y="218" width="56" height="28" rx="3"/>
+        <text class="badge-time" x="443" y="232" text-anchor="middle">12'</text>
+        <text class="badge-label" x="443" y="242" text-anchor="middle">Δασούδι</text>
+      </g>
+
+      <!-- To Marina: 15' -->
+      <line class="map-dist-line" data-delay="6100" x1="440" y1="190" x2="342" y2="316"/>
+      <g class="map-dist-badge" data-delay="6300">
+        <rect x="355" y="286" width="56" height="28" rx="3"/>
+        <text class="badge-time" x="383" y="300" text-anchor="middle">15'</text>
+        <text class="badge-label" x="383" y="310" text-anchor="middle">Μαρίνα</text>
+      </g>
+    </svg>
+  </div>
+  <div class="container">
+    <div class="map-legend" id="map-legend">
+      <div class="map-legend-item">
+        <div class="map-legend-line" style="background:var(--gold);"></div>
+        <span>Ακτογραμμή</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-line" style="background:#3a6a4a; background-image: repeating-linear-gradient(90deg, #3a6a4a 0, #3a6a4a 5px, transparent 5px, transparent 8px);"></div>
+        <span>Αυτοκινητόδρομος A1</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-dot" style="background:var(--gold);"></div>
+        <span>RIVER LAND</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-line" style="background:var(--gold); opacity:0.4; background-image: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 4px, transparent 4px, transparent 7px);"></div>
+        <span>Αποστάσεις σε λεπτά</span>
+      </div>
     </div>
-    <div class="location-info">
-      <div class="loc-card reveal">
-        <div class="loc-time">10'</div>
-        <div class="loc-place">Κέντρο Λεμεσού</div>
-        <div class="loc-dist">~8 km μέσω A1</div>
+  </div>
+</section>
+
+<!-- ==================== PORTFOLIO ==================== -->
+<section class="portfolio-section section" id="portfolio">
+  <div class="container">
+    <span class="label reveal">Χαρτοφυλάκιο</span>
+    <h2 class="reveal" style="margin-top:0.5rem;">Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em></h2>
+    <div class="gold-divider reveal"></div>
+    <p class="body-text reveal" style="max-width:600px;">Μια ματιά στον σχεδιασμό, τις τοποθεσίες και την ταυτότητα του RIVER LAND — μέσα από εικόνες που αποτυπώνουν το όραμά μας.</p>
+  </div>
+  <div class="container">
+    <div class="portfolio-grid reveal">
+      <div class="portfolio-tile tile-wide">
+        <img src="assets/forest-wide.jpg" alt="Πράσινη Κοινότητα" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Περιβάλλον</span>
+          <span class="po-title">Πράσινη Κοινότητα</span>
+          <span class="po-desc">Πνεύμονας πρασίνου 70.000+ τ.μ.</span>
+        </div>
       </div>
-      <div class="loc-card reveal reveal-delay-1">
-        <div class="loc-time">5'</div>
-        <div class="loc-place">Αυτοκινητόδρομος A1</div>
-        <div class="loc-dist">Άμεση πρόσβαση</div>
+      <div class="portfolio-tile">
+        <img src="assets/grid3.jpg" alt="Οικιστικός Σχεδιασμός" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Οικιστικά</span>
+          <span class="po-title">Οικιστικός Σχεδιασμός</span>
+          <span class="po-desc">210+ μονάδες, σύγχρονη αρχιτεκτονική</span>
+        </div>
       </div>
-      <div class="loc-card reveal reveal-delay-2">
-        <div class="loc-time">12'</div>
-        <div class="loc-place">Παραλία Δασούδι</div>
-        <div class="loc-dist">~10 km</div>
+      <div class="portfolio-tile">
+        <img src="assets/grid5.jpg" alt="Κέντρο Ευεξίας" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Στρατηγική</span>
+          <span class="po-title">Κέντρο Ευεξίας</span>
+          <span class="po-desc">Κλινικές & κέντρα αποκατάστασης</span>
+        </div>
       </div>
-      <div class="loc-card reveal reveal-delay-3">
-        <div class="loc-time">15'</div>
-        <div class="loc-place">Μαρίνα Λεμεσού</div>
-        <div class="loc-dist">~12 km</div>
+      <div class="portfolio-tile">
+        <img src="assets/nature-wide1.jpg" alt="Γραμμικό Πάρκο" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Πράσινο</span>
+          <span class="po-title">Γραμμικό Πάρκο</span>
+          <span class="po-desc">Πεζόδρομοι & ποδηλατοδρόμοι κατά μήκος ποταμού</span>
+        </div>
+      </div>
+      <div class="portfolio-tile">
+        <img src="assets/photo-a.jpg" alt="Αμφιθεατρικός Σχεδιασμός" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Σχεδιασμός</span>
+          <span class="po-title">Αμφιθεατρικός Σχεδιασμός</span>
+          <span class="po-desc">Χωροταξική τοποθέτηση με θέα</span>
+        </div>
+      </div>
+      <div class="portfolio-tile tile-wide">
+        <img src="assets/nature-wide2.jpg" alt="Αστικός Πνεύμονας" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Όραμα</span>
+          <span class="po-title">Αστικός Πνεύμονας</span>
+          <span class="po-desc">Ο μεγαλύτερος οργανωμένος χώρος πρασίνου στη Λεμεσό</span>
+        </div>
+      </div>
+      <div class="portfolio-tile">
+        <img src="assets/grid6.jpg" alt="Εκπαιδευτικό Κέντρο" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Στρατηγική</span>
+          <span class="po-title">Εκπαιδευτικό Κέντρο</span>
+          <span class="po-desc">Ιδιωτικές σχολές & ερευνητικά ινστιτούτα</span>
+        </div>
+      </div>
+      <div class="portfolio-tile">
+        <img src="assets/photo-b.jpg" alt="Στρατηγική Ανάπτυξη" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Ανάπτυξη</span>
+          <span class="po-title">Στρατηγική Ανάπτυξη</span>
+          <span class="po-desc">25.000 τ.μ. ανά στρατηγικό τεμάχιο</span>
+        </div>
+      </div>
+      <div class="portfolio-tile">
+        <img src="assets/tall-trees.jpg" alt="Φυσικό Περιβάλλον" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Τοπίο</span>
+          <span class="po-title">Φυσικό Περιβάλλον</span>
+          <span class="po-desc">Δασική γη & ποτάμια οικοσυστήματα</span>
+        </div>
+      </div>
+      <div class="portfolio-tile">
+        <img src="assets/nature-tall.jpg" alt="Βιώσιμη Ανάπτυξη" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label">Βιωσιμότητα</span>
+          <span class="po-title">Βιώσιμη Ανάπτυξη</span>
+          <span class="po-desc">Σεβασμός στη φύση, σχεδιασμός για το μέλλον</span>
+        </div>
       </div>
     </div>
   </div>
@@ -666,6 +1060,7 @@ footer {
         <a href="#masterplan">Master Plan</a>
         <a href="#difference">Διαφορά</a>
         <a href="#location">Τοποθεσία</a>
+        <a href="#portfolio">Χαρτοφυλάκιο</a>
       </div>
       <div class="footer-col">
         <h4>Επικοινωνία</h4>
@@ -768,6 +1163,66 @@ zones.forEach(zone => {
     tooltip.classList.remove('visible');
   });
 });
+
+// ---- ANIMATED MAP ----
+const mapCanvas = document.getElementById('map-canvas');
+let mapAnimated = false;
+
+const mapObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !mapAnimated) {
+      mapAnimated = true;
+      startMapAnimation();
+    }
+  });
+}, { threshold: 0.25 });
+
+if (mapCanvas) mapObserver.observe(mapCanvas);
+
+function startMapAnimation() {
+  // Phase 1: Sea shimmer
+  const shimmer = document.querySelector('.map-sea-shimmer');
+  if (shimmer) shimmer.classList.add('active');
+
+  // Phase 2: Coastline draws (starts at 0.3s)
+  setTimeout(() => {
+    const coast = document.getElementById('coastline');
+    if (coast) coast.classList.add('draw');
+  }, 300);
+
+  // Phase 3: Land mass fills in (starts at 1s, CSS has 0.8s delay built in)
+  setTimeout(() => {
+    const land = document.querySelector('.map-land');
+    if (land) land.classList.add('active');
+  }, 1000);
+
+  // Phase 4: Terrain contours stagger in
+  document.querySelectorAll('.map-terrain').forEach(el => {
+    const d = parseInt(el.dataset.delay) || 2200;
+    setTimeout(() => el.classList.add('active'), d);
+  });
+
+  // Phase 5+: All data-delay elements (highway, labels, dots, pin, distances)
+  const delayEls = document.querySelectorAll('[data-delay]');
+  delayEls.forEach(el => {
+    const d = parseInt(el.dataset.delay) || 3000;
+    setTimeout(() => el.classList.add('active'), d);
+  });
+
+  // Pin ring pulse (separate because it's a child)
+  setTimeout(() => {
+    const ring = document.querySelector('.map-pin-ring');
+    if (ring) ring.classList.add('active');
+    const pinLabel = document.querySelector('.map-pin-label');
+    if (pinLabel) pinLabel.classList.add('active');
+  }, 5600);
+
+  // Legend bar
+  setTimeout(() => {
+    const legend = document.getElementById('map-legend');
+    if (legend) legend.classList.add('active');
+  }, 6500);
+}
 
 // ---- SMOOTH NAV ----
 document.querySelectorAll('a[href^="#"]').forEach(a => {
