@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RIVER LAND — by Next Level Consulting</title>
-<meta name="description" content="Στρατηγική Ευκαιρία Ανάπτυξης Γης στη Λεμεσό. Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό.">
+<meta name="description" id="meta-description" content="Στρατηγική Πρόταση Ανάπτυξης Γης στη Λεμεσό. Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -86,12 +86,12 @@ nav .nav-brand-sub {
   font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
   color: var(--text-secondary); display: block;
 }
-nav .nav-links { display: flex; gap: 2rem; list-style: none; }
+nav .nav-links { display: flex; gap: 1.4rem; list-style: none; }
 nav .nav-links a {
   color: var(--text-secondary); text-decoration: none;
-  font-size: 0.8rem; font-weight: 400; letter-spacing: 0.08em;
+  font-size: 0.72rem; font-weight: 400; letter-spacing: 0.06em;
   text-transform: uppercase; transition: color 0.3s;
-  position: relative;
+  position: relative; white-space: nowrap;
 }
 nav .nav-links a::after {
   content: ''; position: absolute; bottom: -4px; left: 0;
@@ -106,6 +106,37 @@ nav .nav-links a:hover::after { width: 100%; }
   display: block; width: 24px; height: 2px; background: var(--cream);
   margin: 5px 0; transition: 0.3s;
 }
+
+/* ==================== NLC LOGO BUTTON ==================== */
+.nlc-btn {
+  display: flex; align-items: center; margin-left: 1.5rem;
+  opacity: 0.55; transition: opacity 0.3s ease;
+}
+.nlc-btn:hover { opacity: 1; }
+.nlc-btn img { height: 22px; width: auto; }
+.nav-nlc-mobile { display: none; }
+
+/* ==================== LANGUAGE TOGGLE ==================== */
+.lang-toggle {
+  display: flex; align-items: center; gap: 0;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-left: 1.5rem; flex-shrink: 0;
+}
+.lang-toggle .lt-el,
+.lang-toggle .lt-sep,
+.lang-toggle .lt-en {
+  transition: color 0.3s;
+}
+.lang-toggle .lt-sep {
+  color: var(--text-muted); margin: 0 0.3rem;
+}
+.lang-toggle .lt-el { color: var(--text-muted); }
+.lang-toggle .lt-en { color: var(--text-muted); }
+.lang-toggle[data-lang="el"] .lt-el { color: var(--gold); }
+.lang-toggle[data-lang="en"] .lt-en { color: var(--gold); }
 
 /* ==================== HERO ==================== */
 .hero {
@@ -122,14 +153,18 @@ nav .nav-links a:hover::after { width: 100%; }
   position: absolute; inset: 0;
   background: url('assets/forest-pano.jpg') center/cover no-repeat;
   transform: scale(1.05);
-  animation: heroZoom 20s ease-in-out infinite alternate;
+  opacity: 0;
+  animation: heroBgReveal 3s ease-out 0.8s forwards, heroZoom 20s ease-in-out 3.8s infinite alternate;
 }
+@keyframes heroBgReveal { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: scale(1.05); } }
 @keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.12); } }
 
 .hero-content {
   position: relative; z-index: 2;
   max-width: 700px; padding: 0 2rem;
+  animation: heroTextIn 1s ease-out 0.2s both;
 }
+@keyframes heroTextIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 0.6rem;
   margin-bottom: 1.5rem;
@@ -284,19 +319,43 @@ nav .nav-links a:hover::after { width: 100%; }
 .diff-images img:hover { filter: saturate(1); }
 
 /* ==================== NUMBERS ==================== */
-.numbers-split {
-  display: grid; grid-template-columns: 1fr 1px 1fr; gap: 3rem;
-  margin-top: 3rem;
+/* Timeline */
+.timeline-wrap { position: relative; margin-top: 3rem; padding: 2rem 0; }
+.timeline-line {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 1px;
+  background: var(--gold); opacity: 0; transform: scaleY(0); transform-origin: top;
 }
-.numbers-divider { background: var(--gold); opacity: 0.3; }
-.big-number {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 4.5rem; font-weight: 700; color: var(--gold);
-  line-height: 1;
+.timeline-wrap.active .timeline-line { animation: tlLineGrow 1.2s ease-out forwards; }
+@keyframes tlLineGrow { to { opacity: 0.35; transform: scaleY(1); } }
+
+.timeline-items { display: flex; flex-direction: column; gap: 2.5rem; position: relative; }
+.timeline-item {
+  position: relative; min-height: 50px;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
-.number-row { margin-bottom: 1.5rem; }
-.number-row h4 { color: var(--cream); font-size: 0.95rem; font-weight: 500; margin-bottom: 0.3rem; }
-.number-row p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 300; }
+.timeline-item.active { opacity: 1; transform: translateY(0); }
+.tl-content {}
+.timeline-item:nth-child(odd) .tl-content { width: 42%; text-align: right; padding-right: 1.5rem; }
+.timeline-item:nth-child(even) .tl-content { width: 42%; margin-left: 58%; text-align: left; padding-left: 1.5rem; }
+.tl-dot {
+  position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--gold); border: 2px solid var(--bg-deep);
+  z-index: 2;
+}
+.tl-branch {
+  position: absolute; top: 14px; height: 1px; background: var(--gold); opacity: 0.35;
+}
+.timeline-item:nth-child(odd) .tl-branch { left: 42%; width: calc(8% - 6px); }
+.timeline-item:nth-child(even) .tl-branch { left: calc(50% + 6px); width: calc(8% - 6px); }
+.tl-content h4 { color: var(--cream); font-size: 0.95rem; font-weight: 500; margin-bottom: 0.3rem; }
+.tl-content p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 300; line-height: 1.6; }
+
+.numbers-invest-text {
+  max-width: 700px; margin: 3rem auto 0; text-align: center;
+  color: var(--text-secondary); font-size: 1rem; font-weight: 300; line-height: 1.8;
+}
 
 /* ==================== LOCATION MAP ==================== */
 .location-section { padding: 8rem 0; background: var(--bg-deep); overflow: hidden; }
@@ -318,12 +377,12 @@ nav .nav-links a:hover::after { width: 100%; }
   stroke-dasharray: 5000; stroke-dashoffset: 5000;
   opacity: 0.9;
 }
-.map-coastline.draw { animation: drawCoast 3s ease-in-out forwards; }
+.map-coastline.draw { animation: drawCoast 4.5s ease-in-out forwards; }
 @keyframes drawCoast { to { stroke-dashoffset: 0; } }
 
 /* Land mass */
 .map-land { fill: #162416; opacity: 0; }
-.map-land.active { animation: landReveal 1.5s ease forwards 0.8s; }
+.map-land.active { animation: landReveal 2s ease forwards 1s; }
 @keyframes landReveal { to { opacity: 1; } }
 
 /* Terrain contours */
@@ -394,18 +453,42 @@ nav .nav-links a:hover::after { width: 100%; }
 }
 .map-pin-label.active { animation: labelIn 0.5s ease forwards 0.3s; }
 
-/* Distance arcs */
-.map-dist-line {
-  fill: none; stroke: var(--gold); stroke-width: 0.8;
-  stroke-dasharray: 4 3; opacity: 0;
+/* Animated road routes */
+.map-route {
+  fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1000; stroke-dashoffset: 1000; opacity: 0;
 }
-.map-dist-line.active { animation: distLineIn 0.6s ease forwards; }
-@keyframes distLineIn { to { opacity: 0.4; } }
+.map-route.active { opacity: 0.85; animation: drawRoute 2.8s ease-in-out forwards; }
+@keyframes drawRoute { to { stroke-dashoffset: 0; } }
 
-/* Distance badges on map */
-.map-dist-badge { opacity: 0; }
-.map-dist-badge.active { animation: badgeIn 0.4s ease forwards; }
+/* Route info labels */
+.map-route-info { opacity: 0; }
+.map-route-info.active { animation: routeInfoIn 0.6s ease forwards; }
+@keyframes routeInfoIn { to { opacity: 1; } }
+.map-route-info text { font-family: 'Outfit', sans-serif; }
+
+/* Highway junction nodes */
+.map-junction { opacity: 0; }
+.map-junction.active { animation: junctionIn 0.4s ease forwards; }
+@keyframes junctionIn { to { opacity: 1; } }
+
+/* Landmark building icons */
+.map-icon { fill: none; stroke: var(--text-muted); stroke-width: 0.8; opacity: 0; }
+.map-icon.active { animation: iconIn 0.5s ease forwards; }
+@keyframes iconIn { to { opacity: 0.7; } }
+
+/* Hotel markers */
+.map-hotel { opacity: 0; fill: var(--text-muted); }
+.map-hotel.active { animation: dotIn 0.4s ease forwards; }
+
+/* Scale bar badge */
+.map-scale { opacity: 0; }
+.map-scale.active { animation: badgeIn 0.4s ease forwards; }
 @keyframes badgeIn { to { opacity: 1; } }
+
+/* Tower markers */
+.map-tower { opacity: 0; stroke: var(--text-muted); stroke-width: 1; fill: none; }
+.map-tower.active { animation: iconIn 0.5s ease forwards; }
 .map-dist-badge rect { fill: rgba(14,26,14,0.85); stroke: var(--gold); stroke-width: 0.6; rx: 3; }
 .map-dist-badge .badge-time {
   font-family: 'Cormorant Garamond', serif; font-size: 13px;
@@ -523,14 +606,26 @@ footer {
 @media (max-width: 900px) {
   .stats-grid, .pillars { grid-template-columns: 1fr; }
   .diff-grid { grid-template-columns: 1fr; }
-  .numbers-split { grid-template-columns: 1fr; gap: 2rem; }
-  .numbers-divider { display: none; }
+  .timeline-line { left: 24px; }
+  .tl-dot { left: 24px !important; }
+  .timeline-item:nth-child(odd) .tl-content,
+  .timeline-item:nth-child(even) .tl-content { width: auto; margin-left: 52px; text-align: left; padding: 0; }
+  .timeline-item:nth-child(odd) .tl-branch,
+  .timeline-item:nth-child(even) .tl-branch { left: 30px !important; width: 16px; right: auto !important; }
   .map-legend { gap: 1rem; }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
   .portfolio-tile.tile-wide { grid-column: span 2; }
   .footer-grid { grid-template-columns: 1fr; }
-  nav .nav-links { display: none; }
+  nav .nav-links {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; background: var(--bg-deep); padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(196,168,107,0.15); gap: 0.5rem; z-index: 100;
+  }
+  nav .nav-links.show { display: flex; }
+  nav .nav-links a { padding: 0.6rem 0; font-size: 0.9rem; }
   .nav-toggle { display: block; }
+  .nlc-btn { display: none; }
+  .nav-nlc-mobile { display: block; padding-top: 0.5rem; border-top: 1px solid rgba(196,168,107,0.1); }
   .hero-content { padding: 0 1.5rem; }
 }
 @media (max-width: 600px) {
@@ -555,14 +650,23 @@ footer {
       </div>
     </a>
     <ul class="nav-links">
-      <li><a href="#opportunity">Ευκαιρία</a></li>
-      <li><a href="#vision">Όραμα</a></li>
+      <li><a href="#opportunity" data-i18n="nav.opportunity">Πρόταση</a></li>
+      <li><a href="#vision" data-i18n="nav.vision">Όραμα</a></li>
       <li><a href="#masterplan">Masterplan</a></li>
-      <li><a href="#difference">Διαφορά</a></li>
-      <li><a href="#location">Τοποθεσία</a></li>
-      <li><a href="#portfolio">Χαρτοφυλάκιο</a></li>
-      <li><a href="#contact">Επικοινωνία</a></li>
+      <li><a href="#difference" data-i18n="nav.difference">Διαφορά</a></li>
+      <li><a href="#location" data-i18n="nav.location">Τοποθεσία</a></li>
+      <li><a href="#portfolio" data-i18n="nav.portfolio">Χαρτοφυλάκιο</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">Επικοινωνία</a></li>
+      <li class="nav-nlc-mobile"><a href="https://nlc-consulting.org" target="_blank"><img src="assets/nlc-logo.svg" alt="NLC" style="height:18px;opacity:0.6;vertical-align:middle;"></a></li>
     </ul>
+    <button class="lang-toggle" id="lang-toggle" data-lang="el" onclick="setLanguage(this.dataset.lang === 'el' ? 'en' : 'el')" aria-label="Toggle language">
+      <span class="lt-el">ΕΛ</span>
+      <span class="lt-sep">|</span>
+      <span class="lt-en">EN</span>
+    </button>
+    <a href="https://nlc-consulting.org" target="_blank" class="nlc-btn" aria-label="Next Level Consulting" title="Next Level Consulting">
+      <img src="assets/nlc-logo.svg" alt="NLC">
+    </a>
     <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -575,17 +679,17 @@ footer {
   <div class="hero-content container">
     <div class="hero-eyebrow">
       <span class="line"></span>
-      <span class="label">Στρατηγική Ευκαιρία Ανάπτυξης Γης</span>
+      <span class="label" data-i18n="hero.eyebrow">Στρατηγική Πρόταση Ανάπτυξης Γης</span>
     </div>
     <h1>RIVER<br><em>LAND</em></h1>
-    <p class="hero-sub">Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό — στην καρδιά της Λεμεσού.</p>
+    <p class="hero-sub" data-i18n="hero.sub">Ένα έργο με μοναδικό αποτύπωμα που δημιουργεί τον μεγαλύτερο οργανωμένο χώρο πρασίνου στην πόλη.</p>
     <a href="#opportunity" class="hero-cta">
-      Ανακαλύψτε το Έργο
+      <span data-i18n="hero.cta">Ανακαλύψτε το Έργο</span>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
     </a>
   </div>
   <div class="hero-scroll">
-    <span>Κύλιση</span>
+    <span data-i18n="hero.scroll">Κύλιση</span>
     <div class="scroll-line"></div>
   </div>
 </section>
@@ -593,27 +697,27 @@ footer {
 <!-- ==================== OPPORTUNITY ==================== -->
 <section class="section section--dark" id="opportunity">
   <div class="container">
-    <span class="label reveal">Η Ευκαιρία</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Μια Στρατηγική Ευκαιρία<br><em style="color:var(--gold);font-style:italic;">Μετασχηματισμού Γης</em></h2>
+    <span class="label reveal" data-i18n="opportunity.label">Η Πρόταση</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="opportunity.heading">Μια Στρατηγική Πρόταση<br><em style="color:var(--gold);font-style:italic;">Μετασχηματισμού Γης</em></h2>
     <div class="gold-divider reveal"></div>
-    <p class="body-text reveal" style="max-width:720px;">
+    <p class="body-text reveal" style="max-width:720px;" data-i18n="opportunity.body">
       Η παρούσα πρόταση αξιοποιεί ένα ειδικό κυβερνητικό πολεοδομικό πρόγραμμα που επιτρέπει τη μετατροπή γεωργικής και δασικής γης σε περιοχές οικιστικής και εμπορικής ανάπτυξης, υπό συγκεκριμένες προϋποθέσεις.
     </p>
     <div class="stats-grid">
       <div class="stat-card reveal">
         <div class="stat-number">40κ</div>
-        <div class="stat-label">τ.μ. ελάχιστη έκταση πρασίνου</div>
-        <div class="stat-desc">Στα οποία θα προστεθούν επιπλέον 30κ τμ, δημιουργώντας τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</div>
+        <div class="stat-label" data-i18n="stat1.label">τ.μ. ελάχιστη έκταση πρασίνου</div>
+        <div class="stat-desc" data-i18n="stat1.desc">Στα οποία θα προστεθούν επιπλέον 30κ τμ, δημιουργώντας τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</div>
       </div>
       <div class="stat-card reveal reveal-delay-1">
         <div class="stat-number">30%</div>
-        <div class="stat-label">στρατηγικές αναπτύξεις</div>
-        <div class="stat-desc">Κλινικές, Κέντρα Αποκατάστασης, Ιδιωτικές Σχολές, Ερευνητικά Ινστιτούτα — χωρίς χωροταξικούς περιορισμούς.</div>
+        <div class="stat-label" data-i18n="stat2.label">στρατηγικές αναπτύξεις</div>
+        <div class="stat-desc" data-i18n="stat2.desc">Κλινικές, Κέντρα Αποκατάστασης, Ιδιωτικές Σχολές, Ερευνητικά Ινστιτούτα — χωρίς χωροταξικούς περιορισμούς.</div>
       </div>
       <div class="stat-card reveal reveal-delay-2">
         <div class="stat-number">100κ</div>
-        <div class="stat-label">τ.μ. οικιστικός σχεδιασμός</div>
-        <div class="stat-desc">Πρωτοποριακός σχεδιασμός με απόλυτη ανεξαρτησία στον χώρο — μια πρωτοποριακή κοινότητα που δένει το έργο.</div>
+        <div class="stat-label" data-i18n="stat3.label">τ.μ. οικιστικός σχεδιασμός</div>
+        <div class="stat-desc" data-i18n="stat3.desc">Πρωτοποριακός σχεδιασμός με απόλυτη ανεξαρτησία στον χώρο — μια πρωτοποριακή κοινότητα που δένει το έργο.</div>
       </div>
     </div>
     <div class="photo-strip reveal" style="margin-top:3rem;">
@@ -627,21 +731,21 @@ footer {
 <!-- ==================== VISION ==================== -->
 <section class="section section--mid" id="vision">
   <div class="container">
-    <span class="label reveal">Το Όραμα</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Δημιουργούμε μια Νέα<br><em style="color:var(--gold);font-style:italic;">Ποιοτική Ολιστική Ταυτότητα</em></h2>
+    <span class="label reveal" data-i18n="vision.label">Το Όραμα</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="vision.heading">Δημιουργούμε μια Νέα<br><em style="color:var(--gold);font-style:italic;">Ποιοτική Ολιστική Ταυτότητα</em></h2>
     <div class="gold-divider reveal"></div>
     <div class="pillars">
       <div class="pillar reveal">
-        <h3>Οικιστική Ανάπτυξη</h3>
-        <p>Πέραν των 100κ τμ γης παρέχονται ως αντιπαροχή στον επενδυτή με 28,5κ τμ συντελεστή δόμησης. Πέραν των 210 οικιστικών μονάδων μπορούν να διατεθούν στην αγορά, με δικαίωμα σταδιακής κατασκευής και παράδοσης.</p>
+        <h3 data-i18n="vision.pillar1.title">Οικιστική Ανάπτυξη</h3>
+        <p data-i18n="vision.pillar1.body">Πέραν των 100κ τμ γης παρέχονται ως αντιπαροχή στον επενδυτή με 28,5κ τμ συντελεστή δόμησης. Πέραν των 210 οικιστικών μονάδων μπορούν να διατεθούν στην αγορά, με δικαίωμα σταδιακής κατασκευής και παράδοσης.</p>
       </div>
       <div class="pillar reveal reveal-delay-1">
-        <h3>Στρατηγικές Αναπτύξεις</h3>
-        <p>Σε έκταση 25κ τμ η κάθε μια και με συντελεστή δόμησης 7,5κ τμ, κάθε στρατηγική ανάπτυξη δένει άμεσα στον σχεδιασμό, τοποθετημένη σε αμφιθεατρικό χωροταξικό σχεδιασμό που αναδεικνύει τα προνόμια της τοποθεσίας.</p>
+        <h3 data-i18n="vision.pillar2.title">Στρατηγικές Αναπτύξεις</h3>
+        <p data-i18n="vision.pillar2.body">Σε έκταση 25κ τμ η κάθε μια και με συντελεστή δόμησης 7,5κ τμ, κάθε στρατηγική ανάπτυξη δένει άμεσα στον σχεδιασμό, τοποθετημένη σε αμφιθεατρικό χωροταξικό σχεδιασμό που αναδεικνύει τα προνόμια της τοποθεσίας.</p>
       </div>
       <div class="pillar reveal reveal-delay-2">
-        <h3>Περιβάλλοντες Χώροι</h3>
-        <p>Διπλασιάζουμε την απαιτούμενη ποσότητα πρασίνου: δίκτυο ποδηλατοδρόμων, πεζοδρόμων, υπαίθριων αμφιθεάτρων και ανοικτών γηπέδων σε έκταση που υπερβαίνει τις 70κ τμ.</p>
+        <h3 data-i18n="vision.pillar3.title">Περιβάλλοντες Χώροι</h3>
+        <p data-i18n="vision.pillar3.body">Διπλασιάζουμε την απαιτούμενη ποσότητα πρασίνου: δίκτυο ποδηλατοδρόμων, πεζοδρόμων, υπαίθριων αμφιθεάτρων και ανοικτών γηπέδων σε έκταση που υπερβαίνει τις 70κ τμ.</p>
       </div>
     </div>
   </div>
@@ -650,10 +754,10 @@ footer {
 <!-- ==================== MASTERPLAN ==================== -->
 <section class="masterplan-section" id="masterplan">
   <div class="container">
-    <span class="label reveal">Ο Σχεδιασμός</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em></h2>
+    <span class="label reveal" data-i18n="masterplan.label">Ο Σχεδιασμός</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="masterplan.heading">Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em></h2>
     <div class="gold-divider reveal"></div>
-    <p class="body-text reveal" style="max-width:600px;">Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.</p>
+    <p class="body-text reveal" style="max-width:600px;" data-i18n="masterplan.body">Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.</p>
   </div>
   <div class="masterplan-wrapper reveal" id="masterplan-container">
     <img src="assets/masterplan.jpg" alt="RIVERLAND Masterplan" id="masterplan-img">
@@ -691,11 +795,11 @@ footer {
   </div>
   <div class="container">
     <div class="masterplan-legend reveal">
-      <div class="legend-item"><div class="legend-dot" style="background:#A8D08D;"></div> Οικιστικές Ζώνες</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4472C4;"></div> Στρατηγικές Αναπτύξεις</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#70AD47;"></div> Πράσινο & Πάρκα</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4EA0D6;"></div> Ποταμός</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#E8B960;"></div> Οδικό Δίκτυο</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#A8D08D;"></div> <span data-i18n="masterplan.legend.residential">Οικιστικές Ζώνες</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4472C4;"></div> <span data-i18n="masterplan.legend.strategic">Στρατηγικές Αναπτύξεις</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#70AD47;"></div> <span data-i18n="masterplan.legend.green">Πράσινο & Πάρκα</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4EA0D6;"></div> <span data-i18n="masterplan.legend.river">Ποταμός</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E8B960;"></div> <span data-i18n="masterplan.legend.road">Οδικό Δίκτυο</span></div>
     </div>
   </div>
 </section>
@@ -703,18 +807,19 @@ footer {
 <!-- ==================== DIFFERENCE ==================== -->
 <section class="section section--mid" id="difference">
   <div class="container">
-    <span class="label reveal">Η Διαφορά Μας</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em></h2>
+    <span class="label reveal" data-i18n="difference.label">Η Διαφορά Μας</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="difference.heading">Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em></h2>
     <div class="gold-divider reveal"></div>
-    <p class="body-text reveal" style="max-width:600px;margin-bottom:2rem;">Δεν θέλουμε να σχεδιάσουμε ένα ακόμα έργο οικιστικής ανάπτυξης. Δημιουργούμε αποτύπωμα.</p>
+    <h2 class="reveal" style="margin-top:0.5rem;font-size:clamp(1.4rem,3vw,2.2rem);max-width:700px;" data-i18n-html="difference.subheading">Δεν θέλουμε να σχεδιάσουμε ένα ακόμα έργο οικιστικής ανάπτυξης. Θέλουμε να δημιουργήσουμε <em style="color:var(--gold);font-style:italic;">αποτύπωμα.</em></h2>
+    <p class="body-text reveal" style="max-width:700px;margin:1.5rem 0 2rem;" data-i18n="difference.body">Η παρέμβασή μας στον χώρο πολλαπλασιάζει την προστιθέμενη αξία της ανάπτυξης, δείχνοντας στον επισκέπτη κάτι μοναδικό, αφήνοντας πίσω κάτι που θα συζητηθεί.</p>
     <div class="diff-grid">
       <div class="diff-card reveal">
-        <h3>Αποτύπωμα στον Χώρο</h3>
-        <p>Δεν σταματάμε στα πρέπει. Προσθέτουμε στα απαιτούμενα 40κ τμ πρασίνου, επιπλέον 30κ, για να φτιάξουμε τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</p>
+        <h3 data-i18n="difference.card1.title">Αποτύπωμα στον Χώρο</h3>
+        <p data-i18n="difference.card1.body">Δεν σταματάμε στα πρέπει. Προσθέτουμε στα απαιτούμενα 40κ τμ πρασίνου, επιπλέον 30κ, για να φτιάξουμε τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.</p>
       </div>
       <div class="diff-card reveal reveal-delay-1">
-        <h3>Υψηλή Εσωτερική Αξία</h3>
-        <p>Δεν μετασχηματίζουμε για να πωλήσουμε. Η ολιστική μας προσέγγιση δένει τις Στρατηγικές Αναπτύξεις με όλες τις πτυχές του έργου, προσθέτοντας στην ήδη υψηλή αξία του.</p>
+        <h3 data-i18n="difference.card2.title">Υψηλή Εσωτερική Αξία</h3>
+        <p data-i18n="difference.card2.body">Δεν μετασχηματίζουμε για να πωλήσουμε. Η ολιστική μας προσέγγιση δένει τις Στρατηγικές Αναπτύξεις με όλες τις πτυχές του έργου, προσθέτοντας στην ήδη υψηλή αξία του.</p>
       </div>
     </div>
     <div class="diff-images reveal" style="margin-top:2rem;">
@@ -728,55 +833,73 @@ footer {
 <!-- ==================== NUMBERS ==================== -->
 <section class="section section--dark" id="numbers">
   <div class="container">
-    <span class="label reveal">Σε Αριθμούς & Χρόνο</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Η Διαφορά Μας <em style="color:var(--gold);font-style:italic;">σε Βάθος</em></h2>
+    <span class="label reveal" data-i18n="numbers.label">Σε Αριθμούς & Χρόνο</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="numbers.heading">Η Διαφορά Μας <em style="color:var(--gold);font-style:italic;">σε Βάθος</em></h2>
     <div class="gold-divider reveal"></div>
-    <div class="numbers-split reveal">
-      <div>
-        <div class="big-number">30%+</div>
-        <p style="color:var(--text-secondary);font-size:1rem;margin:0.5rem 0 2rem;">πιθανότητες κερδοφορίας</p>
-        <div class="number-row">
-          <h4>Μηδενικό κόστος επένδυσης σε γη</h4>
-          <p>Η εταιρεία διατηρεί ρευστότητα μέχρι την έναρξη του έργου.</p>
+    <div class="timeline-wrap reveal" id="timeline-wrap">
+      <div class="timeline-line"></div>
+      <div class="timeline-items">
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl1.title">Μηδενικό κόστος επένδυσης σε γη</h4>
+            <p data-i18n="numbers.tl1.body">Η εταιρεία διατηρεί ρευστότητα μέχρι την έναρξη του έργου.</p>
+          </div>
         </div>
-        <div class="number-row">
-          <h4>Μοναδικός σχεδιασμός</h4>
-          <p>Στρατηγικές Αναπτύξεις + μεγαλύτερος χώρος πρασίνου = υψηλή υπεραξία.</p>
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl2.title">Μοναδικός σχεδιασμός</h4>
+            <p data-i18n="numbers.tl2.body">Στρατηγικές Αναπτύξεις + μεγαλύτερος χώρος πρασίνου = υψηλή υπεραξία.</p>
+          </div>
         </div>
-        <div class="number-row">
-          <h4>Εγγύτητα & Τοποθεσία</h4>
-          <p>10 λεπτά από αυτοκινητόδρομο, θάλασσα, κέντρο πόλης.</p>
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl3.title">Εγγύτητα & Τοποθεσία</h4>
+            <p data-i18n="numbers.tl3.body">10 λεπτά από αυτοκινητόδρομο, θάλασσα, κέντρο πόλης.</p>
+          </div>
         </div>
-      </div>
-      <div class="numbers-divider"></div>
-      <div>
-        <div style="margin-bottom:2rem;">
-          <span class="label">Σε Χρόνο</span>
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl4.title">Η αδειοδότηση</h4>
+            <p data-i18n="numbers.tl4.body">Αναλαμβάνουμε και τα 3 στάδια υποβολής και επίβλεψης στη διαδικασία έγκρισης.</p>
+          </div>
         </div>
-        <div class="number-row">
-          <h4>Η αδειοδότηση</h4>
-          <p>Αναλαμβάνουμε και τα 3 στάδια υποβολής και επίβλεψης στη διαδικασία έγκρισης.</p>
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl5.title">Το διάστημα έγκρισης</h4>
+            <p data-i18n="numbers.tl5.body">Προπαρασκευαστικές εργασίες και προώθηση καθόλη τη διάρκεια αδειοδότησης.</p>
+          </div>
         </div>
-        <div class="number-row">
-          <h4>Το διάστημα έγκρισης</h4>
-          <p>Προπαρασκευαστικές εργασίες και προώθηση καθόλη τη διάρκεια αδειοδότησης.</p>
-        </div>
-        <div class="number-row">
-          <h4>Οι φάσεις υλοποίησης</h4>
-          <p>Υλοποίηση σε φάσεις με δικαίωμα διακοπής από τον επενδυτή τηρουμένων των διατάξεων.</p>
+        <div class="timeline-item" style="position:relative;">
+          <div class="tl-dot" style="top:12px;"></div>
+          <div class="tl-branch" style="top:16px;"></div>
+          <div class="tl-content">
+            <h4 data-i18n="numbers.tl6.title">Οι φάσεις υλοποίησης</h4>
+            <p data-i18n="numbers.tl6.body">Υλοποίηση σε φάσεις με δικαίωμα διακοπής από τον επενδυτή τηρουμένων των διατάξεων.</p>
+          </div>
         </div>
       </div>
     </div>
+    <p class="numbers-invest-text reveal" data-i18n="numbers.investText">Είναι για όλα αυτά που πέραν από τη μοναδικότητα του έργου και τον πρωτοποριακό σχεδιασμό του, η επένδυση μαζί μας προσφέρει μέγιστες πιθανότητες κερδοφορίας και ανάληψη μηδενικού ρίσκου. Η δε σταδιακή εκτέλεση του σε προκαθορισμένες φάσεις, δημιουργεί μια εξαιρετικά ανθεκτική ανάπτυξη απόλυτα ικανή να αποδώσει τα αναμενόμενα.</p>
   </div>
 </section>
 
 <!-- ==================== LOCATION ==================== -->
 <section class="location-section" id="location">
   <div class="container">
-    <span class="label reveal">Τοποθεσία</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Πύργος Λεμεσού — <em style="color:var(--gold);font-style:italic;">Στο Κέντρο Όλων</em></h2>
+    <span class="label reveal" data-i18n="location.label">Τοποθεσία</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n="location.heading">Πύργος Λεμεσού</h2>
     <div class="gold-divider reveal"></div>
-    <p class="body-text reveal" style="max-width:600px;">Στρατηγικά τοποθετημένο ανάμεσα σε αυτοκινητόδρομο, θάλασσα και κέντρο πόλης — μακριά από τον θόρυβο, κοντά σε ό,τι χρειάζεστε.</p>
+    <p class="body-text reveal" style="max-width:700px;" data-i18n="location.body">Μακριά από τον θόρυβο, κοντά στα πάντα, αποτελεί ιδανικό προορισμό για όποιον ξέρει να ξεχωρίζει.</p>
   </div>
   <div class="map-canvas" id="map-canvas">
     <svg viewBox="0 0 1000 562" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
@@ -811,30 +934,75 @@ footer {
       <path class="map-coastline" id="coastline"
         d="M 1.8,324.6 L 21.8,314.4 L 37.9,320.6 L 48.6,317.7 L 68.8,329.5 L 84.4,347.4 L 94.9,364.3 L 111.8,377.2 L 122.2,394.5 L 132.8,415.4 L 144.6,443.7 L 153.8,471.7 L 156.6,485.9 L 159.3,505.7 L 149.6,524.8 L 160.5,521.3 L 168.5,521.4 L 184.8,522.8 L 192.3,523.9 L 203.1,524.3 L 215.5,513.5 L 232.9,517.4 L 244.1,520.7 L 253.4,521.7 L 258.1,522.3 L 272.4,527.4 L 285.2,528.7 L 289.6,530.4 L 295.3,533.3 L 304.4,535.7 L 307.8,532.9 L 316.7,525.4 L 311.4,516.7 L 309.6,515.9 L 301.7,502.9 L 292.7,496.1 L 281.5,478.3 L 267.4,427.7 L 300.8,356.8 L 303.6,354.8 L 291.7,362.3 L 291.7,342.5 L 297.8,330.5 L 305.7,324.4 L 314.4,314.6 L 317.5,318.1 L 320.0,313.5 L 321.4,313.1 L 324.0,317.4 L 320.3,323.3 L 326.6,317.4 L 326.5,314.9 L 341.9,296.0 L 355.7,282.7 L 372.2,274.2 L 374.9,273.8 L 388.6,267.1 L 398.4,264.8 L 404.9,262.1 L 406.7,260.2 L 409.6,257.5 L 418.8,251.9 L 433.3,244.4 L 452.5,236.8 L 469.1,232.4 L 472.7,233.2 L 478.5,232.0 L 496.9,223.7 L 519.0,223.9 L 523.9,229.9 L 538.5,227.5 L 555.4,231.9 L 571.1,236.7 L 585.7,235.4 L 617.7,236.8 L 634.2,237.4 L 636.5,236.6 L 654.7,238.7 L 675.6,237.9 L 693.0,233.7 L 697.3,222.8 L 701.8,213.0 L 714.6,208.9 L 712.6,207.1 L 726.4,198.7 L 734.2,201.6 L 753.0,205.4 L 767.9,216.8 L 770.8,214.6 L 783.9,209.5 L 802.7,194.0 L 804.0,195.4 L 807.3,192.2 L 820.6,185.2 L 846.5,184.9 L 860.4,175.4 L 877.3,162.8 L 897.8,150.2 L 923.2,145.7 L 931.2,138.5 L 937.0,127.7 L 955.6,114.5 L 977.5,107.7 L 999.1,97.6"/>
 
-      <!-- Scale bar: map spans ~57km (0.62° lon at lat 34.7°), 5km ≈ 88 SVG units -->
-      <g data-delay="6400" class="map-dist-badge">
+      <!-- Scale bar: 5km ≈ 88 SVG units -->
+      <g data-delay="6800" class="map-scale">
         <line x1="860" y1="540" x2="948" y2="540" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
         <line x1="860" y1="536" x2="860" y2="544" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
         <line x1="948" y1="536" x2="948" y2="544" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
         <text x="904" y="534" text-anchor="middle" font-family="Outfit, sans-serif" font-size="9" fill="#A09878" font-weight="300">5 km</text>
       </g>
 
-      <!-- A1 Highway — runs inland from Limassol area to past Zygi -->
-      <path class="map-highway" data-delay="3000"
-        d="M 290,210 Q 350,195 420,180 Q 500,168 580,160 Q 660,155 740,150 Q 800,146 870,140"/>
+      <!-- Dense urban area — Limassol city (between port and Germasogeia) -->
+      <path class="map-terrain" data-delay="2800" style="fill:rgba(40,65,40,0.35);stroke:none;"
+        d="M 280,290 Q 300,275 320,268 Q 340,260 360,258 Q 380,255 400,258 Q 420,260 440,258
+           Q 448,256 450,250 L 450,237 Q 440,244 420,252 Q 400,260 380,265 Q 360,270 340,278
+           Q 320,288 300,300 Q 285,310 280,320 Z"/>
+      <!-- Small building grid pattern in urban area -->
+      <g class="map-terrain" data-delay="2900" style="opacity:0;">
+        <line x1="300" y1="280" x2="300" y2="310" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="320" y1="272" x2="320" y2="305" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="340" y1="265" x2="340" y2="295" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="360" y1="260" x2="360" y2="285" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="380" y1="258" x2="380" y2="272" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="400" y1="258" x2="400" y2="268" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="420" y1="256" x2="420" y2="262" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="290" y1="290" x2="430" y2="255" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="285" y1="300" x2="440" y2="260" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="280" y1="310" x2="445" y2="265" stroke="#2a4a2a" stroke-width="0.3"/>
+      </g>
 
-      <!-- A1 label badges -->
+      <!-- A1 Highway — from OSM motorway junction coordinates -->
+      <path class="map-highway" data-delay="3000"
+        d="M 250,276 L 293,245 L 324,239 L 349,237 L 389,229 L 431,234 L 461,226 L 517,216 L 586,203 L 632,183 L 696,199 L 760,139"/>
+
+      <!-- A1 labels -->
       <g class="map-hw-label" data-delay="3200">
-        <rect x="415" y="172" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
-        <text x="426" y="181" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
+        <rect x="485" y="212" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
+        <text x="496" y="221" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
       </g>
       <g class="map-hw-label" data-delay="3300">
-        <rect x="735" y="143" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
-        <text x="746" y="152" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
+        <rect x="720" y="162" width="22" height="13" rx="2" fill="#2a4a2a" stroke="#3a6a4a" stroke-width="0.5"/>
+        <text x="731" y="171" text-anchor="middle" font-size="8" fill="#5a9a6a" font-weight="600">A1</text>
       </g>
 
-      <!-- Place dots + labels — positioned from OSM coordinate projection -->
-      <!-- Akrotiri (cape tip) -->
+      <!-- A1 Highway Junction Nodes (gold circles) + area labels going UP -->
+      <!-- Polemidia Junction -->
+      <g class="map-junction" data-delay="3400">
+        <circle cx="293" cy="245" r="4.5" fill="var(--gold)" stroke="#0E1A0E" stroke-width="1"/>
+        <line x1="293" y1="240" x2="293" y2="218" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="293" y="213" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Πολεμίδια</text>
+      </g>
+      <!-- Ag. Athanasios Junction -->
+      <g class="map-junction" data-delay="3500">
+        <circle cx="334" cy="238" r="4.5" fill="var(--gold)" stroke="#0E1A0E" stroke-width="1"/>
+        <line x1="334" y1="233" x2="334" y2="211" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="334" y="206" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Αγ. Αθανάσιος</text>
+      </g>
+      <!-- Agia Fyla Junction -->
+      <g class="map-junction" data-delay="3600">
+        <circle cx="358" cy="235" r="4.5" fill="var(--gold)" stroke="#0E1A0E" stroke-width="1"/>
+        <line x1="358" y1="230" x2="358" y2="208" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="358" y="203" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Αγία Φύλα</text>
+      </g>
+      <!-- Germasogeia Junction -->
+      <g class="map-junction" data-delay="3700">
+        <circle cx="433" cy="234" r="4.5" fill="var(--gold)" stroke="#0E1A0E" stroke-width="1"/>
+        <line x1="433" y1="229" x2="433" y2="207" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="433" y="202" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Γερμασόγεια</text>
+      </g>
+
+      <!-- Place dots + labels — OSM coordinate projection -->
+      <!-- Akrotiri -->
       <circle class="map-dot" data-delay="3400" cx="190" cy="516" r="3"/>
       <text class="map-place-label" data-delay="3500" x="175" y="540" text-anchor="middle">Ακρωτήρι</text>
 
@@ -842,25 +1010,77 @@ footer {
       <circle class="map-dot" data-delay="3600" cx="266" cy="406" r="2.5"/>
       <text class="map-place-label" data-delay="3700" x="248" y="398" text-anchor="end" font-size="8">Lady's Mile</text>
 
-      <!-- Limassol City Center -->
-      <circle class="map-dot" data-delay="3800" cx="323" cy="312" r="4" style="fill:var(--cream)"/>
-      <text class="map-place-label major" data-delay="3900" x="323" y="302" text-anchor="middle">Λεμεσός</text>
+      <!-- Limassol City Center — with building icon -->
+      <g class="map-icon" data-delay="3800">
+        <rect x="318" y="296" width="10" height="16" rx="1" stroke="var(--cream)" stroke-width="0.8"/>
+        <line x1="320" y1="300" x2="326" y2="300" stroke="var(--cream)" stroke-width="0.5"/>
+        <line x1="320" y1="303" x2="326" y2="303" stroke="var(--cream)" stroke-width="0.5"/>
+        <line x1="320" y1="306" x2="326" y2="306" stroke="var(--cream)" stroke-width="0.5"/>
+      </g>
+      <text class="map-place-label major" data-delay="3900" x="323" y="290" text-anchor="middle">Λεμεσός</text>
 
       <!-- Limassol Marina -->
-      <circle class="map-dot" data-delay="3950" cx="339" cy="319" r="2"/>
-      <text class="map-place-label" data-delay="4000" x="355" y="329" text-anchor="start" font-size="8">Μαρίνα</text>
+      <circle class="map-dot" data-delay="3950" cx="339" cy="308" r="2"/>
+      <text class="map-place-label" data-delay="4000" x="350" y="318" text-anchor="start" font-size="8">Μαρίνα</text>
+
+      <!-- ONE Tower (landmark, near Marina) -->
+      <g class="map-tower" data-delay="4050">
+        <line x1="337" y1="306" x2="337" y2="290" stroke="var(--text-muted)" stroke-width="1.2"/>
+        <rect x="334" y="288" width="6" height="3" rx="0.5" stroke="var(--text-muted)" stroke-width="0.6"/>
+      </g>
+
+      <!-- Limassol Port — anchor icon -->
+      <g class="map-icon" data-delay="3850">
+        <circle cx="271" cy="350" r="3" stroke="var(--text-muted)" stroke-width="0.8" fill="none"/>
+        <line x1="271" y1="347" x2="271" y2="357" stroke="var(--text-muted)" stroke-width="0.8"/>
+        <path d="M266,355 Q271,358 276,355" fill="none" stroke="var(--text-muted)" stroke-width="0.8"/>
+      </g>
+      <text class="map-place-label" data-delay="3900" x="282" y="356" text-anchor="start" font-size="7.5">Λιμάνι</text>
+
+      <!-- Limassol Hospital — cross icon -->
+      <g class="map-icon" data-delay="3900">
+        <line x1="336" y1="270" x2="336" y2="280" stroke="#6ba86b" stroke-width="1.5"/>
+        <line x1="331" y1="275" x2="341" y2="275" stroke="#6ba86b" stroke-width="1.5"/>
+      </g>
+      <text class="map-place-label" data-delay="4000" x="346" y="278" text-anchor="start" font-size="7">Νοσοκομείο</text>
 
       <!-- Dasoudi Beach -->
-      <circle class="map-dot" data-delay="4100" cx="398" cy="271" r="2.5"/>
-      <text class="map-place-label" data-delay="4200" x="398" y="285" text-anchor="middle" font-size="9">Δασούδι</text>
+      <circle class="map-dot" data-delay="4100" cx="398" cy="265" r="2.5"/>
+      <text class="map-place-label" data-delay="4200" x="398" y="279" text-anchor="middle" font-size="9">Δασούδι</text>
 
-      <!-- Germasogeia -->
-      <circle class="map-dot" data-delay="4300" cx="436" cy="250" r="2.5"/>
-      <text class="map-place-label" data-delay="4400" x="436" y="264" text-anchor="middle" font-size="9">Γερμασόγεια</text>
+      <!-- Hotels on coastline -->
+      <!-- Mediterranean Beach Hotel -->
+      <g class="map-hotel" data-delay="4050">
+        <rect x="374" y="265" width="3" height="3" rx="0.5" fill="var(--text-muted)" transform="rotate(45,375.5,266.5)"/>
+      </g>
+      <text class="map-place-label" data-delay="4100" x="381" y="271" text-anchor="start" font-size="6" style="fill:var(--text-muted);">Mediterranean</text>
+
+      <!-- St Raphael Hotel -->
+      <g class="map-hotel" data-delay="4200">
+        <rect x="430" y="239" width="3" height="3" rx="0.5" fill="var(--text-muted)" transform="rotate(45,431.5,240.5)"/>
+      </g>
+      <text class="map-place-label" data-delay="4250" x="436" y="243" text-anchor="start" font-size="6" style="fill:var(--text-muted);">St Raphael</text>
+
+      <!-- Parklane Hotel -->
+      <g class="map-hotel" data-delay="4300">
+        <rect x="442" y="238" width="3" height="3" rx="0.5" fill="var(--text-muted)" transform="rotate(45,443.5,239.5)"/>
+      </g>
+
+      <!-- Amathus Hotel -->
+      <g class="map-hotel" data-delay="4350">
+        <rect x="472" y="233" width="3" height="3" rx="0.5" fill="var(--text-muted)" transform="rotate(45,473.5,234.5)"/>
+      </g>
+      <text class="map-place-label" data-delay="4400" x="478" y="237" text-anchor="start" font-size="6" style="fill:var(--text-muted);">Amathus</text>
+
+      <!-- Four Seasons Hotel -->
+      <g class="map-hotel" data-delay="4450">
+        <rect x="484" y="234" width="3" height="3" rx="0.5" fill="var(--text-muted)" transform="rotate(45,485.5,235.5)"/>
+      </g>
+      <text class="map-place-label" data-delay="4500" x="490" y="240" text-anchor="start" font-size="6" style="fill:var(--text-muted);">Four Seasons</text>
 
       <!-- Ag. Tychonas -->
       <circle class="map-dot" data-delay="4500" cx="484" cy="239" r="2.5"/>
-      <text class="map-place-label" data-delay="4600" x="484" y="232" text-anchor="middle" font-size="8">Αγ. Τύχωνας</text>
+      <text class="map-place-label" data-delay="4600" x="484" y="250" text-anchor="middle" font-size="8">Αγ. Τύχωνας</text>
 
       <!-- Governor's Beach -->
       <circle class="map-dot" data-delay="4700" cx="629" cy="229" r="2.5"/>
@@ -870,7 +1090,7 @@ footer {
       <circle class="map-dot" data-delay="4800" cx="742" cy="204" r="2.5"/>
       <text class="map-place-label" data-delay="4900" x="742" y="196" text-anchor="middle" font-size="9">Μαρί</text>
 
-      <!-- Zygi (east end) -->
+      <!-- Zygi -->
       <circle class="map-dot" data-delay="5000" cx="802" cy="198" r="3"/>
       <text class="map-place-label" data-delay="5100" x="802" y="190" text-anchor="middle">Ζύγι</text>
 
@@ -879,9 +1099,17 @@ footer {
       <text class="map-place-label" data-delay="3600" x="55" y="377" text-anchor="middle" font-size="8" style="font-style:italic;">Επισκοπής</text>
 
       <!-- Mediterranean Sea label -->
-      <text class="map-sea-label" data-delay="3800" x="520" y="460" text-anchor="middle">Μ ε σ ό γ ε ι ο ς &nbsp; Θ ά λ α σ σ α</text>
+      <text class="map-sea-label" data-delay="3800" data-i18n="map.sea" x="520" y="460" text-anchor="middle">Μ ε σ ό γ ε ι ο ς &nbsp; Θ ά λ α σ σ α</text>
 
-      <!-- ===== RIVERLAND PIN (Pyrgos — inland, OSM coords: 33.120°E, 34.735°N) ===== -->
+      <!-- Airport direction indicators (off-map) -->
+      <g class="map-place-label" data-delay="5200" style="opacity:0;">
+        <text data-i18n="map.airportPaphos" x="14" y="292" text-anchor="start" font-size="7" fill="#A09878">← Αεροδρόμιο Πάφου</text>
+      </g>
+      <g class="map-place-label" data-delay="5300" style="opacity:0;">
+        <text data-i18n="map.airportLarnaca" x="986" y="80" text-anchor="end" font-size="7" fill="#A09878">Αεροδρόμιο Λάρνακας →</text>
+      </g>
+
+      <!-- ===== RIVERLAND PIN (Pyrgos — OSM coords) ===== -->
       <g id="map-pin-group" class="map-pin-group" data-delay="5400">
         <circle cx="452" cy="177" r="30" fill="url(#pinGlow)"/>
         <circle class="map-pin-ring" cx="452" cy="177" r="12"/>
@@ -894,37 +1122,43 @@ footer {
         <text class="map-place-label" data-delay="5600" x="452" y="205" text-anchor="middle" font-size="9" style="fill:var(--gold)">Πύργος Λεμεσού</text>
       </g>
 
-      <!-- ===== DISTANCE LINES + BADGES ===== -->
-      <!-- To City Center: 10' -->
-      <line class="map-dist-line" data-delay="5800" x1="440" y1="190" x2="328" y2="308"/>
-      <g class="map-dist-badge" data-delay="6000">
-        <rect x="345" y="248" width="56" height="28" rx="3"/>
-        <text class="badge-time" x="373" y="262" text-anchor="middle">10'</text>
-        <text class="badge-label" x="373" y="272" text-anchor="middle">Κέντρο</text>
-      </g>
+      <!-- ===== ANIMATED ROAD ROUTES ===== -->
+      <!-- Route 1: To A1 Highway (orange) -->
+      <path class="map-route" data-delay="5800" stroke="#e8a44a"
+        d="M 452,177 C 452,183 453,190 454,197 C 455,204 457,212 459,218 C 460,222 462,225 463,226"/>
 
-      <!-- To A1 Highway: 5' -->
-      <line class="map-dist-line" data-delay="5900" x1="452" y1="172" x2="440" y2="175"/>
-      <g class="map-dist-badge" data-delay="6100">
-        <rect x="480" y="150" width="48" height="28" rx="3"/>
-        <text class="badge-time" x="504" y="164" text-anchor="middle">5'</text>
-        <text class="badge-label" x="504" y="174" text-anchor="middle">A1</text>
-      </g>
+      <!-- Route 2: To Beach (teal) -->
+      <path class="map-route" data-delay="6200" stroke="#5ab8c4"
+        d="M 452,177 C 454,184 456,193 459,202 C 463,213 468,222 474,230 C 478,235 481,237 484,239"/>
 
-      <!-- To Dasoudi: 12' -->
-      <line class="map-dist-line" data-delay="6000" x1="445" y1="192" x2="402" y2="268"/>
-      <g class="map-dist-badge" data-delay="6200">
-        <rect x="415" y="218" width="56" height="28" rx="3"/>
-        <text class="badge-time" x="443" y="232" text-anchor="middle">12'</text>
-        <text class="badge-label" x="443" y="242" text-anchor="middle">Δασούδι</text>
-      </g>
+      <!-- Route 3: To City Center (gold) -->
+      <path class="map-route" data-delay="6600" stroke="#C4A86B"
+        d="M 452,177 C 449,184 446,193 442,203 C 436,216 428,228 420,236 C 410,246 398,254 386,261 C 374,268 362,276 352,284 C 342,292 335,300 330,308 C 327,313 325,316 323,318"/>
 
-      <!-- To Marina: 15' -->
-      <line class="map-dist-line" data-delay="6100" x1="440" y1="190" x2="342" y2="316"/>
-      <g class="map-dist-badge" data-delay="6300">
-        <rect x="355" y="286" width="56" height="28" rx="3"/>
-        <text class="badge-time" x="383" y="300" text-anchor="middle">15'</text>
-        <text class="badge-label" x="383" y="310" text-anchor="middle">Μαρίνα</text>
+      <!-- Route 4: To Coastal Front (green) -->
+      <path class="map-route" data-delay="7000" stroke="#7ab87a"
+        d="M 452,177 C 450,184 447,195 443,207 C 438,222 432,234 425,242 C 418,250 412,256 405,261 C 402,263 400,264 398,265"/>
+
+      <!-- ===== ROUTE LABELS OVER SEA ===== -->
+      <g class="map-route-info" data-delay="5800" transform="translate(340, 362)">
+        <line x1="0" y1="0" x2="14" y2="0" stroke="#e8a44a" stroke-width="2.5" stroke-linecap="round"/>
+        <text data-i18n="map.route1.name" x="20" y="3.5" font-size="9.5" fill="#e8a44a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Αυτοκινητόδρομος</text>
+        <text data-i18n="map.route1.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">9 λεπτά · 4 km</text>
+      </g>
+      <g class="map-route-info" data-delay="6200" transform="translate(340, 392)">
+        <line x1="0" y1="0" x2="14" y2="0" stroke="#5ab8c4" stroke-width="2.5" stroke-linecap="round"/>
+        <text data-i18n="map.route2.name" x="20" y="3.5" font-size="9.5" fill="#5ab8c4" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Παραλία</text>
+        <text data-i18n="map.route2.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">10 λεπτά · 4,5 km</text>
+      </g>
+      <g class="map-route-info" data-delay="6600" transform="translate(340, 422)">
+        <line x1="0" y1="0" x2="14" y2="0" stroke="#C4A86B" stroke-width="2.5" stroke-linecap="round"/>
+        <text data-i18n="map.route3.name" x="20" y="3.5" font-size="9.5" fill="#C4A86B" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Κέντρο Πόλης</text>
+        <text data-i18n="map.route3.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">15 λεπτά · 8 km</text>
+      </g>
+      <g class="map-route-info" data-delay="7000" transform="translate(340, 452)">
+        <line x1="0" y1="0" x2="14" y2="0" stroke="#7ab87a" stroke-width="2.5" stroke-linecap="round"/>
+        <text data-i18n="map.route4.name" x="20" y="3.5" font-size="9.5" fill="#7ab87a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Παραλιακό Μέτωπο</text>
+        <text data-i18n="map.route4.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">12 λεπτά · 6 km</text>
       </g>
     </svg>
   </div>
@@ -932,19 +1166,23 @@ footer {
     <div class="map-legend" id="map-legend">
       <div class="map-legend-item">
         <div class="map-legend-line" style="background:var(--gold);"></div>
-        <span>Ακτογραμμή</span>
+        <span data-i18n="map.legend.coastline">Ακτογραμμή</span>
       </div>
       <div class="map-legend-item">
         <div class="map-legend-line" style="background:#3a6a4a; background-image: repeating-linear-gradient(90deg, #3a6a4a 0, #3a6a4a 5px, transparent 5px, transparent 8px);"></div>
-        <span>Αυτοκινητόδρομος A1</span>
+        <span data-i18n="map.legend.highway">Αυτοκινητόδρομος A1</span>
       </div>
       <div class="map-legend-item">
         <div class="map-legend-dot" style="background:var(--gold);"></div>
         <span>RIVER LAND</span>
       </div>
       <div class="map-legend-item">
-        <div class="map-legend-line" style="background:var(--gold); opacity:0.4; background-image: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 4px, transparent 4px, transparent 7px);"></div>
-        <span>Αποστάσεις σε λεπτά</span>
+        <div class="map-legend-line" style="background:#e8a44a; height:3px;"></div>
+        <span data-i18n="map.legend.routes">Διαδρομές</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-dot" style="background:var(--gold); width:10px; height:10px;"></div>
+        <span data-i18n="map.legend.junctions">Κόμβοι A1</span>
       </div>
     </div>
   </div>
@@ -953,91 +1191,91 @@ footer {
 <!-- ==================== PORTFOLIO ==================== -->
 <section class="portfolio-section section" id="portfolio">
   <div class="container">
-    <span class="label reveal">Χαρτοφυλάκιο</span>
-    <h2 class="reveal" style="margin-top:0.5rem;">Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em></h2>
+    <span class="label reveal" data-i18n="portfolio.label">Χαρτοφυλάκιο</span>
+    <h2 class="reveal" style="margin-top:0.5rem;" data-i18n-html="portfolio.heading">Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em></h2>
     <div class="gold-divider reveal"></div>
-    <p class="body-text reveal" style="max-width:600px;">Μια ματιά στον σχεδιασμό, τις τοποθεσίες και την ταυτότητα του RIVER LAND — μέσα από εικόνες που αποτυπώνουν το όραμά μας.</p>
+    <p class="body-text reveal" style="max-width:600px;" data-i18n="portfolio.body">Μια ματιά στον σχεδιασμό, τις τοποθεσίες και την ταυτότητα του RIVER LAND — μέσα από εικόνες που αποτυπώνουν το όραμά μας.</p>
   </div>
   <div class="container">
     <div class="portfolio-grid reveal">
       <div class="portfolio-tile tile-wide">
         <img src="assets/forest-wide.jpg" alt="Πράσινη Κοινότητα" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Περιβάλλον</span>
-          <span class="po-title">Πράσινη Κοινότητα</span>
-          <span class="po-desc">Πνεύμονας πρασίνου 70.000+ τ.μ.</span>
+          <span class="po-label" data-i18n="portfolio.tile1.label">Περιβάλλον</span>
+          <span class="po-title" data-i18n="portfolio.tile1.title">Πράσινη Κοινότητα</span>
+          <span class="po-desc" data-i18n="portfolio.tile1.desc">Πνεύμονας πρασίνου 70.000+ τ.μ.</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/grid3.jpg" alt="Οικιστικός Σχεδιασμός" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Οικιστικά</span>
-          <span class="po-title">Οικιστικός Σχεδιασμός</span>
-          <span class="po-desc">210+ μονάδες, σύγχρονη αρχιτεκτονική</span>
+          <span class="po-label" data-i18n="portfolio.tile2.label">Οικιστικά</span>
+          <span class="po-title" data-i18n="portfolio.tile2.title">Οικιστικός Σχεδιασμός</span>
+          <span class="po-desc" data-i18n="portfolio.tile2.desc">210+ μονάδες, σύγχρονη αρχιτεκτονική</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/grid5.jpg" alt="Κέντρο Ευεξίας" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Στρατηγική</span>
-          <span class="po-title">Κέντρο Ευεξίας</span>
-          <span class="po-desc">Κλινικές & κέντρα αποκατάστασης</span>
+          <span class="po-label" data-i18n="portfolio.tile3.label">Στρατηγική</span>
+          <span class="po-title" data-i18n="portfolio.tile3.title">Κέντρο Ευεξίας</span>
+          <span class="po-desc" data-i18n="portfolio.tile3.desc">Κλινικές & κέντρα αποκατάστασης</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/nature-wide1.jpg" alt="Γραμμικό Πάρκο" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Πράσινο</span>
-          <span class="po-title">Γραμμικό Πάρκο</span>
-          <span class="po-desc">Πεζόδρομοι & ποδηλατοδρόμοι κατά μήκος ποταμού</span>
+          <span class="po-label" data-i18n="portfolio.tile4.label">Πράσινο</span>
+          <span class="po-title" data-i18n="portfolio.tile4.title">Γραμμικό Πάρκο</span>
+          <span class="po-desc" data-i18n="portfolio.tile4.desc">Πεζόδρομοι & ποδηλατοδρόμοι κατά μήκος ποταμού</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/photo-a.jpg" alt="Αμφιθεατρικός Σχεδιασμός" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Σχεδιασμός</span>
-          <span class="po-title">Αμφιθεατρικός Σχεδιασμός</span>
-          <span class="po-desc">Χωροταξική τοποθέτηση με θέα</span>
+          <span class="po-label" data-i18n="portfolio.tile5.label">Σχεδιασμός</span>
+          <span class="po-title" data-i18n="portfolio.tile5.title">Αμφιθεατρικός Σχεδιασμός</span>
+          <span class="po-desc" data-i18n="portfolio.tile5.desc">Χωροταξική τοποθέτηση με θέα</span>
         </div>
       </div>
       <div class="portfolio-tile tile-wide">
         <img src="assets/nature-wide2.jpg" alt="Αστικός Πνεύμονας" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Όραμα</span>
-          <span class="po-title">Αστικός Πνεύμονας</span>
-          <span class="po-desc">Ο μεγαλύτερος οργανωμένος χώρος πρασίνου στη Λεμεσό</span>
+          <span class="po-label" data-i18n="portfolio.tile6.label">Όραμα</span>
+          <span class="po-title" data-i18n="portfolio.tile6.title">Αστικός Πνεύμονας</span>
+          <span class="po-desc" data-i18n="portfolio.tile6.desc">Ο μεγαλύτερος οργανωμένος χώρος πρασίνου στη Λεμεσό</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/grid6.jpg" alt="Εκπαιδευτικό Κέντρο" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Στρατηγική</span>
-          <span class="po-title">Εκπαιδευτικό Κέντρο</span>
-          <span class="po-desc">Ιδιωτικές σχολές & ερευνητικά ινστιτούτα</span>
+          <span class="po-label" data-i18n="portfolio.tile7.label">Στρατηγική</span>
+          <span class="po-title" data-i18n="portfolio.tile7.title">Εκπαιδευτικό Κέντρο</span>
+          <span class="po-desc" data-i18n="portfolio.tile7.desc">Ιδιωτικές σχολές & ερευνητικά ινστιτούτα</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/photo-b.jpg" alt="Στρατηγική Ανάπτυξη" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Ανάπτυξη</span>
-          <span class="po-title">Στρατηγική Ανάπτυξη</span>
-          <span class="po-desc">25.000 τ.μ. ανά στρατηγικό τεμάχιο</span>
+          <span class="po-label" data-i18n="portfolio.tile8.label">Ανάπτυξη</span>
+          <span class="po-title" data-i18n="portfolio.tile8.title">Στρατηγική Ανάπτυξη</span>
+          <span class="po-desc" data-i18n="portfolio.tile8.desc">25.000 τ.μ. ανά στρατηγικό τεμάχιο</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/tall-trees.jpg" alt="Φυσικό Περιβάλλον" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Τοπίο</span>
-          <span class="po-title">Φυσικό Περιβάλλον</span>
-          <span class="po-desc">Δασική γη & ποτάμια οικοσυστήματα</span>
+          <span class="po-label" data-i18n="portfolio.tile9.label">Τοπίο</span>
+          <span class="po-title" data-i18n="portfolio.tile9.title">Φυσικό Περιβάλλον</span>
+          <span class="po-desc" data-i18n="portfolio.tile9.desc">Δασική γη & ποτάμια οικοσυστήματα</span>
         </div>
       </div>
       <div class="portfolio-tile">
         <img src="assets/nature-tall.jpg" alt="Βιώσιμη Ανάπτυξη" loading="lazy">
         <div class="portfolio-overlay">
-          <span class="po-label">Βιωσιμότητα</span>
-          <span class="po-title">Βιώσιμη Ανάπτυξη</span>
-          <span class="po-desc">Σεβασμός στη φύση, σχεδιασμός για το μέλλον</span>
+          <span class="po-label" data-i18n="portfolio.tile10.label">Βιωσιμότητα</span>
+          <span class="po-title" data-i18n="portfolio.tile10.title">Βιώσιμη Ανάπτυξη</span>
+          <span class="po-desc" data-i18n="portfolio.tile10.desc">Σεβασμός στη φύση, σχεδιασμός για το μέλλον</span>
         </div>
       </div>
     </div>
@@ -1051,32 +1289,425 @@ footer {
       <div class="footer-brand">
         <h3>RIVER LAND</h3>
         <div class="gold-divider"></div>
-        <p>Ένα ολιστικό έργο ανάπτυξης γης στον Πύργο Λεμεσού, σχεδιασμένο από τη Next Level Consulting.</p>
+        <p data-i18n="footer.brand.desc">Ένα ολιστικό έργο ανάπτυξης γης στον Πύργο Λεμεσού, σχεδιασμένο από τη Next Level Consulting.</p>
       </div>
       <div class="footer-col">
-        <h4>Πλοήγηση</h4>
-        <a href="#opportunity">Ευκαιρία</a>
-        <a href="#vision">Όραμα</a>
+        <h4 data-i18n="footer.nav.heading">Πλοήγηση</h4>
+        <a href="#opportunity" data-i18n="nav.opportunity">Πρόταση</a>
+        <a href="#vision" data-i18n="nav.vision">Όραμα</a>
         <a href="#masterplan">Master Plan</a>
-        <a href="#difference">Διαφορά</a>
-        <a href="#location">Τοποθεσία</a>
-        <a href="#portfolio">Χαρτοφυλάκιο</a>
+        <a href="#difference" data-i18n="nav.difference">Διαφορά</a>
+        <a href="#location" data-i18n="nav.location">Τοποθεσία</a>
+        <a href="#portfolio" data-i18n="nav.portfolio">Χαρτοφυλάκιο</a>
       </div>
       <div class="footer-col">
-        <h4>Επικοινωνία</h4>
+        <h4 data-i18n="footer.contact.heading">Επικοινωνία</h4>
         <p>Next Level Consulting</p>
-        <p>Αγίου Ιωάννη 3, Λεμεσός</p>
+        <p data-i18n="footer.contact.address">Αγίου Ιωάννη 3, Λεμεσός</p>
         <p>70008017</p>
         <a href="mailto:nlc@nlc-consulting.org">nlc@nlc-consulting.org</a>
         <a href="https://nlc-consulting.org" target="_blank">nlc-consulting.org</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; 2026 RIVER LAND by NLC. All rights reserved.</span>
+      <span data-i18n="footer.copyright">&copy; 2026 RIVER LAND by NLC. All rights reserved.</span>
       <span>riverlandbynlc.org</span>
     </div>
   </div>
 </footer>
+
+<!-- ==================== TRANSLATIONS ==================== -->
+<script>
+const translations = {
+  el: {
+    'meta.description': 'Στρατηγική Πρόταση Ανάπτυξης Γης στη Λεμεσό. Ένα ολιστικό έργο που συνδυάζει οικιστική ανάπτυξη, στρατηγικές επενδύσεις και πρωτοποριακό σχεδιασμό.',
+    // Nav
+    'nav.opportunity': 'Πρόταση',
+    'nav.vision': 'Όραμα',
+    'nav.difference': 'Διαφορά',
+    'nav.location': 'Τοποθεσία',
+    'nav.portfolio': 'Χαρτοφυλάκιο',
+    'nav.contact': 'Επικοινωνία',
+    // Hero
+    'hero.eyebrow': 'Στρατηγική Πρόταση Ανάπτυξης Γης',
+    'hero.sub': 'Ένα έργο με μοναδικό αποτύπωμα που δημιουργεί τον μεγαλύτερο οργανωμένο χώρο πρασίνου στην πόλη.',
+    'hero.cta': 'Ανακαλύψτε το Έργο',
+    'hero.scroll': 'Κύλιση',
+    // Opportunity
+    'opportunity.label': 'Η Πρόταση',
+    'opportunity.heading': 'Μια Στρατηγική Πρόταση<br><em style="color:var(--gold);font-style:italic;">Μετασχηματισμού Γης</em>',
+    'opportunity.body': 'Η παρούσα πρόταση αξιοποιεί ένα ειδικό κυβερνητικό πολεοδομικό πρόγραμμα που επιτρέπει τη μετατροπή γεωργικής και δασικής γης σε περιοχές οικιστικής και εμπορικής ανάπτυξης, υπό συγκεκριμένες προϋποθέσεις.',
+    // Stats
+    'stat1.label': 'τ.μ. ελάχιστη έκταση πρασίνου',
+    'stat1.desc': 'Στα οποία θα προστεθούν επιπλέον 30κ τμ, δημιουργώντας τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.',
+    'stat2.label': 'στρατηγικές αναπτύξεις',
+    'stat2.desc': 'Κλινικές, Κέντρα Αποκατάστασης, Ιδιωτικές Σχολές, Ερευνητικά Ινστιτούτα — χωρίς χωροταξικούς περιορισμούς.',
+    'stat3.label': 'τ.μ. οικιστικός σχεδιασμός',
+    'stat3.desc': 'Πρωτοποριακός σχεδιασμός με απόλυτη ανεξαρτησία στον χώρο — μια πρωτοποριακή κοινότητα που δένει το έργο.',
+    // Vision
+    'vision.label': 'Το Όραμα',
+    'vision.heading': 'Δημιουργούμε μια Νέα<br><em style="color:var(--gold);font-style:italic;">Ποιοτική Ολιστική Ταυτότητα</em>',
+    'vision.pillar1.title': 'Οικιστική Ανάπτυξη',
+    'vision.pillar1.body': 'Πέραν των 100κ τμ γης παρέχονται ως αντιπαροχή στον επενδυτή με 28,5κ τμ συντελεστή δόμησης. Πέραν των 210 οικιστικών μονάδων μπορούν να διατεθούν στην αγορά, με δικαίωμα σταδιακής κατασκευής και παράδοσης.',
+    'vision.pillar2.title': 'Στρατηγικές Αναπτύξεις',
+    'vision.pillar2.body': 'Σε έκταση 25κ τμ η κάθε μια και με συντελεστή δόμησης 7,5κ τμ, κάθε στρατηγική ανάπτυξη δένει άμεσα στον σχεδιασμό, τοποθετημένη σε αμφιθεατρικό χωροταξικό σχεδιασμό που αναδεικνύει τα προνόμια της τοποθεσίας.',
+    'vision.pillar3.title': 'Περιβάλλοντες Χώροι',
+    'vision.pillar3.body': 'Διπλασιάζουμε την απαιτούμενη ποσότητα πρασίνου: δίκτυο ποδηλατοδρόμων, πεζοδρόμων, υπαίθριων αμφιθεάτρων και ανοικτών γηπέδων σε έκταση που υπερβαίνει τις 70κ τμ.',
+    // Masterplan
+    'masterplan.label': 'Ο Σχεδιασμός',
+    'masterplan.heading': 'Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
+    'masterplan.body': 'Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.',
+    'masterplan.legend.residential': 'Οικιστικές Ζώνες',
+    'masterplan.legend.strategic': 'Στρατηγικές Αναπτύξεις',
+    'masterplan.legend.green': 'Πράσινο & Πάρκα',
+    'masterplan.legend.river': 'Ποταμός',
+    'masterplan.legend.road': 'Οδικό Δίκτυο',
+    // Difference
+    'difference.label': 'Η Διαφορά Μας',
+    'difference.heading': 'Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em>',
+    'difference.subheading': 'Δεν θέλουμε να σχεδιάσουμε ένα ακόμα έργο οικιστικής ανάπτυξης. Θέλουμε να δημιουργήσουμε <em style="color:var(--gold);font-style:italic;">αποτύπωμα.</em>',
+    'difference.body': 'Η παρέμβασή μας στον χώρο πολλαπλασιάζει την προστιθέμενη αξία της ανάπτυξης, δείχνοντας στον επισκέπτη κάτι μοναδικό, αφήνοντας πίσω κάτι που θα συζητηθεί.',
+    'difference.card1.title': 'Αποτύπωμα στον Χώρο',
+    'difference.card1.body': 'Δεν σταματάμε στα πρέπει. Προσθέτουμε στα απαιτούμενα 40κ τμ πρασίνου, επιπλέον 30κ, για να φτιάξουμε τον μεγαλύτερο οργανωμένο πνεύμονα πρασίνου στην πόλη.',
+    'difference.card2.title': 'Υψηλή Εσωτερική Αξία',
+    'difference.card2.body': 'Δεν μετασχηματίζουμε για να πωλήσουμε. Η ολιστική μας προσέγγιση δένει τις Στρατηγικές Αναπτύξεις με όλες τις πτυχές του έργου, προσθέτοντας στην ήδη υψηλή αξία του.',
+    // Numbers
+    'numbers.label': 'Σε Αριθμούς & Χρόνο',
+    'numbers.heading': 'Η Διαφορά Μας <em style="color:var(--gold);font-style:italic;">σε Βάθος</em>',
+    'numbers.tl1.title': 'Μηδενικό κόστος επένδυσης σε γη',
+    'numbers.tl1.body': 'Η εταιρεία διατηρεί ρευστότητα μέχρι την έναρξη του έργου.',
+    'numbers.tl2.title': 'Μοναδικός σχεδιασμός',
+    'numbers.tl2.body': 'Στρατηγικές Αναπτύξεις + μεγαλύτερος χώρος πρασίνου = υψηλή υπεραξία.',
+    'numbers.tl3.title': 'Εγγύτητα & Τοποθεσία',
+    'numbers.tl3.body': '10 λεπτά από αυτοκινητόδρομο, θάλασσα, κέντρο πόλης.',
+    'numbers.tl4.title': 'Η αδειοδότηση',
+    'numbers.tl4.body': 'Αναλαμβάνουμε και τα 3 στάδια υποβολής και επίβλεψης στη διαδικασία έγκρισης.',
+    'numbers.tl5.title': 'Το διάστημα έγκρισης',
+    'numbers.tl5.body': 'Προπαρασκευαστικές εργασίες και προώθηση καθόλη τη διάρκεια αδειοδότησης.',
+    'numbers.tl6.title': 'Οι φάσεις υλοποίησης',
+    'numbers.tl6.body': 'Υλοποίηση σε φάσεις με δικαίωμα διακοπής από τον επενδυτή τηρουμένων των διατάξεων.',
+    'numbers.investText': 'Είναι για όλα αυτά που πέραν από τη μοναδικότητα του έργου και τον πρωτοποριακό σχεδιασμό του, η επένδυση μαζί μας προσφέρει μέγιστες πιθανότητες κερδοφορίας και ανάληψη μηδενικού ρίσκου. Η δε σταδιακή εκτέλεση του σε προκαθορισμένες φάσεις, δημιουργεί μια εξαιρετικά ανθεκτική ανάπτυξη απόλυτα ικανή να αποδώσει τα αναμενόμενα.',
+    // Location
+    'location.label': 'Τοποθεσία',
+    'location.heading': 'Πύργος Λεμεσού',
+    'location.body': 'Μακριά από τον θόρυβο, κοντά στα πάντα, αποτελεί ιδανικό προορισμό για όποιον ξέρει να ξεχωρίζει.',
+    // Map SVG text
+    'map.sea': 'Μ ε σ ό γ ε ι ο ς \u00a0 Θ ά λ α σ σ α',
+    'map.airportPaphos': '← Αεροδρόμιο Πάφου',
+    'map.airportLarnaca': 'Αεροδρόμιο Λάρνακας →',
+    'map.route1.name': 'Αυτοκινητόδρομος',
+    'map.route1.time': '9 λεπτά · 4 km',
+    'map.route2.name': 'Παραλία',
+    'map.route2.time': '10 λεπτά · 4,5 km',
+    'map.route3.name': 'Κέντρο Πόλης',
+    'map.route3.time': '15 λεπτά · 8 km',
+    'map.route4.name': 'Παραλιακό Μέτωπο',
+    'map.route4.time': '12 λεπτά · 6 km',
+    'map.legend.coastline': 'Ακτογραμμή',
+    'map.legend.highway': 'Αυτοκινητόδρομος A1',
+    'map.legend.routes': 'Διαδρομές',
+    'map.legend.junctions': 'Κόμβοι A1',
+    // Portfolio
+    'portfolio.label': 'Χαρτοφυλάκιο',
+    'portfolio.heading': 'Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em>',
+    'portfolio.body': 'Μια ματιά στον σχεδιασμό, τις τοποθεσίες και την ταυτότητα του RIVER LAND — μέσα από εικόνες που αποτυπώνουν το όραμά μας.',
+    'portfolio.tile1.label': 'Περιβάλλον',
+    'portfolio.tile1.title': 'Πράσινη Κοινότητα',
+    'portfolio.tile1.desc': 'Πνεύμονας πρασίνου 70.000+ τ.μ.',
+    'portfolio.tile2.label': 'Οικιστικά',
+    'portfolio.tile2.title': 'Οικιστικός Σχεδιασμός',
+    'portfolio.tile2.desc': '210+ μονάδες, σύγχρονη αρχιτεκτονική',
+    'portfolio.tile3.label': 'Στρατηγική',
+    'portfolio.tile3.title': 'Κέντρο Ευεξίας',
+    'portfolio.tile3.desc': 'Κλινικές & κέντρα αποκατάστασης',
+    'portfolio.tile4.label': 'Πράσινο',
+    'portfolio.tile4.title': 'Γραμμικό Πάρκο',
+    'portfolio.tile4.desc': 'Πεζόδρομοι & ποδηλατοδρόμοι κατά μήκος ποταμού',
+    'portfolio.tile5.label': 'Σχεδιασμός',
+    'portfolio.tile5.title': 'Αμφιθεατρικός Σχεδιασμός',
+    'portfolio.tile5.desc': 'Χωροταξική τοποθέτηση με θέα',
+    'portfolio.tile6.label': 'Όραμα',
+    'portfolio.tile6.title': 'Αστικός Πνεύμονας',
+    'portfolio.tile6.desc': 'Ο μεγαλύτερος οργανωμένος χώρος πρασίνου στη Λεμεσό',
+    'portfolio.tile7.label': 'Στρατηγική',
+    'portfolio.tile7.title': 'Εκπαιδευτικό Κέντρο',
+    'portfolio.tile7.desc': 'Ιδιωτικές σχολές & ερευνητικά ινστιτούτα',
+    'portfolio.tile8.label': 'Ανάπτυξη',
+    'portfolio.tile8.title': 'Στρατηγική Ανάπτυξη',
+    'portfolio.tile8.desc': '25.000 τ.μ. ανά στρατηγικό τεμάχιο',
+    'portfolio.tile9.label': 'Τοπίο',
+    'portfolio.tile9.title': 'Φυσικό Περιβάλλον',
+    'portfolio.tile9.desc': 'Δασική γη & ποτάμια οικοσυστήματα',
+    'portfolio.tile10.label': 'Βιωσιμότητα',
+    'portfolio.tile10.title': 'Βιώσιμη Ανάπτυξη',
+    'portfolio.tile10.desc': 'Σεβασμός στη φύση, σχεδιασμός για το μέλλον',
+    // Footer
+    'footer.brand.desc': 'Ένα ολιστικό έργο ανάπτυξης γης στον Πύργο Λεμεσού, σχεδιασμένο από τη Next Level Consulting.',
+    'footer.nav.heading': 'Πλοήγηση',
+    'footer.contact.heading': 'Επικοινωνία',
+    'footer.contact.address': 'Αγίου Ιωάννη 3, Λεμεσός',
+    'footer.copyright': '\u00a9 2026 RIVER LAND by NLC. All rights reserved.',
+  },
+  en: {
+    'meta.description': 'Strategic Land Development Proposal in Limassol. A holistic project combining residential development, strategic investments and pioneering design.',
+    // Nav
+    'nav.opportunity': 'Proposal',
+    'nav.vision': 'Vision',
+    'nav.difference': 'Difference',
+    'nav.location': 'Location',
+    'nav.portfolio': 'Portfolio',
+    'nav.contact': 'Contact',
+    // Hero
+    'hero.eyebrow': 'Strategic Land Development Proposal',
+    'hero.sub': 'A project with a unique footprint creating the city\'s largest organized green space.',
+    'hero.cta': 'Discover the Project',
+    'hero.scroll': 'Scroll',
+    // Opportunity
+    'opportunity.label': 'The Proposal',
+    'opportunity.heading': 'A Strategic Proposal<br><em style="color:var(--gold);font-style:italic;">for Land Transformation</em>',
+    'opportunity.body': 'This proposal leverages a special government urban planning programme that allows the conversion of agricultural and forest land into residential and commercial development zones, subject to specific conditions.',
+    // Stats
+    'stat1.label': 'sq.m. minimum green area',
+    'stat1.desc': 'To which an additional 30k sq.m. will be added, creating the city\'s largest organised green lung.',
+    'stat2.label': 'strategic developments',
+    'stat2.desc': 'Clinics, Rehabilitation Centres, Private Schools, Research Institutes — without spatial planning restrictions.',
+    'stat3.label': 'sq.m. residential design',
+    'stat3.desc': 'Pioneering design with absolute spatial independence — a trailblazing community that ties the project together.',
+    // Vision
+    'vision.label': 'The Vision',
+    'vision.heading': 'Creating a New<br><em style="color:var(--gold);font-style:italic;">Holistic Quality Identity</em>',
+    'vision.pillar1.title': 'Residential Development',
+    'vision.pillar1.body': 'Over 100k sq.m. of land is provided as consideration to the investor with a 28.5k sq.m. building coefficient. Over 210 residential units can be placed on the market, with the right to phased construction and delivery.',
+    'vision.pillar2.title': 'Strategic Developments',
+    'vision.pillar2.body': 'At 25k sq.m. each and with a 7.5k sq.m. building coefficient, each strategic development integrates directly into the design, positioned in an amphitheatrical spatial layout that highlights the advantages of the location.',
+    'vision.pillar3.title': 'Surrounding Spaces',
+    'vision.pillar3.body': 'We double the required amount of green space: a network of cycling paths, pedestrian walkways, open-air amphitheatres and outdoor courts covering more than 70k sq.m.',
+    // Masterplan
+    'masterplan.label': 'The Design',
+    'masterplan.heading': 'Interactive <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
+    'masterplan.body': 'Explore the project zones. Hover over each area for details.',
+    'masterplan.legend.residential': 'Residential Zones',
+    'masterplan.legend.strategic': 'Strategic Developments',
+    'masterplan.legend.green': 'Green & Parks',
+    'masterplan.legend.river': 'River',
+    'masterplan.legend.road': 'Road Network',
+    // Difference
+    'difference.label': 'Our Difference',
+    'difference.heading': 'The \u201cDON\'Ts\u201d in <em style="color:var(--gold);font-style:italic;">Our Plan</em>',
+    'difference.subheading': 'We don\'t want to design yet another residential development project. We want to create <em style="color:var(--gold);font-style:italic;">a footprint.</em>',
+    'difference.body': 'Our spatial intervention multiplies the added value of the development, showing the visitor something unique and leaving behind something that will be talked about.',
+    'difference.card1.title': 'Spatial Footprint',
+    'difference.card1.body': 'We don\'t stop at the minimum. We add 30k sq.m. on top of the required 40k sq.m. of green space, to build the city\'s largest organised green lung.',
+    'difference.card2.title': 'High Intrinsic Value',
+    'difference.card2.body': 'We don\'t transform to sell. Our holistic approach ties the Strategic Developments to every facet of the project, adding to its already high value.',
+    // Numbers
+    'numbers.label': 'In Numbers & Time',
+    'numbers.heading': 'Our Difference <em style="color:var(--gold);font-style:italic;">in Depth</em>',
+    'numbers.tl1.title': 'Zero land investment cost',
+    'numbers.tl1.body': 'The company maintains liquidity until the project commences.',
+    'numbers.tl2.title': 'Unique design',
+    'numbers.tl2.body': 'Strategic Developments + largest green space = high added value.',
+    'numbers.tl3.title': 'Proximity & Location',
+    'numbers.tl3.body': '10 minutes from motorway, beach, city centre.',
+    'numbers.tl4.title': 'Licensing',
+    'numbers.tl4.body': 'We undertake all 3 stages of submission and supervision in the approval process.',
+    'numbers.tl5.title': 'The approval period',
+    'numbers.tl5.body': 'Preparatory works and promotion throughout the entire licensing duration.',
+    'numbers.tl6.title': 'Implementation phases',
+    'numbers.tl6.body': 'Implementation in phases with the investor\'s right of interruption subject to regulatory provisions.',
+    'numbers.investText': 'It is for all these reasons that, beyond the uniqueness of the project and its pioneering design, investing with us offers maximum profitability prospects and zero risk assumption. The phased execution in predetermined stages creates an exceptionally resilient development fully capable of delivering the expected returns.',
+    // Location
+    'location.label': 'Location',
+    'location.heading': 'Pyrgos Limassol',
+    'location.body': 'Far from the noise, close to everything — an ideal destination for those who know how to stand out.',
+    // Map SVG text
+    'map.sea': 'M e d i t e r r a n e a n \u00a0 S e a',
+    'map.airportPaphos': '\u2190 Paphos Airport',
+    'map.airportLarnaca': 'Larnaca Airport \u2192',
+    'map.route1.name': 'Motorway',
+    'map.route1.time': '9 min · 4 km',
+    'map.route2.name': 'Beach',
+    'map.route2.time': '10 min · 4.5 km',
+    'map.route3.name': 'City Centre',
+    'map.route3.time': '15 min · 8 km',
+    'map.route4.name': 'Coastal Front',
+    'map.route4.time': '12 min · 6 km',
+    'map.legend.coastline': 'Coastline',
+    'map.legend.highway': 'A1 Motorway',
+    'map.legend.routes': 'Routes',
+    'map.legend.junctions': 'A1 Junctions',
+    // Portfolio
+    'portfolio.label': 'Portfolio',
+    'portfolio.heading': 'Images from the <em style="color:var(--gold);font-style:italic;">Project</em>',
+    'portfolio.body': 'A glimpse at the design, locations and identity of RIVER LAND — through images that capture our vision.',
+    'portfolio.tile1.label': 'Environment',
+    'portfolio.tile1.title': 'Green Community',
+    'portfolio.tile1.desc': 'Green lung of 70,000+ sq.m.',
+    'portfolio.tile2.label': 'Residential',
+    'portfolio.tile2.title': 'Residential Design',
+    'portfolio.tile2.desc': '210+ units, contemporary architecture',
+    'portfolio.tile3.label': 'Strategic',
+    'portfolio.tile3.title': 'Wellness Centre',
+    'portfolio.tile3.desc': 'Clinics & rehabilitation centres',
+    'portfolio.tile4.label': 'Green',
+    'portfolio.tile4.title': 'Linear Park',
+    'portfolio.tile4.desc': 'Pedestrian & cycling paths along the river',
+    'portfolio.tile5.label': 'Design',
+    'portfolio.tile5.title': 'Amphitheatrical Layout',
+    'portfolio.tile5.desc': 'Spatial positioning with panoramic views',
+    'portfolio.tile6.label': 'Vision',
+    'portfolio.tile6.title': 'Urban Green Lung',
+    'portfolio.tile6.desc': 'The largest organised green space in Limassol',
+    'portfolio.tile7.label': 'Strategic',
+    'portfolio.tile7.title': 'Education Centre',
+    'portfolio.tile7.desc': 'Private schools & research institutes',
+    'portfolio.tile8.label': 'Development',
+    'portfolio.tile8.title': 'Strategic Development',
+    'portfolio.tile8.desc': '25,000 sq.m. per strategic plot',
+    'portfolio.tile9.label': 'Landscape',
+    'portfolio.tile9.title': 'Natural Environment',
+    'portfolio.tile9.desc': 'Forest land & river ecosystems',
+    'portfolio.tile10.label': 'Sustainability',
+    'portfolio.tile10.title': 'Sustainable Development',
+    'portfolio.tile10.desc': 'Respect for nature, design for the future',
+    // Footer
+    'footer.brand.desc': 'A holistic land development project in Pyrgos Limassol, designed by Next Level Consulting.',
+    'footer.nav.heading': 'Navigation',
+    'footer.contact.heading': 'Contact',
+    'footer.contact.address': '3 Agiou Ioanni, Limassol',
+    'footer.copyright': '\u00a9 2026 RIVER LAND by NLC. All rights reserved.',
+  }
+};
+
+// Bilingual zoneData for masterplan tooltips
+const zoneDataBilingual = {
+  el: {
+    'strat1': {
+      label: 'Στρατηγική Ανάπτυξη',
+      title: '1η Στρατηγική Ανάπτυξη',
+      desc: 'Έκταση 25.000 τ.μ. με συντελεστή δόμησης 7.500 τ.μ. Κλινικές, ερευνητικά ινστιτούτα ή εκπαιδευτικοί φορείς.'
+    },
+    'strat2': {
+      label: 'Στρατηγική Ανάπτυξη',
+      title: '2η Στρατηγική Ανάπτυξη',
+      desc: 'Έκταση 25.000 τ.μ. Κέντρα αποκατάστασης, ιδιωτικές σχολές ή κέντρα φροντίδας — αμφιθεατρικός σχεδιασμός.'
+    },
+    'private-green': {
+      label: 'Ιδιωτικός Χώρος',
+      title: 'Ιδιωτικός Χώρος Πρασίνου',
+      desc: 'Γήπεδα, κατασκηνωτικοί χώροι και δίκτυα ποδηλατοδρόμων — μέρος του μεγαλύτερου οργανωμένου πρασίνου στην πόλη.'
+    },
+    'public-green': {
+      label: 'Δημόσιος Χώρος',
+      title: 'Γραμμικό Πάρκο Ποταμού',
+      desc: 'Δημόσιος χώρος πρασίνου κατά μήκος του ποταμού με πεζοδρόμους, ποδηλατοδρόμους και υπαίθρια αμφιθέατρα. 30.000+ τ.μ.'
+    },
+    'res1': {
+      label: 'Οικιστική Ζώνη',
+      title: 'Πρώτο Οικιστικό',
+      desc: 'Οικιστική ανάπτυξη με αυτόνομες μονάδες, πρωτοποριακός σχεδιασμός που εξασφαλίζει ιδιωτικότητα.'
+    },
+    'res2': {
+      label: 'Οικιστική Ζώνη',
+      title: 'Δεύτερο Οικιστικό',
+      desc: 'Ισόγειες κατοικίες ≥100 τ.μ. σε οικόπεδα 250 τ.μ. — σταδιακή κατασκευή και παράδοση.'
+    },
+    'res3': {
+      label: 'Οικιστική Ζώνη',
+      title: 'Τρίτο Οικιστικό',
+      desc: 'Τοποθετημένο με απόλυτη ανεξαρτησία στον χώρο — μια κοινότητα που δένει και συμπληρώνει το έργο.'
+    },
+    'res4': {
+      label: 'Οικιστική Ζώνη',
+      title: 'Τέταρτο Οικιστικό',
+      desc: 'Πέραν των 210 οικιστικών μονάδων συνολικά, με 28.500 τ.μ. συντελεστή δόμησης.'
+    }
+  },
+  en: {
+    'strat1': {
+      label: 'Strategic Development',
+      title: '1st Strategic Development',
+      desc: 'Area of 25,000 sq.m. with a building coefficient of 7,500 sq.m. Clinics, research institutes or educational bodies.'
+    },
+    'strat2': {
+      label: 'Strategic Development',
+      title: '2nd Strategic Development',
+      desc: 'Area of 25,000 sq.m. Rehabilitation centres, private schools or care facilities — amphitheatrical design.'
+    },
+    'private-green': {
+      label: 'Private Space',
+      title: 'Private Green Space',
+      desc: 'Sports courts, camping areas and cycling path networks — part of the city\'s largest organised green space.'
+    },
+    'public-green': {
+      label: 'Public Space',
+      title: 'River Linear Park',
+      desc: 'Public green space along the river with pedestrian walkways, cycling paths and open-air amphitheatres. 30,000+ sq.m.'
+    },
+    'res1': {
+      label: 'Residential Zone',
+      title: 'First Residential',
+      desc: 'Residential development with autonomous units, pioneering design ensuring privacy.'
+    },
+    'res2': {
+      label: 'Residential Zone',
+      title: 'Second Residential',
+      desc: 'Single-storey dwellings ≥100 sq.m. on 250 sq.m. plots — phased construction and delivery.'
+    },
+    'res3': {
+      label: 'Residential Zone',
+      title: 'Third Residential',
+      desc: 'Positioned with absolute spatial independence — a community that ties and completes the project.'
+    },
+    'res4': {
+      label: 'Residential Zone',
+      title: 'Fourth Residential',
+      desc: 'Over 210 residential units in total, with a 28,500 sq.m. building coefficient.'
+    }
+  }
+};
+
+function setLanguage(lang) {
+  if (lang !== 'el' && lang !== 'en') return;
+  const t = translations[lang];
+
+  // Update html lang attribute
+  document.documentElement.lang = lang;
+
+  // Update meta description
+  const metaDesc = document.getElementById('meta-description');
+  if (metaDesc) metaDesc.setAttribute('content', t['meta.description']);
+
+  // Update lang toggle button state
+  const btn = document.getElementById('lang-toggle');
+  if (btn) btn.dataset.lang = lang;
+
+  // Update all data-i18n elements (textContent)
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+
+  // Update all data-i18n-html elements (innerHTML)
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+
+  // Update zoneData for masterplan tooltips
+  if (typeof zoneData !== 'undefined') {
+    const zd = zoneDataBilingual[lang];
+    Object.keys(zd).forEach(k => {
+      zoneData[k] = zd[k];
+    });
+  }
+
+  // Save to localStorage
+  localStorage.setItem('rl_lang', lang);
+}
+
+// setLanguage is called after page scripts run (see end of main script)
+</script>
 
 <!-- ==================== SCRIPTS ==================== -->
 <script>
@@ -1092,6 +1723,24 @@ const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
 }, { threshold: 0.15 });
 reveals.forEach(el => revealObserver.observe(el));
+
+// ---- TIMELINE ANIMATION ----
+const tlWrap = document.getElementById('timeline-wrap');
+if (tlWrap) {
+  const tlObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tlWrap.classList.add('active');
+        const items = tlWrap.querySelectorAll('.timeline-item');
+        items.forEach((item, i) => {
+          setTimeout(() => item.classList.add('active'), 1400 + i * 300);
+        });
+        tlObserver.unobserve(tlWrap);
+      }
+    });
+  }, { threshold: 0.2 });
+  tlObserver.observe(tlWrap);
+}
 
 // ---- MASTERPLAN INTERACTIVE ZONES ----
 const zoneData = {
@@ -1184,28 +1833,28 @@ function startMapAnimation() {
   const shimmer = document.querySelector('.map-sea-shimmer');
   if (shimmer) shimmer.classList.add('active');
 
-  // Phase 2: Coastline draws (starts at 0.3s)
+  // Phase 2: Coastline draws (starts at 0.5s)
   setTimeout(() => {
     const coast = document.getElementById('coastline');
     if (coast) coast.classList.add('draw');
-  }, 300);
+  }, 500);
 
-  // Phase 3: Land mass fills in (starts at 1s, CSS has 0.8s delay built in)
+  // Phase 3: Land mass fills in (starts at 1.5s, CSS has 1s delay built in)
   setTimeout(() => {
     const land = document.querySelector('.map-land');
     if (land) land.classList.add('active');
-  }, 1000);
+  }, 1500);
 
-  // Phase 4: Terrain contours stagger in
+  // Phase 4: Terrain contours stagger in (1.4x slower)
   document.querySelectorAll('.map-terrain').forEach(el => {
-    const d = parseInt(el.dataset.delay) || 2200;
+    const d = Math.round((parseInt(el.dataset.delay) || 2200) * 1.4);
     setTimeout(() => el.classList.add('active'), d);
   });
 
   // Phase 5+: All data-delay elements (highway, labels, dots, pin, distances)
   const delayEls = document.querySelectorAll('[data-delay]');
   delayEls.forEach(el => {
-    const d = parseInt(el.dataset.delay) || 3000;
+    const d = Math.round((parseInt(el.dataset.delay) || 3000) * 1.4);
     setTimeout(() => el.classList.add('active'), d);
   });
 
@@ -1215,13 +1864,13 @@ function startMapAnimation() {
     if (ring) ring.classList.add('active');
     const pinLabel = document.querySelector('.map-pin-label');
     if (pinLabel) pinLabel.classList.add('active');
-  }, 5600);
+  }, 7800);
 
-  // Legend bar
+  // Legend bar (after routes finish)
   setTimeout(() => {
     const legend = document.getElementById('map-legend');
     if (legend) legend.classList.add('active');
-  }, 6500);
+  }, 13500);
 }
 
 // ---- SMOOTH NAV ----
@@ -1232,6 +1881,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+// ---- LANGUAGE INIT (after all JS is ready) ----
+(function() {
+  const saved = localStorage.getItem('rl_lang') || 'el';
+  setLanguage(saved);
+})();
 </script>
 </body>
 </html>
