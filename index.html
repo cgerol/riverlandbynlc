@@ -151,13 +151,13 @@ nav .nav-links a:hover::after { width: 100%; }
 }
 .hero-bg {
   position: absolute; inset: 0;
-  background: url('assets/forest-pano.jpg') center/cover no-repeat;
-  transform: scale(1.05);
+  background: url('assets/background.jpeg') center/cover no-repeat;
+  transform: scale(1.0);
   opacity: 0;
   animation: heroBgReveal 3s ease-out 0.8s forwards, heroZoom 20s ease-in-out 3.8s infinite alternate;
 }
-@keyframes heroBgReveal { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: scale(1.05); } }
-@keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.12); } }
+@keyframes heroBgReveal { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: scale(1.0); } }
+@keyframes heroZoom { from { transform: scale(1.0); } to { transform: scale(1.04); } }
 
 .hero-content {
   position: relative; z-index: 2;
@@ -310,10 +310,11 @@ nav .nav-links a:hover::after { width: 100%; }
 .diff-card p { color: var(--text-secondary); font-size: 0.9rem; font-weight: 300; }
 
 .diff-images {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+  overflow: hidden;
 }
 .diff-images img {
-  width: 100%; height: 150px; object-fit: cover;
+  width: 100%; height: 200px; object-fit: cover;
   filter: saturate(0.7); transition: var(--transition);
 }
 .diff-images img:hover { filter: saturate(1); }
@@ -361,7 +362,7 @@ nav .nav-links a:hover::after { width: 100%; }
 .location-section { padding: 8rem 0; background: var(--bg-deep); overflow: hidden; }
 .map-canvas {
   position: relative; width: 100%; max-width: 1100px;
-  margin: 3rem auto 0; aspect-ratio: 600 / 490;
+  margin: 3rem auto 0; aspect-ratio: 720 / 560;
 }
 .map-canvas svg { width: 100%; height: 100%; }
 
@@ -522,13 +523,13 @@ nav .nav-links a:hover::after { width: 100%; }
 .portfolio-section { padding: 8rem 0; background: var(--bg-primary); }
 .portfolio-grid {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem; margin-top: 3rem;
+  gap: 0; margin-top: 3rem;
 }
 .portfolio-tile {
   position: relative; overflow: hidden;
   aspect-ratio: 16 / 11; cursor: pointer;
 }
-.portfolio-tile.tile-wide { grid-column: span 2; }
+.portfolio-tile.tile-wide { grid-column: span 1; }
 .portfolio-tile img {
   width: 100%; height: 100%; object-fit: cover;
   filter: brightness(0.88) saturate(0.9);
@@ -606,7 +607,7 @@ footer {
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .portfolio-grid { grid-template-columns: repeat(3, 1fr); }
-  .portfolio-tile.tile-wide { grid-column: span 2; }
+  .portfolio-tile.tile-wide { grid-column: span 1; }
 }
 @media (max-width: 900px) {
   .stats-grid, .pillars { grid-template-columns: 1fr; }
@@ -619,7 +620,7 @@ footer {
   .timeline-item:nth-child(even) .tl-branch { left: 30px !important; width: 16px; right: auto !important; }
   .map-legend { gap: 1rem; }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-  .portfolio-tile.tile-wide { grid-column: span 2; }
+  .portfolio-tile.tile-wide { grid-column: span 1; }
   .footer-grid { grid-template-columns: 1fr; }
   nav .nav-links {
     display: none; position: absolute; top: 100%; left: 0; right: 0;
@@ -649,6 +650,7 @@ footer {
 <nav id="navbar">
   <div class="nav-inner">
     <a href="#home" class="nav-brand">
+      <img src="assets/riverland_logo.png" alt="River Land Logo" style="height:36px; width:auto; object-fit:contain;">
       <div>
         <span class="nav-brand-text">RIVER LAND</span>
         <span class="nav-brand-sub">by Next Level Consulting</span>
@@ -726,9 +728,9 @@ footer {
       </div>
     </div>
     <div class="photo-strip reveal" style="margin-top:3rem;">
-      <img src="assets/grid1.jpg" alt="Nature" loading="lazy">
-      <img src="assets/grid2.jpg" alt="Nature" loading="lazy">
-      <img src="assets/grid4.jpg" alt="Nature" loading="lazy">
+      <img src="assets/section2_1.jpeg" alt="Nature" loading="lazy">
+      <img src="assets/section2_2.jpeg" alt="Nature" loading="lazy">
+      <img src="assets/section2_3.jpeg" alt="Nature" loading="lazy">
     </div>
   </div>
 </section>
@@ -828,9 +830,9 @@ footer {
       </div>
     </div>
     <div class="diff-images reveal" style="margin-top:2rem;">
-      <img src="assets/accent1.jpg" alt="Detail" loading="lazy">
-      <img src="assets/accent2.jpg" alt="Detail" loading="lazy">
-      <img src="assets/accent3.jpg" alt="Detail" loading="lazy">
+      <img src="assets/section5_1.jpeg" alt="Detail" loading="lazy">
+      <img src="assets/section5_2.jpeg" alt="Detail" loading="lazy">
+      <img src="assets/section5_3.jpeg" alt="Detail" loading="lazy">
     </div>
   </div>
 </section>
@@ -907,7 +909,7 @@ footer {
     <p class="body-text reveal" style="max-width:700px;" data-i18n="location.body">Μακριά από τον θόρυβο, κοντά στα πάντα, αποτελεί ιδανικό προορισμό για όποιον ξέρει να ξεχωρίζει.</p>
   </div>
   <div class="map-canvas" id="map-canvas">
-    <svg viewBox="120 62 600 490" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="70 40 720 560" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="seaGradient" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#0d2218" />
@@ -979,6 +981,61 @@ footer {
         <text x="475" y="210" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Άγ. Τύχων</text>
         <text x="458" y="155" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Αρμενοχώρι</text>
         <text x="618" y="165" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μοναγρούλι</text>
+
+        <!-- ===== WESTERN COMMUNITIES — OSM admin_level=8 ===== -->
+        <!-- Kato Polemidia (Κ. Πολεμίδια) -->
+        <path class="community-boundary" id="community-kato-polemidia"
+          d="M 270.6,249.5 L 262.7,252.3 L 255.5,251.2 L 252.5,248.9 L 242.6,245.9 L 229.2,229.1 L 224.1,221.0 L 228.4,213.3 L 232.7,214.2 L 230.9,209.3 L 230.4,202.6 L 235.5,204.4 L 235.9,199.9 L 236.7,194.3 L 236.8,188.3 L 235.7,187.0 L 230.4,187.2 L 228.0,188.3 L 226.3,192.1 L 223.8,190.8 L 223.2,188.3 L 219.9,188.2 L 215.8,183.0 L 212.8,178.4 L 209.7,178.1 L 206.9,173.5 L 205.7,175.3 L 204.9,178.4 L 205.4,182.4 L 205.3,183.9 L 204.0,185.6 L 200.1,183.6 L 197.6,178.7 L 195.6,172.4 L 190.2,169.2 L 187.9,162.9 L 186.3,169.1 L 188.2,173.2 L 189.5,180.5 L 188.9,186.2 L 180.6,188.1 L 178.5,191.8 L 182.9,199.1 L 182.4,204.6 L 182.7,211.3 L 184.6,217.1 L 187.0,217.2 L 187.7,222.1 L 191.8,223.0 L 191.9,227.7 L 193.9,230.7 L 196.4,239.1 L 201.7,239.1 L 206.5,244.8 L 209.7,246.0 L 209.6,249.9 L 209.8,257.1 L 216.3,264.0 L 217.4,267.1 L 215.2,270.8 L 217.0,272.4 L 222.6,275.8 L 228.5,277.8 L 224.5,282.8 L 227.3,286.9 L 234.8,290.1 L 239.1,303.0 L 241.2,330.4 L 248.5,342.1 L 252.3,330.5 L 254.4,326.3 L 255.4,319.2 L 249.7,321.5 L 241.8,315.9 L 239.6,306.8 L 244.1,303.8 L 248.1,303.8 L 253.8,304.4 L 261.7,304.8 L 266.6,303.9 L 268.9,303.2 L 271.2,296.6 L 274.9,294.6 L 280.8,292.1 L 285.0,286.9 L 285.9,273.5 L 282.8,264.9 L 278.6,259.6 L 275.0,254.4 L 270.6,249.5 Z"
+          fill="#c7d4e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Pano Polemidia (Π. Πολεμίδια) -->
+        <path class="community-boundary" id="community-pano-polemidia"
+          d="M 247.2,215.5 L 248.4,217.5 L 249.2,218.4 L 249.9,218.6 L 251.1,218.8 L 250.9,219.9 L 251.0,220.5 L 251.1,221.0 L 251.4,221.7 L 252.5,223.1 L 253.5,223.8 L 253.9,224.5 L 255.1,226.3 L 256.3,228.8 L 256.4,228.8 L 256.5,228.2 L 257.2,229.4 L 258.6,231.2 L 259.0,232.3 L 260.0,233.7 L 260.7,235.0 L 262.4,237.3 L 265.0,244.1 L 266.2,245.5 L 266.8,245.9 L 269.1,247.8 L 270.2,249.0 L 270.6,249.5 L 269.8,250.6 L 266.0,249.5 L 265.7,250.2 L 264.0,251.1 L 263.1,250.5 L 262.7,252.3 L 259.7,253.0 L 257.6,253.6 L 257.4,253.2 L 256.0,253.5 L 255.7,251.2 L 255.5,251.2 L 255.3,251.6 L 255.0,251.6 L 254.7,250.8 L 253.7,250.7 L 253.5,251.4 L 252.5,248.9 L 251.8,249.2 L 251.5,248.5 L 251.2,248.4 L 249.9,246.7 L 245.3,248.1 L 242.6,245.9 L 241.5,244.8 L 236.8,238.8 L 234.3,237.2 L 232.8,235.6 L 230.5,232.2 L 229.2,229.1 L 228.1,226.9 L 225.8,224.3 L 225.4,223.4 L 224.7,222.8 L 224.0,221.7 L 224.1,221.0 L 223.8,219.9 L 224.0,218.7 L 222.4,216.6 L 227.3,214.0 L 227.3,213.8 L 228.4,213.3 L 229.4,213.9 L 229.7,214.6 L 230.2,216.5 L 230.5,217.1 L 233.1,216.6 L 232.7,214.2 L 233.3,213.3 L 232.9,212.6 L 231.2,212.0 L 231.6,211.3 L 230.3,210.8 L 230.9,209.3 L 229.9,208.9 L 230.1,208.1 L 229.4,207.9 L 228.9,203.6 L 229.8,202.9 L 230.4,202.6 L 231.7,203.5 L 235.4,204.8 L 235.7,204.6 L 235.7,204.5 L 236.0,204.2 L 237.1,204.1 L 238.1,204.1 L 238.7,204.3 L 239.2,205.2 L 239.4,205.9 L 240.7,207.7 L 241.2,208.6 L 241.5,209.7 L 242.0,210.5 L 242.0,210.7 L 241.6,211.8 L 242.0,212.3 L 242.4,212.9 L 243.2,213.6 L 244.6,214.3 L 245.4,214.2 L 245.8,214.8 L 246.1,215.0 L 246.4,215.1 L 246.4,214.8 L 246.9,215.1 L 247.2,215.5 Z"
+          fill="#d4c7e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Mesa Geitonia (Μέσα Γειτονιά) -->
+        <path class="community-boundary" id="community-mesa-geitonia"
+          d="M 360.9,264.6 L 363.7,260.2 L 362.5,258.2 L 361.0,255.6 L 357.0,255.7 L 354.5,254.8 L 353.4,251.7 L 353.6,248.3 L 352.1,246.4 L 348.6,243.5 L 344.3,244.0 L 341.5,241.8 L 338.6,240.0 L 337.2,236.5 L 335.7,236.7 L 334.5,236.9 L 332.3,234.1 L 331.0,231.5 L 327.9,231.3 L 324.9,230.1 L 328.3,227.0 L 327.5,222.0 L 324.3,221.2 L 322.4,221.1 L 319.6,220.8 L 317.9,218.5 L 317.5,214.4 L 316.2,212.8 L 313.5,210.6 L 314.3,206.1 L 315.9,201.9 L 317.7,200.9 L 317.5,198.6 L 317.1,197.0 L 318.2,194.9 L 320.5,192.0 L 319.4,189.9 L 318.3,187.4 L 316.3,190.0 L 314.0,191.1 L 311.8,192.6 L 312.1,195.9 L 310.1,196.9 L 308.7,197.7 L 308.5,195.3 L 306.5,194.2 L 305.6,196.4 L 304.0,200.9 L 304.0,204.2 L 305.1,206.0 L 306.7,208.7 L 308.7,210.5 L 310.7,213.6 L 312.9,218.2 L 316.4,221.4 L 317.5,225.3 L 318.3,233.6 L 318.4,238.1 L 318.5,241.1 L 319.3,242.9 L 320.2,245.4 L 322.0,253.3 L 323.5,257.5 L 324.2,263.2 L 326.0,265.9 L 328.8,267.3 L 331.3,266.2 L 333.1,265.4 L 335.2,264.2 L 336.2,264.0 L 338.8,262.6 L 340.6,260.6 L 342.5,259.5 L 345.0,259.3 L 348.0,257.9 L 347.6,254.8 L 348.7,253.7 L 350.4,254.9 L 349.3,258.3 L 352.1,258.8 L 354.3,257.6 L 357.9,257.2 L 355.8,259.2 L 356.5,261.1 L 358.9,260.5 L 360.9,264.6 Z"
+          fill="#e8d4c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Ypsonas (Ύψωνας) -->
+        <path class="community-boundary" id="community-ypsonas"
+          d="M 194.1,163.7 L 193.2,159.1 L 190.4,159.1 L 187.1,155.3 L 185.2,153.5 L 184.0,149.3 L 181.0,144.8 L 182.6,144.7 L 184.4,143.2 L 183.7,140.3 L 179.5,141.0 L 174.5,140.7 L 168.2,140.5 L 163.6,136.2 L 162.8,133.1 L 168.4,133.2 L 168.4,131.3 L 166.7,126.9 L 163.8,130.5 L 158.2,131.6 L 158.5,135.4 L 156.2,139.7 L 157.1,141.9 L 154.8,143.7 L 151.2,144.6 L 149.8,146.1 L 146.6,147.0 L 147.3,149.6 L 145.7,151.5 L 146.4,153.3 L 146.3,155.7 L 143.2,156.4 L 140.3,159.6 L 134.6,162.5 L 132.2,174.7 L 128.8,186.5 L 127.6,198.4 L 132.3,199.0 L 133.6,202.2 L 135.8,202.2 L 136.1,205.1 L 133.0,206.2 L 130.8,214.3 L 125.3,218.5 L 126.7,226.4 L 136.7,222.0 L 140.4,226.6 L 141.8,234.0 L 143.1,240.4 L 145.4,252.7 L 151.3,253.7 L 162.6,262.2 L 160.5,272.1 L 159.2,279.1 L 164.7,281.7 L 168.2,280.9 L 170.0,286.5 L 191.8,283.7 L 230.2,290.4 L 230.2,289.5 L 224.3,283.2 L 228.5,277.8 L 217.9,276.1 L 216.8,271.3 L 217.4,267.1 L 214.6,262.0 L 210.6,250.8 L 209.7,246.0 L 203.8,241.3 L 202.1,243.0 L 193.9,230.7 L 192.4,224.9 L 189.2,222.2 L 187.0,217.2 L 182.7,215.9 L 183.8,206.9 L 182.9,199.1 L 178.1,189.8 L 188.9,183.0 L 189.5,180.5 L 188.1,171.3 L 188.1,163.6 L 190.2,169.2 L 194.3,164.2 L 194.1,163.7 Z"
+          fill="#c7e8d4" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Agios Athanasios (Αγ. Αθανάσιος) -->
+        <path class="community-boundary" id="community-agios-athanasios-west"
+          d="M 377.5,230.7 L 379.2,235.4 L 380.1,241.6 L 380.2,245.0 L 378.4,248.3 L 377.4,253.2 L 378.9,257.5 L 380.0,265.7 L 384.4,266.7 L 375.1,272.9 L 374.6,274.0 L 372.7,274.3 L 372.5,274.4 L 371.8,273.2 L 370.9,271.3 L 369.0,267.9 L 367.3,264.8 L 366.0,263.1 L 364.4,261.5 L 363.2,259.4 L 361.5,255.8 L 357.0,255.7 L 353.8,254.5 L 354.2,250.3 L 353.0,246.5 L 349.1,243.3 L 344.4,244.2 L 339.7,240.5 L 337.9,238.6 L 336.1,236.2 L 334.5,236.9 L 332.1,233.2 L 330.5,231.2 L 325.7,231.3 L 328.2,227.5 L 327.2,221.4 L 323.5,220.8 L 320.7,220.8 L 318.3,219.0 L 317.5,214.4 L 316.7,212.3 L 312.9,208.8 L 314.5,202.7 L 317.6,201.1 L 317.4,198.5 L 317.8,196.9 L 319.4,193.2 L 319.9,190.3 L 319.9,186.3 L 319.6,179.1 L 321.9,173.4 L 325.6,166.9 L 325.6,163.9 L 328.4,157.6 L 330.8,153.5 L 333.7,150.8 L 335.9,148.6 L 337.7,147.2 L 338.7,144.4 L 339.8,141.4 L 342.5,139.8 L 343.5,141.4 L 344.8,145.3 L 348.2,144.7 L 348.7,143.0 L 351.9,146.8 L 352.8,152.6 L 353.9,156.4 L 355.7,160.6 L 356.2,163.4 L 357.2,161.5 L 361.5,159.3 L 364.4,161.8 L 367.7,167.1 L 367.1,172.4 L 370.3,181.0 L 366.5,184.8 L 362.0,188.0 L 364.7,194.0 L 365.8,199.1 L 365.6,204.3 L 365.3,208.8 L 366.8,214.9 L 370.8,218.7 L 371.9,224.1 L 376.0,228.0 L 377.1,229.8 Z"
+          fill="#d4e8e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Palodeia (Παλόδεια) -->
+        <path class="community-boundary" id="community-palodeia"
+          d="M 257.7,134.2 L 256.0,134.9 L 255.7,137.9 L 253.5,139.3 L 250.2,138.9 L 246.1,139.9 L 242.3,139.7 L 240.2,140.2 L 238.0,140.7 L 235.9,140.3 L 232.3,136.8 L 232.7,134.6 L 232.2,132.8 L 229.6,134.6 L 229.2,138.0 L 227.5,140.6 L 228.1,142.8 L 228.0,144.4 L 227.7,148.0 L 228.5,151.1 L 228.9,153.5 L 227.8,155.1 L 222.0,153.9 L 219.4,156.8 L 217.5,155.1 L 215.0,156.6 L 211.0,156.2 L 208.4,155.4 L 205.0,156.9 L 203.3,157.1 L 201.0,158.0 L 197.6,160.5 L 195.7,160.8 L 194.0,162.9 L 193.6,166.7 L 195.1,170.9 L 196.7,177.8 L 199.6,183.1 L 202.7,185.7 L 204.6,185.0 L 207.5,182.6 L 204.6,180.2 L 205.8,175.9 L 206.2,173.2 L 208.6,175.8 L 211.6,178.6 L 214.5,181.5 L 218.8,184.6 L 221.8,189.2 L 224.0,188.3 L 226.1,192.1 L 227.7,188.5 L 229.9,187.8 L 233.2,187.5 L 236.4,187.6 L 238.9,185.2 L 238.5,182.0 L 242.0,178.7 L 245.5,176.2 L 251.8,172.3 L 256.7,169.2 L 260.5,170.5 L 263.0,169.9 L 268.6,171.2 L 272.7,173.2 L 275.5,172.2 L 273.1,166.8 L 276.5,169.9 L 280.8,169.9 L 282.5,166.5 L 280.2,163.9 L 279.3,160.0 L 279.2,155.4 L 279.7,153.7 L 281.6,152.2 L 283.3,149.3 L 283.4,147.2 L 283.6,142.7 L 283.7,139.1 L 282.1,137.1 L 278.9,135.9 L 278.0,133.6 L 275.9,134.6 L 272.9,132.6 L 271.7,135.7 L 269.6,134.0 L 268.0,134.3 L 266.2,135.5 L 262.8,137.1 L 262.9,138.0 L 261.0,137.5 L 259.9,134.7 L 257.7,134.2 Z"
+          fill="#c7e8e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Fasoula (Φάσουλα) -->
+        <path class="community-boundary" id="community-fasoula"
+          d="M 282.6,137.4 L 283.6,142.7 L 283.2,149.0 L 280.5,153.2 L 280.2,156.0 L 280.9,164.9 L 284.3,168.5 L 288.2,176.6 L 293.4,183.8 L 297.6,186.5 L 301.4,188.6 L 302.7,195.3 L 304.0,200.9 L 305.5,195.7 L 307.6,194.4 L 308.4,197.4 L 309.8,197.0 L 312.2,196.0 L 312.4,192.2 L 315.2,190.2 L 318.1,187.7 L 319.8,186.0 L 318.9,177.9 L 321.7,172.9 L 325.4,166.5 L 326.1,163.3 L 328.4,157.5 L 331.8,152.9 L 333.8,150.5 L 336.1,148.6 L 337.9,147.0 L 338.8,144.1 L 340.3,141.2 L 342.5,139.4 L 340.7,136.9 L 338.9,135.5 L 339.0,134.8 L 338.8,133.0 L 338.5,132.2 L 337.5,130.4 L 337.5,129.0 L 338.5,126.5 L 339.1,124.9 L 339.3,121.3 L 336.7,120.9 L 333.6,119.2 L 329.8,117.3 L 328.9,112.6 L 326.2,106.3 L 326.3,102.5 L 325.9,98.9 L 322.3,97.2 L 322.6,95.8 L 323.6,93.0 L 321.9,88.4 L 323.1,84.8 L 321.2,82.0 L 315.5,79.1 L 312.5,78.1 L 310.3,76.5 L 305.3,73.1 L 302.2,72.5 L 300.1,76.1 L 296.0,80.2 L 291.2,83.9 L 285.0,82.4 L 279.4,85.0 L 277.9,89.5 L 280.2,92.6 L 281.8,94.0 L 279.7,95.5 L 283.1,96.3 L 284.6,97.8 L 286.0,98.3 L 289.5,97.7 L 291.3,103.4 L 288.6,103.6 L 286.1,103.0 L 284.3,102.7 L 282.0,105.2 L 282.4,111.5 L 280.2,114.6 L 278.4,118.4 L 279.6,120.4 L 282.3,121.8 L 282.4,126.4 L 283.1,133.8 L 282.6,137.4 Z"
+          fill="#e8d4d4" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+
+        <!-- Germasogeia -->
+        <path class="community-boundary" id="community-germasogeia"
+          d="M 415.6,180.4 L 413.0,173.3 L 409.3,168.3 L 407.5,161.9 L 400.5,165.8 L 400.0,163.0 L 397.7,160.4 L 396.2,157.1 L 394.6,153.8 L 392.6,152.4 L 390.6,148.2 L 387.7,147.9 L 385.5,145.8 L 384.6,144.3 L 383.0,143.9 L 379.0,144.4 L 376.4,141.9 L 373.4,142.6 L 372.0,145.1 L 368.4,146.6 L 362.1,148.5 L 359.1,148.5 L 352.6,143.2 L 351.9,146.3 L 352.8,152.6 L 354.1,156.6 L 356.1,161.1 L 357.3,163.3 L 357.8,160.8 L 360.9,157.9 L 364.5,163.7 L 368.9,170.9 L 369.4,177.6 L 367.2,184.7 L 362.6,187.7 L 364.7,194.0 L 365.9,199.7 L 365.5,205.1 L 365.9,210.4 L 368.5,216.1 L 372.3,221.4 L 373.2,227.1 L 378.6,233.1 L 379.8,241.2 L 380.2,244.4 L 378.4,248.3 L 376.5,253.6 L 380.0,260.2 L 380.7,265.5 L 379.2,269.1 L 379.2,271.3 L 387.2,267.7 L 389.9,266.6 L 395.8,265.6 L 397.1,265.3 L 399.6,264.5 L 402.9,263.2 L 404.3,262.2 L 404.9,261.6 L 406.2,261.2 L 406.7,260.3 L 407.7,259.2 L 408.5,259.1 L 409.6,257.5 L 412.1,256.0 L 415.4,253.8 L 420.7,250.8 L 421.7,250.5 L 428.0,246.6 L 427.1,241.4 L 424.3,236.7 L 423.7,233.9 L 421.7,229.3 L 420.7,224.1 L 423.2,220.2 L 417.3,219.7 L 415.5,218.9 L 414.9,212.3 L 409.7,215.2 L 408.8,209.7 L 410.0,205.0 L 412.3,201.4 L 413.2,197.7 L 412.3,193.6 L 411.7,189.0 L 417.5,187.8 L 416.2,182.6 L 415.6,180.4 Z"
+          fill="#c7dae8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Agia Fylaxis -->
+        <path class="community-boundary" id="community-agia-fylaxis"
+          d="M 303.8,201.2 L 304.5,202.9 L 303.9,204.6 L 304.7,205.9 L 305.5,206.5 L 306.7,208.7 L 307.8,210.1 L 308.7,210.5 L 310.1,212.4 L 310.7,213.9 L 311.2,216.2 L 314.0,218.9 L 316.0,220.8 L 317.0,222.7 L 317.4,224.5 L 318.4,228.6 L 318.3,233.6 L 316.6,235.7 L 312.8,237.3 L 311.6,239.2 L 308.1,239.7 L 305.8,240.5 L 302.7,241.8 L 301.2,238.8 L 297.2,239.1 L 297.2,241.3 L 292.3,241.0 L 283.5,257.5 L 280.3,258.1 L 281.2,260.2 L 279.2,261.3 L 278.0,258.4 L 275.0,254.4 L 270.2,249.0 L 262.4,237.3 L 257.2,229.4 L 253.9,224.5 L 261.4,231.9 L 272.6,234.4 L 274.7,235.4 L 274.3,233.5 L 286.8,231.7 L 286.0,226.1 L 277.5,220.5 L 262.3,206.9 L 259.3,213.4 L 251.5,213.6 L 246.9,215.1 L 245.4,214.2 L 241.6,211.8 L 240.7,207.7 L 237.1,204.1 L 235.5,204.1 L 235.9,199.9 L 236.7,194.9 L 237.2,191.5 L 237.7,186.8 L 238.9,184.0 L 238.7,181.5 L 242.0,178.7 L 244.3,176.7 L 249.8,174.1 L 254.3,169.3 L 257.1,169.2 L 261.0,171.6 L 263.0,169.9 L 267.6,171.5 L 270.9,171.2 L 274.8,174.3 L 274.6,170.0 L 274.5,166.3 L 276.5,169.9 L 280.5,169.6 L 282.2,166.9 L 283.7,166.3 L 284.1,167.9 L 284.3,169.3 L 286.8,174.5 L 289.4,178.8 L 292.3,182.3 L 294.6,187.0 L 295.5,188.3 L 298.5,185.8 L 300.2,187.7 L 301.4,188.6 L 302.1,191.1 L 302.7,195.2 L 302.9,198.4 L 303.6,201.1 L 303.8,201.2 Z"
+          fill="#d4e0c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Mathikoloni -->
+        <path class="community-boundary" id="community-mathikoloni"
+          d="M 342.5,139.4 L 343.3,141.0 L 344.6,144.3 L 346.1,146.3 L 348.5,143.8 L 349.6,143.8 L 352.3,145.0 L 353.3,143.7 L 358.6,148.0 L 364.1,150.9 L 364.8,149.4 L 365.4,144.4 L 362.6,143.3 L 362.7,140.5 L 362.1,136.9 L 359.8,134.0 L 358.8,131.7 L 361.1,132.1 L 360.6,128.3 L 363.5,126.5 L 366.4,127.0 L 367.1,125.4 L 366.1,121.9 L 366.2,119.4 L 365.0,115.6 L 365.6,113.9 L 366.8,111.1 L 369.8,107.8 L 371.6,105.5 L 368.9,103.7 L 371.2,100.7 L 369.9,96.5 L 368.5,95.1 L 370.5,92.3 L 370.4,89.9 L 372.2,86.9 L 372.9,84.8 L 373.0,83.3 L 372.7,81.5 L 371.8,64.4 L 370.1,-1.6 L 341.7,58.6 L 341.4,61.8 L 343.8,63.0 L 344.5,64.6 L 342.0,67.1 L 341.7,68.3 L 339.5,67.5 L 337.0,67.5 L 332.6,67.0 L 327.3,70.1 L 326.4,73.7 L 328.6,74.1 L 326.3,77.6 L 323.1,81.6 L 323.5,86.4 L 321.9,88.4 L 323.8,92.2 L 323.5,94.9 L 321.6,96.5 L 324.1,97.4 L 326.0,98.9 L 326.5,102.3 L 326.0,104.7 L 328.0,109.5 L 329.1,114.6 L 330.1,118.0 L 333.6,119.2 L 336.2,120.7 L 339.1,120.2 L 339.7,124.0 L 338.5,125.1 L 338.4,126.7 L 337.8,128.8 L 336.8,129.3 L 338.5,131.6 L 337.8,131.7 L 338.6,133.7 L 339.0,134.8 L 339.0,135.1 L 340.0,136.3 L 341.5,138.4 L 342.5,139.4 Z"
+          fill="#e8d8c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+
+        <!-- Western community labels -->
+        <text x="230" y="270" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Κ. Πολεμίδια</text>
+        <text x="248" y="236" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Π. Πολεμίδια</text>
+        <text x="330" y="248" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μέσα Γειτονιά</text>
+        <text x="165" y="210" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Ύψωνας</text>
+        <text x="350" y="200" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Αγ. Αθανάσιος</text>
+        <text x="241" y="158" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Παλόδεια</text>
+        <text x="308" y="130" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Φάσουλα</text>
+        <text x="391" y="210" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Γερμασόγεια</text>
+        <text x="275" y="215" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Αγία Φύλα</text>
+        <text x="348" y="110" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μαθηκολώνη</text>
       </g>
 
       <!-- Terrain contour lines -->
@@ -1000,26 +1057,30 @@ footer {
 
       <!-- Dense urban area — Limassol city (between port and Germasogeia) -->
       <path class="map-terrain" data-delay="2800" style="fill:rgba(40,65,40,0.35);stroke:none;"
-        d="M 280,290 Q 300,275 320,268 Q 340,260 360,258 Q 380,255 400,258 Q 420,260 440,258
-           Q 448,256 450,250 L 450,237 Q 440,244 420,252 Q 400,260 380,265 Q 360,270 340,278
-           Q 320,288 300,300 Q 285,310 280,320 Z"/>
+        d="M 260,310 Q 275,295 290,285 Q 310,272 330,265 Q 350,258 370,255 Q 390,253 410,255
+           Q 430,257 450,255 Q 460,253 465,248 L 465,237 Q 450,245 430,252 Q 410,258 390,262
+           Q 370,266 350,272 Q 330,280 310,290 Q 290,300 275,315 Q 265,325 260,340 Z"/>
       <!-- Small building grid pattern in urban area -->
       <g class="map-terrain" data-delay="2900" style="opacity:0;">
-        <line x1="300" y1="280" x2="300" y2="310" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="320" y1="272" x2="320" y2="305" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="340" y1="265" x2="340" y2="295" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="360" y1="260" x2="360" y2="285" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="380" y1="258" x2="380" y2="272" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="400" y1="258" x2="400" y2="268" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="420" y1="256" x2="420" y2="262" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="290" y1="290" x2="430" y2="255" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="285" y1="300" x2="440" y2="260" stroke="#2a4a2a" stroke-width="0.3"/>
-        <line x1="280" y1="310" x2="445" y2="265" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="280" y1="300" x2="280" y2="330" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="300" y1="280" x2="300" y2="320" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="320" y1="272" x2="320" y2="310" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="340" y1="265" x2="340" y2="300" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="360" y1="260" x2="360" y2="290" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="380" y1="258" x2="380" y2="278" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="400" y1="258" x2="400" y2="272" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="420" y1="256" x2="420" y2="266" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="440" y1="255" x2="440" y2="262" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="460" y1="252" x2="460" y2="258" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="270" y1="295" x2="460" y2="250" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="265" y1="310" x2="455" y2="255" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="260" y1="325" x2="450" y2="260" stroke="#2a4a2a" stroke-width="0.3"/>
+        <line x1="258" y1="340" x2="445" y2="265" stroke="#2a4a2a" stroke-width="0.25" opacity="0.7"/>
       </g>
 
       <!-- A6/A1 Highway — combined from OSM motorway data -->
       <path class="map-highway" data-delay="3000"
-        d="M 134,271 L 143,270 L 160,271 L 166,269 L 170,265 L 182,257 L 184,257 L 198,257 L 207,261 L 242,276 L 245,276 L 255,276 L 270,273 L 280,262 L 287,254 L 293,245 L 324,239 L 334,238 L 349,237 L 358,235 L 389,229 L 412,237 L 430,234 L 458,227 L 481,216 L 494,212 L 505,212 L 522,217 L 543,213 L 577,204 L 586,203 L 593,197 L 607,180 L 631,183 L 654,197 L 683,207"/>
+        d="M 134,271 L 143,270 L 160,271 L 166,269 L 170,265 L 182,257 L 184,257 L 198,257 L 207,261 L 242,276 L 245,276 L 255,276 L 270,273 L 280,262 L 287,254 L 293,245 L 324,239 L 334,238 L 349,237 L 358,235 L 389,229 L 412,237 L 430,234 L 458,227 L 481,216 L 494,212 L 505,212 L 522,217 L 543,213 L 577,204 L 586,203 L 593,197 L 607,180 L 631,183 L 654,197 L 683,207 L 689,205 L 703,191 L 712,184 L 719,168 L 725,158 L 732,154 L 767,136 L 775,131 L 790,116 L 805,92"/>
 
       <!-- Highway labels -->
       <g class="map-hw-label" data-delay="3200">
@@ -1082,25 +1143,28 @@ footer {
 
       <!-- ===== CITY CENTER — golden grid (urban fabric) ===== -->
       <g class="map-terrain" data-delay="3600" style="opacity:0;">
-        <!-- Subtle golden wash over urban area -->
-        <rect x="270" y="270" width="85" height="55" rx="4" fill="rgba(196,168,107,0.06)" stroke="none"/>
         <!-- Horizontal streets -->
-        <line x1="280" y1="272" x2="355" y2="272" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
-        <line x1="275" y1="280" x2="360" y2="280" stroke="#C4A86B" stroke-width="0.35" opacity="0.38"/>
-        <line x1="270" y1="288" x2="358" y2="288" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
-        <line x1="268" y1="296" x2="355" y2="296" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
-        <line x1="265" y1="304" x2="350" y2="304" stroke="#C4A86B" stroke-width="0.35" opacity="0.38"/>
-        <line x1="263" y1="312" x2="348" y2="312" stroke="#C4A86B" stroke-width="0.35" opacity="0.32"/>
-        <line x1="260" y1="320" x2="345" y2="320" stroke="#C4A86B" stroke-width="0.3" opacity="0.25"/>
-        <line x1="258" y1="328" x2="340" y2="328" stroke="#C4A86B" stroke-width="0.25" opacity="0.18"/>
-        <!-- Vertical streets (angled for perspective) -->
-        <line x1="285" y1="268" x2="265" y2="332" stroke="#C4A86B" stroke-width="0.3" opacity="0.28"/>
-        <line x1="298" y1="265" x2="270" y2="330" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
-        <line x1="310" y1="264" x2="280" y2="328" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
-        <line x1="322" y1="264" x2="295" y2="326" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
-        <line x1="334" y1="266" x2="315" y2="324" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
-        <line x1="346" y1="268" x2="332" y2="322" stroke="#C4A86B" stroke-width="0.3" opacity="0.28"/>
-        <line x1="355" y1="270" x2="345" y2="318" stroke="#C4A86B" stroke-width="0.25" opacity="0.20"/>
+        <line x1="290" y1="268" x2="440" y2="255" stroke="#C4A86B" stroke-width="0.3" opacity="0.28"/>
+        <line x1="280" y1="276" x2="445" y2="260" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
+        <line x1="275" y1="284" x2="440" y2="264" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
+        <line x1="270" y1="292" x2="430" y2="268" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
+        <line x1="268" y1="300" x2="420" y2="272" stroke="#C4A86B" stroke-width="0.35" opacity="0.38"/>
+        <line x1="265" y1="308" x2="410" y2="276" stroke="#C4A86B" stroke-width="0.35" opacity="0.32"/>
+        <line x1="263" y1="316" x2="395" y2="280" stroke="#C4A86B" stroke-width="0.3" opacity="0.25"/>
+        <line x1="260" y1="324" x2="380" y2="284" stroke="#C4A86B" stroke-width="0.25" opacity="0.18"/>
+        <line x1="258" y1="332" x2="360" y2="290" stroke="#C4A86B" stroke-width="0.2" opacity="0.12"/>
+        <!-- Vertical streets -->
+        <line x1="285" y1="268" x2="265" y2="336" stroke="#C4A86B" stroke-width="0.3" opacity="0.28"/>
+        <line x1="300" y1="264" x2="275" y2="332" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
+        <line x1="315" y1="262" x2="290" y2="328" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
+        <line x1="330" y1="260" x2="308" y2="324" stroke="#C4A86B" stroke-width="0.4" opacity="0.42"/>
+        <line x1="345" y1="258" x2="328" y2="318" stroke="#C4A86B" stroke-width="0.35" opacity="0.35"/>
+        <line x1="360" y1="257" x2="348" y2="310" stroke="#C4A86B" stroke-width="0.3" opacity="0.28"/>
+        <line x1="375" y1="256" x2="365" y2="300" stroke="#C4A86B" stroke-width="0.25" opacity="0.22"/>
+        <line x1="390" y1="256" x2="382" y2="290" stroke="#C4A86B" stroke-width="0.2" opacity="0.18"/>
+        <line x1="405" y1="256" x2="400" y2="278" stroke="#C4A86B" stroke-width="0.18" opacity="0.14"/>
+        <line x1="420" y1="256" x2="418" y2="270" stroke="#C4A86B" stroke-width="0.15" opacity="0.10"/>
+        <line x1="435" y1="255" x2="433" y2="264" stroke="#C4A86B" stroke-width="0.12" opacity="0.08"/>
       </g>
       <text class="map-place-label major" data-delay="3800" x="310" y="298" text-anchor="middle">Λεμεσός</text>
 
@@ -1115,6 +1179,25 @@ footer {
       <!-- New Port of Limassol — on coastline breakwater -->
       <circle class="map-dot" data-delay="3800" cx="296" cy="355" r="2"/>
       <text class="map-place-label" data-delay="3850" x="275" y="350" text-anchor="end" font-size="7" data-i18n="map.newPort">Νέο Λιμάνι</text>
+      <!-- Port breakwater shape -->
+      <g class="map-icon" data-delay="3820" style="opacity:0;">
+        <path d="M 290,358 L 290,372 L 310,372 L 310,368 L 294,368 L 294,358 Z"
+              fill="none" stroke="#C4A86B" stroke-width="0.6" opacity="0.35"/>
+        <line x1="295" y1="362" x2="308" y2="362" stroke="#C4A86B" stroke-width="0.3" opacity="0.25"/>
+        <line x1="295" y1="365" x2="306" y2="365" stroke="#C4A86B" stroke-width="0.3" opacity="0.25"/>
+      </g>
+
+      <!-- My Mall Limassol (34.6527°N, 32.9970°E) — Zakaki near port -->
+      <g class="map-icon" data-delay="3870" style="opacity:0;">
+        <rect x="248" y="344" width="12" height="8" rx="1" fill="rgba(196,168,107,0.08)" stroke="#C4A86B" stroke-width="0.5" opacity="0.4"/>
+      </g>
+      <circle class="map-dot" data-delay="3860" cx="254" cy="348" r="2.5"/>
+      <text class="map-place-label" data-delay="3880" x="240" y="342" text-anchor="end" font-size="6.5" data-i18n="map.myMall">My Mall</text>
+
+      <!-- Airplane icon at eastern end of A1 -->
+      <text class="map-place-label" data-delay="7550" x="765" y="120" font-size="18" fill="#A09878" opacity="0.5" text-anchor="middle">✈</text>
+      <!-- Paphos Airport direction (west end of highway) -->
+      <text class="map-place-label" data-delay="4550" x="138" y="282" text-anchor="start" font-size="6" opacity="0.5" data-i18n="map.airportPaphos">← Αεροδρόμιο Πάφου</text>
 
       <!-- Hospital — just the cross, no text (34.7064°N, 32.9836°E) -->
       <g class="map-icon" data-delay="3900" style="opacity:0;">
@@ -1310,6 +1393,10 @@ footer {
       <path class="map-route" data-delay="7000" stroke="#7ab87a"
         d="M 563.1,100.0 L 563.3,98.1 L 562.0,95.8 L 555.1,97.2 L 551.9,99.0 L 548.7,102.5 L 546.5,105.3 L 543.5,108.3 L 539.7,110.2 L 536.3,116.1 L 535.3,120.9 L 532.3,126.5 L 529.1,131.1 L 526.1,136.6 L 521.7,139.6 L 519.9,142.4 L 518.5,146.4 L 515.6,149.6 L 512.5,152.6 L 509.7,155.5 L 508.4,159.3 L 509.4,163.3 L 513.0,166.3 L 518.5,171.0 L 518.5,173.6 L 517.4,178.1 L 516.5,181.9 L 517.7,187.5 L 517.4,191.4 L 517.9,195.7 L 519.9,198.0 L 522.1,200.3 L 522.7,203.8 L 522.2,205.7 L 521.6,211.3 L 521.1,213.5 L 521.9,215.2 L 521.6,219.9 L 519.5,219.1 L 520.0,218.3 L 520.1,218.3"/>
 
+      <!-- Route 5: To Larnaca Airport (muted) — 35 min via A1 east -->
+      <path class="map-route" data-delay="7400" stroke="#A09878" stroke-width="2.5"
+        d="M 563.1,100.0 L 563.3,98.1 L 562.0,95.8 L 555.1,97.2 L 551.9,99.0 L 548.7,102.5 L 543.5,108.3 L 539.7,110.2 L 536.3,116.1 L 535.3,120.9 L 532.3,126.5 L 526.1,136.6 L 521.7,139.6 L 518.5,146.4 L 512.5,152.6 L 509.7,155.5 L 508.4,159.3 L 513.0,166.3 L 518.5,171.0 L 518.5,173.6 L 517.4,178.1 L 516.5,181.9 L 517.7,187.5 L 519.9,198.0 L 522.7,203.8 L 521.6,211.3 L 521.4,216.7 L 527.6,216.6 L 543.6,212.5 L 577,204 L 586,203 L 593,197 L 607,180 L 631,183 L 654,197 L 683,207 L 689,205 L 703,191 L 712,184 L 719,168 L 725,158 L 732,154 L 767,136 L 775,131"/>
+
       <!-- ===== DESTINATION PINS (colored dots at route endpoints) ===== -->
       <!-- Highway destination pin (orange) — Pyrgos/Parekklisia A1 junction -->
       <g class="map-route" data-delay="5900">
@@ -1330,6 +1417,11 @@ footer {
       <g class="map-route" data-delay="7100">
         <circle cx="520" cy="219" r="4.5" fill="#7ab87a" opacity="0.9"/>
         <circle cx="520" cy="219" r="2" fill="#0E1A0E"/>
+      </g>
+      <!-- Airport destination pin (muted) — eastern end of A1 -->
+      <g class="map-route" data-delay="7500">
+        <circle cx="775" cy="131" r="4.5" fill="#A09878" opacity="0.9"/>
+        <circle cx="775" cy="131" r="2" fill="#0E1A0E"/>
       </g>
 
       <!-- ===== ROUTE LABELS OVER SEA ===== -->
@@ -1352,6 +1444,11 @@ footer {
         <line x1="0" y1="0" x2="14" y2="0" stroke="#7ab87a" stroke-width="2.5" stroke-linecap="round"/>
         <text data-i18n="map.route4.name" x="20" y="3.5" font-size="9.5" fill="#7ab87a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Παραλιακό Μέτωπο</text>
         <text data-i18n="map.route4.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">10 λεπτά · 9 km</text>
+      </g>
+      <g class="map-route-info" data-delay="7400" transform="translate(520, 398)">
+        <text x="0" y="3.5" font-size="12" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif">✈</text>
+        <text data-i18n="map.airport.name" x="20" y="3.5" font-size="9.5" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Αεροδρόμιο Λάρνακας</text>
+        <text data-i18n="map.airport.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">35 λεπτά</text>
       </g>
     </svg>
   </div>
@@ -1608,6 +1705,8 @@ const translations = {
     'map.route3.time': '22 λεπτά · 23 km',
     'map.route4.name': 'Παραλιακό Μέτωπο',
     'map.route4.time': '10 λεπτά · 9 km',
+    'map.airport.name': 'Αεροδρόμιο Λάρνακας',
+    'map.airport.time': '35 λεπτά',
     'map.legend.coastline': 'Ακτογραμμή',
     'map.legend.highway': 'Αυτοκινητόδρομος A1',
     'map.legend.routes': 'Διαδρομές',
@@ -1617,6 +1716,8 @@ const translations = {
     'map.legend.route3': 'Κέντρο Πόλης',
     'map.legend.route4': 'Παραλιακό Μέτωπο',
     'map.newPort': 'Νέο Λιμάνι',
+    'map.myMall': 'My Mall',
+    'map.airportTime': '35 λεπτά',
     // Portfolio
     'portfolio.label': 'Χαρτοφυλάκιο',
     'portfolio.heading': 'Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em>',
@@ -1742,6 +1843,8 @@ const translations = {
     'map.route3.time': '22 min · 23 km',
     'map.route4.name': 'Coastal Front',
     'map.route4.time': '10 min · 9 km',
+    'map.airport.name': 'Larnaca Airport',
+    'map.airport.time': '35 min',
     'map.legend.coastline': 'Coastline',
     'map.legend.highway': 'A1 Motorway',
     'map.legend.routes': 'Routes',
@@ -1751,6 +1854,8 @@ const translations = {
     'map.legend.route3': 'City Centre',
     'map.legend.route4': 'Coastal Front',
     'map.newPort': 'New Port',
+    'map.myMall': 'My Mall',
+    'map.airportTime': '35 min',
     // Portfolio
     'portfolio.label': 'Portfolio',
     'portfolio.heading': 'Images from the <em style="color:var(--gold);font-style:italic;">Project</em>',
