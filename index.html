@@ -361,7 +361,7 @@ nav .nav-links a:hover::after { width: 100%; }
 .location-section { padding: 8rem 0; background: var(--bg-deep); overflow: hidden; }
 .map-canvas {
   position: relative; width: 100%; max-width: 1100px;
-  margin: 3rem auto 0; aspect-ratio: 16 / 9;
+  margin: 3rem auto 0; aspect-ratio: 600 / 490;
 }
 .map-canvas svg { width: 100%; height: 100%; }
 
@@ -480,6 +480,11 @@ nav .nav-links a:hover::after { width: 100%; }
 /* Hotel markers */
 .map-hotel { opacity: 0; fill: var(--text-muted); }
 .map-hotel.active { animation: dotIn 0.4s ease forwards; }
+
+/* Community boundaries */
+.community-boundaries { opacity: 0; }
+.community-boundaries.active { animation: communityIn 1.2s ease forwards; }
+@keyframes communityIn { to { opacity: 1; } }
 
 /* Scale bar badge */
 .map-scale { opacity: 0; }
@@ -902,7 +907,7 @@ footer {
     <p class="body-text reveal" style="max-width:700px;" data-i18n="location.body">Μακριά από τον θόρυβο, κοντά στα πάντα, αποτελεί ιδανικό προορισμό για όποιον ξέρει να ξεχωρίζει.</p>
   </div>
   <div class="map-canvas" id="map-canvas">
-    <svg viewBox="130 80 550 470" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="120 62 600 490" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="seaGradient" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#0d2218" />
@@ -925,6 +930,57 @@ footer {
       <path class="map-land" filter="url(#landShadow)"
         d="M 0,0 L 1000,0 L 1000,97.6 L 999.1,97.6 L 977.5,107.7 L 955.6,114.5 L 937.0,127.7 L 931.2,138.5 L 923.2,145.7 L 897.8,150.2 L 877.3,162.8 L 860.4,175.4 L 846.5,184.9 L 820.6,185.2 L 807.3,192.2 L 804.0,195.4 L 802.7,194.0 L 783.9,209.5 L 770.8,214.6 L 767.9,216.8 L 753.0,205.4 L 734.2,201.6 L 726.4,198.7 L 712.6,207.1 L 714.6,208.9 L 701.8,213.0 L 697.3,222.8 L 693.0,233.7 L 675.6,237.9 L 654.7,238.7 L 636.5,236.6 L 634.2,237.4 L 617.7,236.8 L 585.7,235.4 L 571.1,236.7 L 555.4,231.9 L 538.5,227.5 L 523.9,229.9 L 519.0,223.9 L 496.9,223.7 L 478.5,232.0 L 472.7,233.2 L 469.1,232.4 L 452.5,236.8 L 433.3,244.4 L 418.8,251.9 L 409.6,257.5 L 406.7,260.2 L 404.9,262.1 L 398.4,264.8 L 388.6,267.1 L 374.9,273.8 L 372.2,274.2 L 355.7,282.7 L 341.9,296.0 L 326.5,314.9 L 326.6,317.4 L 320.3,323.3 L 324.0,317.4 L 321.4,313.1 L 320.0,313.5 L 317.5,318.1 L 314.4,314.6 L 305.7,324.4 L 297.8,330.5 L 291.7,342.5 L 291.7,362.3 L 303.6,354.8 L 300.8,356.8 L 267.4,427.7 L 281.5,478.3 L 292.7,496.1 L 301.7,502.9 L 309.6,515.9 L 311.4,516.7 L 316.7,525.4 L 307.8,532.9 L 304.4,535.7 L 295.3,533.3 L 289.6,530.4 L 285.2,528.7 L 272.4,527.4 L 258.1,522.3 L 253.4,521.7 L 244.1,520.7 L 232.9,517.4 L 215.5,513.5 L 203.1,524.3 L 192.3,523.9 L 184.8,522.8 L 168.5,521.4 L 160.5,521.3 L 149.6,524.8 L 159.3,505.7 L 156.6,485.9 L 153.8,471.7 L 144.6,443.7 L 132.8,415.4 L 122.2,394.5 L 111.8,377.2 L 94.9,364.3 L 84.4,347.4 L 68.8,329.5 L 48.6,317.7 L 37.9,320.6 L 21.8,314.4 L 1.8,324.6 L 0,324.6 Z"/>
 
+      <!-- ===== COMMUNITY BOUNDARIES — OSM admin_level=8 ===== -->
+      <g class="community-boundaries" data-delay="1800" style="opacity:0;">
+        <!-- Akrounta -->
+        <path class="community-boundary" id="community-akrounta"
+          d="M 432.2,65.2 L 394.0,64.5 L 371.8,64.4 L 372.5,80.9 L 372.9,81.7 L 373.0,82.9 L 372.8,83.7 L 372.8,84.6 L 372.8,85.1 L 372.1,86.4 L 371.9,87.6 L 370.4,89.9 L 370.7,91.0 L 368.9,92.2 L 369.4,93.5 L 367.3,95.2 L 370.6,95.9 L 370.0,97.5 L 371.6,100.5 L 369.1,101.3 L 368.9,103.7 L 371.3,103.9 L 371.2,106.0 L 369.4,107.4 L 370.4,108.8 L 367.9,110.8 L 365.6,110.7 L 365.7,113.4 L 365.9,114.7 L 365.0,115.6 L 364.4,119.1 L 366.0,119.7 L 366.1,121.0 L 365.8,122.7 L 366.2,124.6 L 366.8,126.3 L 366.7,127.1 L 364.8,127.9 L 363.5,126.5 L 361.4,126.5 L 360.8,129.0 L 360.6,130.7 L 360.9,132.1 L 358.6,131.3 L 359.6,132.4 L 359.7,133.6 L 360.8,135.0 L 362.1,136.9 L 362.4,138.5 L 362.8,141.0 L 361.6,143.5 L 363.3,143.4 L 364.9,143.8 L 366.4,146.0 L 367.3,146.5 L 369.3,146.9 L 371.2,145.7 L 372.3,145.1 L 372.7,143.6 L 373.1,142.8 L 375.0,142.7 L 375.8,141.6 L 376.5,142.8 L 377.8,143.0 L 379.0,144.4 L 380.5,144.7 L 382.5,143.6 L 383.1,144.9 L 383.7,144.5 L 384.7,144.6 L 385.4,145.0 L 386.0,145.5 L 385.2,146.2 L 387.0,146.9 L 387.9,148.0 L 389.1,148.4 L 390.6,148.2 L 390.4,149.0 L 392.1,152.0 L 393.3,152.8 L 394.1,153.1 L 394.7,153.8 L 394.6,155.4 L 396.9,156.7 L 399.8,152.8 L 401.5,142.2 L 404.5,138.8 L 404.8,134.8 L 407.3,127.2 L 410.8,123.4 L 414.4,116.8 L 418.9,114.8 L 420.7,109.8 L 419.6,106.2 L 422.0,102.7 L 426.6,101.9 L 423.6,96.6 L 423.3,94.1 L 424.1,91.5 L 426.4,83.1 L 424.3,80.5 L 426.3,73.8 L 428.9,72.7 L 426.6,70.2 L 431.7,65.4 L 432.2,65.2 Z"
+          fill="#e8c7c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Foinikaria -->
+        <path class="community-boundary" id="community-foinikaria"
+          d="M 434.7,185.9 L 434.9,183.6 L 434.7,181.9 L 436.9,178.2 L 438.2,174.5 L 439.8,172.4 L 440.6,171.6 L 439.9,169.7 L 439.5,166.3 L 438.7,164.0 L 441.1,163.1 L 443.5,162.8 L 444.3,160.4 L 442.3,160.2 L 443.4,158.1 L 444.0,156.1 L 444.4,154.7 L 443.3,154.3 L 442.6,153.2 L 442.0,151.9 L 442.6,150.0 L 441.1,148.7 L 441.4,147.4 L 444.0,147.1 L 446.4,147.7 L 448.1,145.9 L 448.1,144.8 L 446.9,142.9 L 445.9,141.0 L 445.0,140.0 L 444.4,139.4 L 443.7,138.0 L 441.9,135.8 L 441.9,134.0 L 442.6,132.7 L 443.3,130.7 L 444.3,130.2 L 445.4,129.4 L 446.0,127.2 L 448.1,124.9 L 449.2,123.7 L 449.8,122.5 L 450.7,120.8 L 451.3,120.1 L 454.6,118.6 L 466.4,106.8 L 460.6,87.9 L 452.2,73.1 L 434.3,66.0 L 432.2,65.2 L 429.3,67.2 L 426.9,70.9 L 429.0,73.0 L 426.3,73.8 L 424.6,79.5 L 426.6,81.9 L 426.6,85.0 L 424.1,92.0 L 423.3,94.1 L 422.6,95.7 L 425.8,100.3 L 426.1,102.6 L 422.2,104.6 L 419.6,106.2 L 421.1,109.5 L 420.0,113.5 L 417.0,115.4 L 413.6,118.0 L 410.8,123.4 L 408.6,126.1 L 404.7,132.9 L 405.6,136.5 L 403.7,139.8 L 401.5,142.2 L 400.7,147.0 L 399.0,154.7 L 395.5,157.9 L 395.2,160.3 L 397.2,160.4 L 397.9,160.4 L 399.7,161.2 L 399.7,162.8 L 400.2,163.4 L 400.6,164.7 L 398.7,165.0 L 401.6,166.0 L 403.8,164.8 L 405.7,161.8 L 407.4,162.3 L 409.1,163.2 L 409.1,165.1 L 409.7,170.1 L 411.1,174.1 L 412.5,172.5 L 413.2,173.4 L 413.2,178.4 L 414.2,180.2 L 416.0,179.8 L 417.2,180.1 L 417.5,181.9 L 418.4,178.8 L 418.9,176.8 L 420.4,176.3 L 422.6,174.9 L 423.6,175.9 L 424.7,174.7 L 425.9,175.5 L 426.6,176.9 L 427.6,178.8 L 427.5,181.9 L 428.0,183.3 L 428.7,185.8 L 428.7,187.1 L 429.4,188.0 L 429.8,185.2 L 430.9,185.9 L 432.2,184.4 L 432.7,183.9 L 434.1,186.6 L 434.7,185.9 Z"
+          fill="#c7e8d4" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Moni -->
+        <path class="community-boundary" id="community-moni"
+          d="M 573.7,237.3 L 579.1,237.0 L 583.7,235.4 L 585.6,236.4 L 584.8,235.4 L 585.6,235.5 L 592.7,235.9 L 598.4,236.1 L 602.5,236.4 L 604.9,234.7 L 607.0,231.8 L 607.4,226.2 L 607.2,224.2 L 607.3,222.5 L 608.7,220.4 L 610.4,218.0 L 608.6,217.3 L 607.3,213.8 L 606.6,211.1 L 606.7,207.0 L 605.1,203.9 L 606.1,201.9 L 607.8,198.9 L 606.4,195.4 L 603.3,191.3 L 600.9,190.7 L 598.0,187.2 L 596.4,186.8 L 594.6,185.6 L 595.6,184.5 L 597.8,183.2 L 597.3,180.7 L 594.9,181.0 L 595.0,175.8 L 597.6,173.8 L 593.9,169.6 L 593.9,166.1 L 594.1,162.9 L 595.0,159.6 L 591.9,157.6 L 589.4,155.2 L 588.5,155.6 L 587.9,155.5 L 587.3,154.1 L 587.1,152.1 L 586.0,149.7 L 584.6,147.4 L 579.9,145.4 L 577.8,145.2 L 575.2,144.1 L 574.8,141.3 L 572.3,139.5 L 570.8,137.4 L 571.3,136.7 L 572.2,135.6 L 571.1,135.3 L 570.0,137.0 L 568.3,138.9 L 566.5,140.1 L 566.0,143.3 L 565.1,145.9 L 566.8,148.4 L 569.7,146.8 L 570.6,147.5 L 568.9,150.2 L 567.4,152.5 L 566.9,155.8 L 568.4,159.6 L 570.7,162.2 L 568.4,165.1 L 567.6,169.1 L 569.1,172.2 L 570.8,173.5 L 570.1,176.0 L 570.0,178.9 L 571.9,180.3 L 571.6,182.5 L 573.0,184.1 L 571.7,188.9 L 573.9,191.6 L 570.7,192.3 L 569.6,196.1 L 570.7,198.5 L 572.1,200.8 L 576.7,201.5 L 577.3,205.0 L 579.5,211.0 L 581.7,213.7 L 580.1,215.5 L 579.8,218.0 L 579.7,219.0 L 580.4,220.3 L 579.1,220.1 L 577.6,219.7 L 576.1,219.4 L 573.8,219.8 L 571.9,219.9 L 570.9,223.3 L 572.2,227.3 L 571.0,228.5 L 570.0,230.0 L 569.4,233.3 L 571.5,235.0 L 572.8,234.5 L 573.7,237.3 Z"
+          fill="#d4e8c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Pyrgos -->
+        <path class="community-boundary" id="community-pyrgos"
+          d="M 571.5,134.9 L 572.9,132.9 L 573.1,129.7 L 573.9,126.0 L 573.1,123.0 L 572.7,120.1 L 570.5,117.3 L 570.2,116.9 L 569.6,115.9 L 569.7,114.8 L 573.1,109.3 L 573.3,106.8 L 573.5,105.5 L 575.3,104.0 L 577.4,104.0 L 577.9,101.3 L 578.4,99.2 L 568.2,91.6 L 566.9,94.2 L 564.4,97.4 L 562.5,101.1 L 561.2,104.1 L 558.8,109.0 L 557.0,112.9 L 555.7,111.3 L 553.3,109.4 L 550.3,111.6 L 549.0,115.2 L 543.9,117.3 L 540.8,119.7 L 535.5,120.5 L 535.7,124.9 L 536.3,129.6 L 534.0,131.3 L 531.3,128.2 L 531.7,131.3 L 535.0,135.4 L 538.0,139.5 L 540.3,140.6 L 541.9,143.2 L 541.5,145.8 L 543.8,150.2 L 543.4,154.0 L 542.6,156.6 L 540.8,161.2 L 537.2,166.0 L 535.3,168.6 L 532.4,173.0 L 531.1,175.6 L 526.9,175.3 L 527.4,179.0 L 532.4,183.4 L 530.2,187.6 L 528.6,193.8 L 526.0,197.9 L 524.2,201.1 L 527.5,199.3 L 526.0,202.1 L 525.9,205.2 L 527.7,208.4 L 530.3,211.8 L 530.5,216.8 L 528.3,220.2 L 526.8,226.1 L 524.9,231.6 L 523.9,229.9 L 528.0,230.9 L 528.6,226.8 L 537.3,226.9 L 540.9,228.1 L 543.9,228.7 L 549.5,230.2 L 558.4,232.7 L 566.0,235.2 L 566.6,235.0 L 570.6,236.2 L 572.6,234.5 L 569.5,233.7 L 570.2,229.0 L 570.9,226.7 L 571.6,220.1 L 574.7,220.1 L 577.9,219.8 L 580.4,220.4 L 579.6,218.7 L 580.3,215.0 L 580.5,212.1 L 577.8,202.8 L 571.7,200.7 L 570.3,196.2 L 572.8,192.7 L 571.9,188.5 L 571.8,182.6 L 570.8,179.9 L 570.1,175.3 L 569.4,172.2 L 567.8,167.7 L 568.9,162.8 L 566.5,155.9 L 567.4,151.7 L 570.7,147.4 L 567.5,148.3 L 566.1,144.8 L 566.7,139.9 L 569.7,137.2 L 571.5,134.9 Z"
+          fill="#e8d5b7" fill-opacity="0.10" stroke="#C4A86B" stroke-width="0.6" stroke-opacity="0.5" />
+        <!-- Parekklisia -->
+        <path class="community-boundary" id="community-parekklisia"
+          d="M 511.5,223.9 L 517.5,224.0 L 519.0,223.9 L 520.5,224.9 L 524.7,226.2 L 526.8,226.1 L 527.3,220.6 L 529.5,217.8 L 531.1,215.1 L 530.5,210.6 L 527.7,208.4 L 527.8,205.5 L 525.3,203.3 L 528.2,200.2 L 526.3,199.6 L 524.2,201.1 L 525.2,198.5 L 528.2,195.7 L 529.8,190.9 L 531.3,186.8 L 532.4,183.4 L 528.2,180.2 L 526.9,177.2 L 529.5,174.9 L 532.3,175.8 L 532.4,173.0 L 535.8,169.2 L 536.3,166.9 L 538.5,164.5 L 540.9,160.9 L 542.6,156.6 L 543.1,154.6 L 544.1,151.1 L 543.9,147.7 L 542.3,145.5 L 541.9,143.2 L 541.5,141.7 L 539.1,140.4 L 536.9,137.2 L 535.4,134.7 L 531.7,131.3 L 531.3,127.5 L 532.7,129.6 L 535.6,131.8 L 535.9,128.3 L 535.7,124.9 L 535.9,121.1 L 538.9,118.3 L 542.7,119.4 L 544.5,116.6 L 549.0,115.2 L 549.9,112.4 L 552.0,109.9 L 554.3,110.3 L 556.2,111.9 L 557.0,112.9 L 558.4,109.8 L 560.8,105.1 L 561.6,102.3 L 562.9,100.4 L 564.4,97.4 L 565.9,94.7 L 567.5,93.2 L 549.7,57.1 L 541.3,56.6 L 502.6,77.8 L 476.8,112.2 L 478.8,115.5 L 474.9,122.3 L 474.5,124.0 L 473.1,125.4 L 472.9,127.1 L 473.5,132.7 L 473.1,139.1 L 475.8,144.8 L 475.4,148.2 L 475.9,152.6 L 476.8,154.7 L 477.9,157.1 L 478.0,160.9 L 480.6,162.3 L 483.7,166.3 L 486.4,168.3 L 487.7,169.3 L 488.8,170.1 L 490.9,170.7 L 492.7,172.2 L 494.4,173.4 L 495.6,174.0 L 496.3,174.7 L 496.0,175.2 L 492.3,175.1 L 492.5,178.9 L 494.5,180.0 L 496.0,183.4 L 496.5,184.4 L 497.6,186.4 L 497.0,189.2 L 496.3,191.3 L 495.7,195.5 L 499.9,197.2 L 507.1,196.6 L 510.1,198.8 L 510.8,202.0 L 508.5,203.9 L 507.8,207.8 L 510.0,210.1 L 508.9,211.6 L 508.2,213.2 L 509.1,217.5 L 510.1,220.1 L 511.3,223.1 L 511.5,223.9 Z"
+          fill="#c7dae8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Mouttayiaka -->
+        <path class="community-boundary" id="community-mouttayiaka"
+          d="M 430.4,245.6 L 428.9,245.3 L 427.5,243.3 L 426.7,240.1 L 425.2,238.2 L 425.1,237.2 L 424.0,236.2 L 423.7,235.7 L 423.8,234.1 L 424.1,232.4 L 423.1,230.7 L 421.8,229.8 L 421.7,228.1 L 421.0,226.6 L 420.1,225.0 L 420.9,223.0 L 422.1,222.8 L 423.0,221.4 L 423.1,219.5 L 420.6,220.6 L 417.9,220.6 L 416.9,218.9 L 415.1,220.3 L 415.2,219.4 L 415.8,217.5 L 414.9,214.9 L 415.1,212.6 L 413.9,212.8 L 412.5,213.6 L 410.3,214.8 L 409.2,215.5 L 409.4,213.7 L 409.4,210.6 L 409.6,209.5 L 410.2,206.5 L 410.2,205.3 L 410.4,204.2 L 410.1,201.3 L 411.7,201.0 L 412.9,201.1 L 414.5,199.9 L 413.5,198.1 L 412.9,197.8 L 412.0,196.0 L 412.2,194.0 L 411.7,193.3 L 411.0,191.4 L 411.6,189.9 L 412.8,188.4 L 414.9,188.8 L 417.4,189.7 L 417.3,187.6 L 416.8,185.0 L 416.9,183.5 L 415.7,180.9 L 416.9,178.7 L 417.1,180.9 L 417.7,180.1 L 418.6,178.8 L 419.1,176.8 L 420.5,176.8 L 422.6,175.3 L 424.0,175.2 L 424.8,174.8 L 426.2,175.4 L 426.8,178.4 L 427.2,180.3 L 427.5,182.0 L 428.2,183.8 L 428.8,186.3 L 428.7,187.7 L 429.9,187.8 L 429.5,184.1 L 431.4,185.7 L 432.3,184.3 L 432.8,183.6 L 434.3,187.0 L 434.9,185.9 L 436.8,184.9 L 438.8,186.5 L 440.3,190.5 L 441.7,193.6 L 443.1,194.2 L 444.1,195.3 L 446.0,196.1 L 447.8,195.1 L 448.8,196.2 L 448.1,198.0 L 449.7,197.8 L 448.6,200.5 L 447.7,199.2 L 447.4,201.0 L 447.5,204.7 L 446.7,207.0 L 446.2,213.0 L 445.3,215.4 L 443.6,219.7 L 442.9,222.1 L 441.2,222.4 L 440.3,224.0 L 440.6,225.4 L 440.6,228.2 L 439.2,229.3 L 437.5,231.7 L 437.5,233.0 L 437.8,233.6 L 440.2,232.9 L 440.2,236.9 L 438.0,237.7 L 435.6,238.2 L 434.3,238.3 L 434.9,241.1 L 434.8,242.7 L 435.0,243.5 L 433.3,244.4 L 432.3,244.9 L 430.4,245.6 Z"
+          fill="#e8c7d4" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Agios Tychon -->
+        <path class="community-boundary" id="community-agios-tychon"
+          d="M 435.0,243.6 L 440.8,241.2 L 445.6,239.8 L 448.6,238.3 L 452.4,237.3 L 455.0,236.0 L 458.0,235.3 L 465.6,233.4 L 467.6,234.4 L 468.5,232.5 L 470.3,234.4 L 470.3,232.6 L 471.2,232.7 L 471.4,232.7 L 472.7,233.3 L 472.5,232.5 L 473.5,232.4 L 473.7,232.8 L 477.2,231.1 L 478.5,232.0 L 481.5,230.3 L 486.9,229.6 L 490.6,227.3 L 494.9,225.0 L 498.3,223.3 L 503.6,223.1 L 510.4,223.5 L 510.7,221.0 L 509.7,220.0 L 509.0,217.2 L 508.2,213.2 L 508.8,211.7 L 509.7,210.8 L 508.4,208.6 L 508.7,205.5 L 508.7,202.7 L 510.6,200.7 L 510.0,198.2 L 507.1,196.6 L 500.9,197.6 L 496.8,195.5 L 496.0,193.7 L 496.4,190.5 L 496.3,188.4 L 496.9,186.3 L 496.8,184.0 L 496.0,183.4 L 495.0,179.8 L 492.4,179.7 L 492.6,176.1 L 494.6,175.0 L 496.6,175.2 L 495.8,174.6 L 495.4,173.8 L 494.4,173.4 L 492.8,172.3 L 491.3,170.8 L 489.9,170.1 L 488.2,169.9 L 487.5,168.9 L 485.6,168.7 L 483.0,164.5 L 480.6,162.3 L 478.4,161.0 L 476.9,162.9 L 477.4,164.4 L 475.4,165.2 L 473.7,166.6 L 471.8,166.4 L 470.9,168.7 L 470.5,170.7 L 467.7,171.5 L 468.4,173.6 L 465.2,174.9 L 465.9,176.8 L 465.4,180.9 L 464.9,181.2 L 464.6,183.2 L 461.2,185.2 L 459.9,186.0 L 459.6,186.3 L 459.3,186.6 L 459.0,187.0 L 457.7,189.2 L 457.7,189.2 L 457.6,189.3 L 457.6,189.4 L 457.6,189.4 L 457.6,189.5 L 457.7,190.1 L 454.9,195.1 L 453.4,195.6 L 448.9,196.3 L 449.6,197.8 L 448.0,199.7 L 448.1,201.6 L 446.7,207.0 L 445.6,215.0 L 442.6,221.5 L 439.8,223.3 L 440.6,225.4 L 439.9,229.0 L 437.5,232.2 L 438.1,233.6 L 440.2,236.9 L 435.8,238.2 L 434.4,239.2 L 434.9,243.2 L 435.0,243.6 Z"
+          fill="#d4c7e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Armenochori -->
+        <path class="community-boundary" id="community-armenochori"
+          d="M 478.0,160.9 L 478.3,157.8 L 477.0,157.7 L 476.4,155.4 L 477.0,153.2 L 475.7,152.2 L 475.6,149.9 L 476.1,146.3 L 475.8,144.8 L 473.8,141.4 L 473.0,137.0 L 473.3,133.2 L 474.1,129.8 L 472.7,126.7 L 473.0,126.0 L 474.5,125.0 L 474.5,124.0 L 474.1,123.0 L 476.8,119.5 L 478.6,116.3 L 478.1,113.2 L 476.5,112.0 L 472.8,87.2 L 464.6,101.1 L 455.5,116.8 L 451.3,120.1 L 450.4,121.2 L 449.5,123.0 L 448.4,124.6 L 446.0,127.2 L 444.9,129.5 L 443.4,130.3 L 442.0,132.3 L 441.9,134.0 L 441.8,136.0 L 444.4,138.8 L 444.4,139.9 L 445.9,141.0 L 447.3,143.3 L 448.6,145.3 L 446.6,147.1 L 444.0,147.1 L 441.3,148.0 L 441.9,149.0 L 442.5,151.0 L 442.6,153.2 L 443.8,154.3 L 444.4,155.7 L 443.1,157.3 L 442.3,160.2 L 444.6,160.8 L 442.7,161.9 L 439.7,162.9 L 439.5,166.3 L 440.2,170.1 L 440.3,172.0 L 438.4,174.6 L 436.9,178.2 L 434.8,182.3 L 434.7,184.9 L 435.5,186.1 L 438.7,185.9 L 440.3,190.5 L 441.9,194.1 L 443.8,194.4 L 445.7,196.2 L 447.8,195.1 L 448.9,196.3 L 452.2,195.6 L 454.4,196.0 L 454.9,195.1 L 457.9,190.8 L 457.6,189.5 L 457.6,189.5 L 457.6,189.4 L 457.6,189.4 L 457.6,189.3 L 457.6,189.3 L 457.7,189.3 L 457.7,189.2 L 457.7,189.2 L 459.0,187.0 L 459.1,186.8 L 459.3,186.5 L 459.6,186.3 L 459.8,186.1 L 460.1,185.9 L 461.6,185.0 L 463.9,183.3 L 464.7,182.1 L 465.0,180.9 L 465.4,180.9 L 465.2,177.7 L 464.7,175.5 L 465.5,175.5 L 468.5,173.9 L 468.0,172.7 L 468.8,171.9 L 470.5,170.7 L 471.4,169.3 L 470.7,167.2 L 472.1,166.5 L 473.6,167.0 L 474.7,165.8 L 476.1,163.8 L 477.4,164.4 L 477.4,163.0 L 476.9,162.0 L 478.0,160.9 Z"
+          fill="#e8e0c7" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+        <!-- Monagrouli -->
+        <path class="community-boundary" id="community-monagrouli"
+          d="M 581.9,91.3 L 600.0,69.9 L 605.3,93.9 L 609.0,97.9 L 610.8,101.2 L 615.1,104.5 L 617.6,103.4 L 617.6,102.5 L 619.0,100.1 L 621.1,99.6 L 621.4,100.4 L 622.6,103.9 L 626.2,112.6 L 622.9,117.1 L 623.1,120.9 L 623.9,120.5 L 625.9,120.3 L 628.0,118.9 L 628.6,119.8 L 630.5,121.7 L 632.5,122.3 L 633.7,126.1 L 633.2,129.8 L 630.9,135.1 L 627.3,137.8 L 630.1,142.1 L 630.0,144.0 L 628.8,148.9 L 628.7,153.8 L 631.0,157.4 L 634.5,159.4 L 631.8,163.1 L 629.9,166.7 L 631.4,169.8 L 630.6,173.6 L 630.8,179.5 L 631.7,183.7 L 629.8,189.1 L 629.1,192.3 L 627.8,193.1 L 626.6,193.7 L 625.7,195.8 L 626.6,198.0 L 626.7,202.0 L 629.2,204.1 L 629.1,206.4 L 630.2,208.0 L 630.9,209.7 L 632.8,211.2 L 633.1,215.2 L 632.9,220.9 L 636.0,225.3 L 637.3,228.5 L 637.9,230.9 L 637.7,233.7 L 639.5,236.1 L 636.1,236.8 L 634.8,237.3 L 634.4,237.5 L 634.2,237.4 L 633.9,236.8 L 627.8,236.7 L 617.7,236.8 L 608.1,236.4 L 605.0,232.8 L 607.3,225.8 L 607.4,222.3 L 610.4,218.0 L 607.5,214.5 L 606.5,208.2 L 606.2,203.1 L 607.2,198.0 L 603.1,191.4 L 598.0,187.2 L 594.5,185.9 L 597.3,183.4 L 596.4,181.8 L 595.8,175.4 L 594.1,168.8 L 594.1,162.9 L 592.4,157.2 L 588.9,155.5 L 587.3,155.2 L 587.1,150.7 L 582.8,146.6 L 577.8,145.2 L 574.9,141.8 L 571.2,138.3 L 571.5,136.0 L 571.5,133.9 L 573.1,130.9 L 573.4,127.6 L 573.4,124.2 L 573.1,120.6 L 570.5,117.6 L 570.2,116.9 L 569.6,115.8 L 570.6,113.4 L 573.0,107.8 L 573.6,106.3 L 573.2,104.9 L 576.8,104.4 L 577.4,101.7 L 578.2,99.4 L 581.9,91.3 Z"
+          fill="#c7e8e8" fill-opacity="0.08" stroke="#8b7355" stroke-width="0.5" stroke-opacity="0.3" />
+
+        <!-- Community labels (Greek only, subtle) -->
+        <text x="390" y="110" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Ακρούντα</text>
+        <text x="440" y="135" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Φοινικάρια</text>
+        <text x="583" y="192" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μόνη</text>
+        <text x="555" y="170" text-anchor="middle" font-size="7" fill="#C4A86B" font-weight="500" font-family="'Outfit', sans-serif" opacity="0.7">Πύργος</text>
+        <text x="520" y="155" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Παρεκκλησιά</text>
+        <text x="420" y="230" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μουτταγιάκα</text>
+        <text x="475" y="210" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Άγ. Τύχων</text>
+        <text x="458" y="155" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Αρμενοχώρι</text>
+        <text x="618" y="165" text-anchor="middle" font-size="6" fill="#A09878" font-weight="400" font-family="'Outfit', sans-serif" opacity="0.6">Μοναγρούλι</text>
+      </g>
+
       <!-- Terrain contour lines -->
       <path class="map-terrain" data-delay="2200" d="M 0,50 Q 250,45 500,48 Q 750,42 1000,46"/>
       <path class="map-terrain" data-delay="2400" d="M 0,95 Q 250,88 500,92 Q 750,85 1000,80"/>
@@ -936,10 +992,10 @@ footer {
 
       <!-- Scale bar: 5km ≈ 88 SVG units -->
       <g data-delay="6800" class="map-scale">
-        <line x1="590" y1="440" x2="678" y2="440" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
-        <line x1="590" y1="437" x2="590" y2="443" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
-        <line x1="678" y1="437" x2="678" y2="443" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
-        <text x="634" y="436" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7" fill="#A09878" font-weight="300">5 km</text>
+        <line x1="520" y1="290" x2="608" y2="290" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+        <line x1="520" y1="287" x2="520" y2="293" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+        <line x1="608" y1="287" x2="608" y2="293" stroke="var(--gold)" stroke-width="1" opacity="0.5"/>
+        <text x="564" y="286" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7" fill="#A09878" font-weight="300">5 km</text>
       </g>
 
       <!-- Dense urban area — Limassol city (between port and Germasogeia) -->
@@ -997,26 +1053,26 @@ footer {
         <line x1="334" y1="233" x2="334" y2="211" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
         <text x="334" y="206" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Αγία Φύλα</text>
       </g>
-      <!-- 4. Μέσα Γειτονιά — Exit 25 SVG(358, 235) — label BELOW to avoid overlap -->
+      <!-- 4. Μέσα Γειτονιά — Exit 25 SVG(358, 235) — label NORTH (staggered) -->
       <g class="map-junction" data-delay="3550">
         <circle cx="358" cy="235" r="5" fill="rgba(30,50,30,0.6)" stroke="#C4A86B" stroke-width="0.6"/>
         <circle cx="358" cy="235" r="2" fill="rgba(40,70,40,0.7)" stroke="#C4A86B" stroke-width="0.4"/>
-        <line x1="358" y1="240" x2="358" y2="258" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
-        <text x="358" y="267" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Μέσα Γειτονιά</text>
+        <line x1="358" y1="230" x2="358" y2="219" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="358" y="215" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Μέσα Γειτονιά</text>
       </g>
-      <!-- 5. Αγ. Αθανάσιος — Exit 24 SVG(400, 233) -->
+      <!-- 5. Αγ. Αθανάσιος — Exit 24 SVG(400, 233) — label NORTH (staggered lower) -->
       <g class="map-junction" data-delay="3600">
         <circle cx="400" cy="233" r="5" fill="rgba(30,50,30,0.6)" stroke="#C4A86B" stroke-width="0.6"/>
         <circle cx="400" cy="233" r="2" fill="rgba(40,70,40,0.7)" stroke="#C4A86B" stroke-width="0.4"/>
-        <line x1="400" y1="228" x2="400" y2="206" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
-        <text x="400" y="201" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Αγ. Αθανάσιος</text>
+        <line x1="400" y1="228" x2="400" y2="222" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="400" y="219" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Αγ. Αθανάσιος</text>
       </g>
-      <!-- 6. Γερμασόγεια — Exit 23 SVG(433, 233) — label BELOW to avoid overlap -->
+      <!-- 6. Γερμασόγεια — Exit 23 SVG(433, 233) — label NORTH -->
       <g class="map-junction" data-delay="3650">
         <circle cx="433" cy="233" r="5" fill="rgba(30,50,30,0.6)" stroke="#C4A86B" stroke-width="0.6"/>
         <circle cx="433" cy="233" r="2" fill="rgba(40,70,40,0.7)" stroke="#C4A86B" stroke-width="0.4"/>
-        <line x1="433" y1="238" x2="433" y2="256" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
-        <text x="433" y="265" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Γερμασόγεια</text>
+        <line x1="433" y1="228" x2="433" y2="210" stroke="var(--gold)" stroke-width="0.7" opacity="0.5"/>
+        <text x="433" y="205" text-anchor="middle" font-family="Outfit, sans-serif" font-size="7.5" fill="#A09878" font-weight="400">Γερμασόγεια</text>
       </g>
 
       <!-- Place dots + labels — OSM coordinate projection -->
@@ -1070,9 +1126,7 @@ footer {
       <circle class="map-dot" data-delay="4000" cx="398" cy="271" r="1.5"/>
       <text class="map-place-label" data-delay="4050" x="398" y="283" text-anchor="middle" font-size="7.5">Δασούδι</text>
 
-      <!-- Αγ. Τύχωνας -->
-      <circle class="map-dot" data-delay="4200" cx="484" cy="239" r="1.5"/>
-      <text class="map-place-label" data-delay="4250" x="484" y="250" text-anchor="middle" font-size="7.5">Αγ. Τύχωνας</text>
+      <!-- Αγ. Τύχωνας — removed (covered by community boundary label) -->
 
       <!-- Gov. Beach -->
       <circle class="map-dot" data-delay="4400" cx="629" cy="229" r="1.5"/>
@@ -1225,58 +1279,79 @@ footer {
       <!-- no label -->
 
       <!-- Mediterranean Sea label -->
-      <text class="map-sea-label" data-delay="3800" data-i18n="map.sea" x="450" y="490" text-anchor="middle" font-size="9">Μ ε σ ό γ ε ι ο ς &nbsp; Θ ά λ α σ σ α</text>
+      <!-- Mediterranean Sea label — positioned over open water -->
+      <text class="map-sea-label" data-delay="3800" data-i18n="map.sea" x="500" y="450" text-anchor="middle" font-size="9">Μ ε σ ό γ ε ι ο ς &nbsp; Θ ά λ α σ σ α</text>
 
-      <!-- ===== RIVERLAND PIN (Pyrgos — OSM coords) ===== -->
+      <!-- ===== RIVERLAND LOGO (Pyrgos — 33.1894°E, 34.7719°N) ===== -->
       <g id="map-pin-group" class="map-pin-group" data-delay="5400">
-        <circle cx="452" cy="177" r="30" fill="url(#pinGlow)"/>
-        <circle class="map-pin-ring" cx="452" cy="177" r="12"/>
-        <g transform="translate(452,157)">
-          <path d="M0,0 C-8,0 -14,6 -14,14 C-14,24 0,36 0,36 C0,36 14,24 14,14 C14,6 8,0 0,0 Z"
-                fill="var(--gold)" stroke="#0E1A0E" stroke-width="1.5"/>
-          <circle cx="0" cy="13" r="5" fill="#0E1A0E"/>
-        </g>
-        <text class="map-pin-label" x="452" y="147" text-anchor="middle">RIVER LAND</text>
-        <text class="map-place-label" data-delay="5600" x="452" y="205" text-anchor="middle" font-size="9" style="fill:var(--gold)">Πύργος Λεμεσού</text>
+        <circle cx="563" cy="95" r="30" fill="url(#pinGlow)"/>
+        <circle class="map-pin-ring" cx="563" cy="95" r="22"/>
+        <!-- Logo image (transparent PNG) -->
+        <image x="536" y="70" width="54" height="50" href="assets/riverland_logo.png"
+               preserveAspectRatio="xMidYMid meet"/>
+        <text class="map-pin-label" x="563" y="67" text-anchor="middle">RIVER LAND</text>
+        <text class="map-place-label" data-delay="5600" x="563" y="130" text-anchor="middle" font-size="9" style="fill:var(--gold)">Πύργος Λεμεσού</text>
       </g>
 
-      <!-- ===== ANIMATED ROAD ROUTES ===== -->
-      <!-- Route 1: To A1 Highway (orange) -->
+      <!-- ===== ANIMATED ROAD ROUTES — real OSRM driving paths ===== -->
+      <!-- Route 1: To A1 Highway / Pyrgos-Parekklisia junction (orange) — 9 min, 10 km -->
       <path class="map-route" data-delay="5800" stroke="#e8a44a"
-        d="M 452,177 C 452,183 453,190 454,197 C 455,204 457,212 459,218 C 460,222 462,225 463,226"/>
+        d="M 563.1,100.0 L 563.3,98.1 L 562.0,95.8 L 555.1,97.2 L 551.9,99.0 L 548.7,102.5 L 546.5,105.3 L 543.5,108.3 L 539.7,110.2 L 536.3,116.1 L 535.3,120.9 L 532.3,126.5 L 529.1,131.1 L 526.1,136.6 L 521.7,139.6 L 519.9,142.4 L 518.5,146.4 L 515.6,149.6 L 512.5,152.6 L 509.7,155.5 L 508.4,159.3 L 509.4,163.3 L 513.0,166.3 L 518.5,171.0 L 518.5,173.6 L 517.4,178.1 L 516.5,181.9 L 517.7,187.5 L 517.4,191.4 L 517.9,195.7 L 519.9,198.0 L 522.1,200.3 L 522.7,203.8 L 522.2,205.7 L 521.6,211.3 L 521.1,213.5 L 521.4,216.7 L 527.6,216.6 L 543.6,212.5"/>
 
-      <!-- Route 2: To Beach (teal) -->
+      <!-- Route 2: To Beach / Malindi Beach Bar (teal) — 11 min, 10 km -->
       <path class="map-route" data-delay="6200" stroke="#5ab8c4"
-        d="M 452,177 C 454,184 456,193 459,202 C 463,213 468,222 474,230 C 478,235 481,237 484,239"/>
+        d="M 563.1,100.0 L 563.1,97.9 L 560.3,95.9 L 553.8,97.2 L 550.2,99.9 L 547.3,104.4 L 543.8,108.2 L 539.7,110.2 L 536.0,117.1 L 534.5,122.5 L 531.1,128.0 L 527.6,134.3 L 523.4,139.0 L 520.1,142.0 L 518.5,146.4 L 514.7,150.4 L 512.1,153.1 L 509.1,156.5 L 508.9,162.3 L 511.4,165.2 L 518.4,170.7 L 518.5,173.6 L 517.2,178.4 L 516.3,185.0 L 518.1,188.8 L 517.1,193.3 L 519.1,197.5 L 521.9,199.8 L 522.7,203.8 L 522.1,206.2 L 521.4,212.2 L 521.5,213.8 L 521.9,217.1 L 523.8,220.2 L 525.1,220.8 L 527.0,222.3 L 526.4,225.0 L 525.3,224.3"/>
 
-      <!-- Route 3: To City Center (coral-red) -->
+      <!-- Route 3: To City Center / Lanitio (golden) — 22 min, 23 km -->
       <path class="map-route" data-delay="6600" stroke="#e8b84a" stroke-width="3"
-        d="M 452,177 C 449,184 446,193 442,203 C 436,216 428,228 420,236 C 410,246 398,254 386,261 C 374,268 362,276 352,284 C 342,292 335,300 330,308 C 327,313 325,316 323,318"/>
+        d="M 563.1,100.0 L 562.7,95.6 L 552.1,98.9 L 547.8,104.1 L 542.0,108.8 L 535.9,117.3 L 532.1,126.7 L 526.1,136.6 L 520.1,142.0 L 517.2,148.1 L 511.0,154.2 L 508.6,161.5 L 517.1,169.2 L 518.5,173.7 L 516.5,181.9 L 517.8,190.4 L 519.1,197.5 L 522.7,203.0 L 522.0,208.3 L 521.4,213.7 L 521.6,220.0 L 519.9,217.5 L 506.5,212.7 L 491.3,213.0 L 460.8,226.0 L 425.2,235.6 L 404.9,235.6 L 383.2,229.6 L 337.1,238.9 L 334.7,241.7 L 334.8,245.1 L 332.1,247.5 L 331.6,253.3 L 331.1,256.9 L 330.8,261.7 L 330.3,268.0 L 324.8,273.0 L 323.1,271.7"/>
 
-      <!-- Route 4: To Coastal Front (green) -->
+      <!-- Route 4: To Coastal Front / Up Town Square (green) — 10 min, 9 km -->
       <path class="map-route" data-delay="7000" stroke="#7ab87a"
-        d="M 452,177 C 450,184 447,195 443,207 C 438,222 432,234 425,242 C 418,250 412,256 405,261 C 402,263 400,264 398,265"/>
+        d="M 563.1,100.0 L 563.3,98.1 L 562.0,95.8 L 555.1,97.2 L 551.9,99.0 L 548.7,102.5 L 546.5,105.3 L 543.5,108.3 L 539.7,110.2 L 536.3,116.1 L 535.3,120.9 L 532.3,126.5 L 529.1,131.1 L 526.1,136.6 L 521.7,139.6 L 519.9,142.4 L 518.5,146.4 L 515.6,149.6 L 512.5,152.6 L 509.7,155.5 L 508.4,159.3 L 509.4,163.3 L 513.0,166.3 L 518.5,171.0 L 518.5,173.6 L 517.4,178.1 L 516.5,181.9 L 517.7,187.5 L 517.4,191.4 L 517.9,195.7 L 519.9,198.0 L 522.1,200.3 L 522.7,203.8 L 522.2,205.7 L 521.6,211.3 L 521.1,213.5 L 521.9,215.2 L 521.6,219.9 L 519.5,219.1 L 520.0,218.3 L 520.1,218.3"/>
+
+      <!-- ===== DESTINATION PINS (colored dots at route endpoints) ===== -->
+      <!-- Highway destination pin (orange) — Pyrgos/Parekklisia A1 junction -->
+      <g class="map-route" data-delay="5900">
+        <circle cx="544" cy="213" r="4.5" fill="#e8a44a" opacity="0.9"/>
+        <circle cx="544" cy="213" r="2" fill="#0E1A0E"/>
+      </g>
+      <!-- Beach destination pin (teal) — Malindi Beach Bar -->
+      <g class="map-route" data-delay="6300">
+        <circle cx="524" cy="225" r="4.5" fill="#5ab8c4" opacity="0.9"/>
+        <circle cx="524" cy="225" r="2" fill="#0E1A0E"/>
+      </g>
+      <!-- City Center destination pin (golden) — Lanitio School -->
+      <g class="map-route" data-delay="6700">
+        <circle cx="322" cy="271" r="4.5" fill="#e8b84a" opacity="0.9"/>
+        <circle cx="322" cy="271" r="2" fill="#0E1A0E"/>
+      </g>
+      <!-- Coastal Front destination pin (green) — Up Town Square -->
+      <g class="map-route" data-delay="7100">
+        <circle cx="520" cy="219" r="4.5" fill="#7ab87a" opacity="0.9"/>
+        <circle cx="520" cy="219" r="2" fill="#0E1A0E"/>
+      </g>
 
       <!-- ===== ROUTE LABELS OVER SEA ===== -->
-      <g class="map-route-info" data-delay="5800" transform="translate(340, 362)">
+      <g class="map-route-info" data-delay="5800" transform="translate(520, 310)">
         <line x1="0" y1="0" x2="14" y2="0" stroke="#e8a44a" stroke-width="2.5" stroke-linecap="round"/>
         <text data-i18n="map.route1.name" x="20" y="3.5" font-size="9.5" fill="#e8a44a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Αυτοκινητόδρομος</text>
-        <text data-i18n="map.route1.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">9 λεπτά · 4 km</text>
+        <text data-i18n="map.route1.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">9 λεπτά · 10 km</text>
       </g>
-      <g class="map-route-info" data-delay="6200" transform="translate(340, 392)">
+      <g class="map-route-info" data-delay="6200" transform="translate(520, 332)">
         <line x1="0" y1="0" x2="14" y2="0" stroke="#5ab8c4" stroke-width="2.5" stroke-linecap="round"/>
         <text data-i18n="map.route2.name" x="20" y="3.5" font-size="9.5" fill="#5ab8c4" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Παραλία</text>
-        <text data-i18n="map.route2.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">10 λεπτά · 4,5 km</text>
+        <text data-i18n="map.route2.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">11 λεπτά · 10 km</text>
       </g>
-      <g class="map-route-info" data-delay="6600" transform="translate(340, 422)">
+      <g class="map-route-info" data-delay="6600" transform="translate(520, 354)">
         <line x1="0" y1="0" x2="14" y2="0" stroke="#e8b84a" stroke-width="2.5" stroke-linecap="round"/>
         <text data-i18n="map.route3.name" x="20" y="3.5" font-size="9.5" fill="#e8b84a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Κέντρο Πόλης</text>
-        <text data-i18n="map.route3.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">15 λεπτά · 8 km</text>
+        <text data-i18n="map.route3.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">22 λεπτά · 23 km</text>
       </g>
-      <g class="map-route-info" data-delay="7000" transform="translate(340, 452)">
+      <g class="map-route-info" data-delay="7000" transform="translate(520, 376)">
         <line x1="0" y1="0" x2="14" y2="0" stroke="#7ab87a" stroke-width="2.5" stroke-linecap="round"/>
         <text data-i18n="map.route4.name" x="20" y="3.5" font-size="9.5" fill="#7ab87a" font-weight="400" font-family="'Outfit', sans-serif" letter-spacing="0.04em">Παραλιακό Μέτωπο</text>
-        <text data-i18n="map.route4.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">12 λεπτά · 6 km</text>
+        <text data-i18n="map.route4.time" x="20" y="14" font-size="7.5" fill="#A09878" font-weight="300" font-family="'Outfit', sans-serif">10 λεπτά · 9 km</text>
       </g>
     </svg>
   </div>
@@ -1295,8 +1370,20 @@ footer {
         <span>RIVER LAND</span>
       </div>
       <div class="map-legend-item">
-        <div class="map-legend-line" style="background:#e8a44a; height:3px;"></div>
-        <span data-i18n="map.legend.routes">Διαδρομές</span>
+        <div class="map-legend-dot" style="background:#e8a44a; width:9px; height:9px;"></div>
+        <span data-i18n="map.legend.route1">Αυτοκινητόδρομος</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-dot" style="background:#5ab8c4; width:9px; height:9px;"></div>
+        <span data-i18n="map.legend.route2">Παραλία</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-dot" style="background:#e8b84a; width:9px; height:9px;"></div>
+        <span data-i18n="map.legend.route3">Κέντρο Πόλης</span>
+      </div>
+      <div class="map-legend-item">
+        <div class="map-legend-dot" style="background:#7ab87a; width:9px; height:9px;"></div>
+        <span data-i18n="map.legend.route4">Παραλιακό Μέτωπο</span>
       </div>
       <div class="map-legend-item">
         <div class="map-legend-dot" style="background:var(--gold); width:10px; height:10px;"></div>
@@ -1514,17 +1601,21 @@ const translations = {
     'map.airportPaphos': '← Αεροδρόμιο Πάφου',
     'map.airportLarnaca': 'Αεροδρόμιο Λάρνακας →',
     'map.route1.name': 'Αυτοκινητόδρομος',
-    'map.route1.time': '9 λεπτά · 4 km',
+    'map.route1.time': '9 λεπτά · 10 km',
     'map.route2.name': 'Παραλία',
-    'map.route2.time': '10 λεπτά · 4,5 km',
+    'map.route2.time': '11 λεπτά · 10 km',
     'map.route3.name': 'Κέντρο Πόλης',
-    'map.route3.time': '15 λεπτά · 8 km',
+    'map.route3.time': '22 λεπτά · 23 km',
     'map.route4.name': 'Παραλιακό Μέτωπο',
-    'map.route4.time': '12 λεπτά · 6 km',
+    'map.route4.time': '10 λεπτά · 9 km',
     'map.legend.coastline': 'Ακτογραμμή',
     'map.legend.highway': 'Αυτοκινητόδρομος A1',
     'map.legend.routes': 'Διαδρομές',
     'map.legend.junctions': 'Κόμβοι A1',
+    'map.legend.route1': 'Αυτοκινητόδρομος',
+    'map.legend.route2': 'Παραλία',
+    'map.legend.route3': 'Κέντρο Πόλης',
+    'map.legend.route4': 'Παραλιακό Μέτωπο',
     'map.newPort': 'Νέο Λιμάνι',
     // Portfolio
     'portfolio.label': 'Χαρτοφυλάκιο',
@@ -1644,17 +1735,21 @@ const translations = {
     'map.airportPaphos': '\u2190 Paphos Airport',
     'map.airportLarnaca': 'Larnaca Airport \u2192',
     'map.route1.name': 'Motorway',
-    'map.route1.time': '9 min · 4 km',
+    'map.route1.time': '9 min · 10 km',
     'map.route2.name': 'Beach',
-    'map.route2.time': '10 min · 4.5 km',
+    'map.route2.time': '11 min · 10 km',
     'map.route3.name': 'City Centre',
-    'map.route3.time': '15 min · 8 km',
+    'map.route3.time': '22 min · 23 km',
     'map.route4.name': 'Coastal Front',
-    'map.route4.time': '12 min · 6 km',
+    'map.route4.time': '10 min · 9 km',
     'map.legend.coastline': 'Coastline',
     'map.legend.highway': 'A1 Motorway',
     'map.legend.routes': 'Routes',
     'map.legend.junctions': 'A1 Junctions',
+    'map.legend.route1': 'Motorway',
+    'map.legend.route2': 'Beach',
+    'map.legend.route3': 'City Centre',
+    'map.legend.route4': 'Coastal Front',
     'map.newPort': 'New Port',
     // Portfolio
     'portfolio.label': 'Portfolio',
