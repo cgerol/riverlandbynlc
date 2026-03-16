@@ -146,18 +146,19 @@ nav .nav-links a:hover::after { width: 100%; }
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(14,26,14,0.95) 0%, rgba(14,26,14,0.7) 40%, rgba(14,26,14,0.3) 100%);
+  background: linear-gradient(135deg, rgba(14,26,14,0.92) 0%, rgba(14,26,14,0.88) 40%, rgba(14,26,14,0.88) 100%);
   z-index: 1;
 }
 .hero-bg {
-  position: absolute; inset: 0;
-  background: url('assets/background.jpeg') center center/100% auto no-repeat;
-  transform: scale(1.0);
+  position: absolute; inset: -5%;
+  width: 110%; height: 110%;
+  background: url('assets/masterplan-new-hd.jpg') center center/cover no-repeat;
+  transform: scale(0.9);
   opacity: 0;
   animation: heroBgReveal 3s ease-out 0.8s forwards, heroZoom 20s ease-in-out 3.8s infinite alternate;
 }
-@keyframes heroBgReveal { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: scale(1.0); } }
-@keyframes heroZoom { from { transform: scale(1.0); } to { transform: scale(1.02); } }
+@keyframes heroBgReveal { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(0.9); } }
+@keyframes heroZoom { from { transform: scale(0.9); } to { transform: scale(0.92); } }
 
 .hero-content {
   position: relative; z-index: 2;
@@ -253,23 +254,32 @@ nav .nav-links a:hover::after { width: 100%; }
 /* ==================== INTERACTIVE MASTERPLAN ==================== */
 .masterplan-section { padding: 6rem 0; background: var(--bg-deep); }
 .masterplan-wrapper {
-  position: relative; max-width: 1100px; margin: 3rem auto 0;
-  background: #fff; border-radius: 4px; overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  position: relative; max-width: 800px; margin: 3rem auto 0;
+  background: transparent; border-radius: 4px; overflow: hidden;
 }
-.masterplan-wrapper img {
+.masterplan-inner {
+  position: relative;
+}
+.masterplan-inner::after {
+  content: ''; position: absolute; inset: -2px; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 78% 72% at 50% 46%, transparent 40%, rgba(14,26,14,0.15) 48%, rgba(14,26,14,0.35) 55%, rgba(14,26,14,0.6) 63%, rgba(14,26,14,0.82) 72%, var(--bg-primary) 82%);
+}
+.masterplan-inner img {
   width: 100%; height: auto; display: block;
 }
 .masterplan-svg {
-  position: absolute; inset: 0; width: 100%; height: 100%;
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2;
 }
 .zone {
-  fill: transparent; stroke: transparent; stroke-width: 1.5;
-  cursor: pointer; transition: all 0.3s;
+  cursor: pointer; transition: all 0.35s ease; stroke-width: 1.5; stroke-opacity: 0.3; fill-opacity: 0.08;
 }
-.zone:hover {
-  fill: rgba(196, 168, 107, 0.2);
-  stroke: var(--gold); stroke-width: 2;
+.zone:hover, .zone.active {
+  fill-opacity: 0.4 !important; stroke-opacity: 1; stroke-width: 3;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.35));
+}
+.zone.dimmed {
+  fill-opacity: 0.03 !important; stroke-opacity: 0.1; filter: none;
 }
 .zone-tooltip {
   position: absolute; pointer-events: none;
@@ -277,7 +287,7 @@ nav .nav-links a:hover::after { width: 100%; }
   padding: 1rem 1.4rem; border-radius: 2px;
   opacity: 0; transform: translateY(8px);
   transition: all 0.25s ease;
-  max-width: 260px; z-index: 10;
+  max-width: 340px; z-index: 10;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
 .zone-tooltip.visible { opacity: 1; transform: translateY(0); }
@@ -292,6 +302,15 @@ nav .nav-links a:hover::after { width: 100%; }
 .legend-item {
   display: flex; align-items: center; gap: 0.5rem;
   font-size: 0.78rem; color: var(--text-secondary);
+  cursor: pointer; padding: 0.3rem 0.6rem; border-radius: 4px;
+  transition: all 0.25s ease; user-select: none;
+}
+.legend-item:hover, .legend-item.active {
+  color: var(--cream); background: rgba(255,255,255,0.08);
+}
+.legend-item .legend-dot { transition: transform 0.25s ease; }
+.legend-item:hover .legend-dot, .legend-item.active .legend-dot {
+  transform: scale(1.4);
 }
 .legend-dot {
   width: 12px; height: 12px; border-radius: 2px;
@@ -544,10 +563,60 @@ nav .nav-links a:hover::after { width: 100%; }
   position: absolute; inset: 0;
   background: linear-gradient(transparent 30%, rgba(14, 26, 14, 0.92) 100%);
   display: flex; flex-direction: column; justify-content: flex-end;
-  padding: 1.5rem; opacity: 0;
+  padding: 1.5rem; opacity: 1;
   transition: opacity 0.4s ease;
 }
 .portfolio-tile:hover .portfolio-overlay { opacity: 1; }
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: all 0.35s ease;
+  cursor: zoom-out;
+}
+.lightbox-overlay.active { opacity: 1; visibility: visible; }
+.lightbox-content {
+  position: relative; max-width: 90vw; max-height: 85vh; display: flex;
+  flex-direction: column; align-items: center; cursor: default;
+}
+.lightbox-content img {
+  max-width: 90vw; max-height: 75vh; object-fit: contain; border-radius: 4px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.lightbox-caption {
+  text-align: center; margin-top: 1.2rem; max-width: 600px;
+}
+.lightbox-caption .lb-label {
+  font-family: 'Outfit', sans-serif; font-size: 0.65rem; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem;
+}
+.lightbox-caption .lb-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--cream); line-height: 1.3;
+}
+.lightbox-caption .lb-desc {
+  font-size: 0.85rem; color: var(--text-secondary); font-weight: 300; margin-top: 0.4rem; line-height: 1.5;
+}
+.lightbox-close {
+  position: absolute; top: -40px; right: 0;
+  background: none; border: none; color: var(--cream); font-size: 2rem;
+  cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+}
+.lightbox-close:hover { opacity: 1; }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--cream); font-size: 1.5rem; width: 44px; height: 44px;
+  border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+.lightbox-nav.prev { left: -60px; }
+.lightbox-nav.next { right: -60px; }
+@media (max-width: 768px) {
+  .lightbox-nav.prev { left: 10px; }
+  .lightbox-nav.next { right: 10px; }
+}
 .portfolio-overlay .po-label {
   font-family: 'Outfit', sans-serif;
   font-size: 0.65rem; font-weight: 500;
@@ -767,33 +836,35 @@ footer {
     <p class="body-text reveal" style="max-width:600px;" data-i18n="masterplan.body">Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.</p>
   </div>
   <div class="masterplan-wrapper reveal" id="masterplan-container">
-    <img src="assets/masterplan.jpg" alt="RIVERLAND Masterplan" id="masterplan-img">
-    <svg class="masterplan-svg" viewBox="0 0 1000 742" preserveAspectRatio="xMidYMid meet" id="masterplan-svg">
-      <!-- Zone 1: Strategic Development 1 (top-right, blue outlined area) -->
-      <polygon class="zone" data-zone="strat1"
-        points="540,80 680,30 740,60 750,200 680,240 600,220 550,180"/>
-      <!-- Zone 2: Strategic Development 2 (right middle) -->
-      <polygon class="zone" data-zone="strat2"
-        points="560,240 680,250 730,320 720,400 640,430 560,380 540,300"/>
-      <!-- Zone 3: Private Green Space (center, near river) -->
-      <polygon class="zone" data-zone="private-green"
-        points="400,180 480,170 520,200 530,280 520,360 490,440 440,500 400,480 380,380 370,280"/>
-      <!-- Zone 4: Public Green / Linear Park (along river belt) -->
-      <polygon class="zone" data-zone="public-green"
-        points="340,100 400,90 410,170 395,260 380,370 400,470 420,540 380,560 320,520 300,430 310,320 320,210"/>
-      <!-- Zone 5: Residential 1 (upper left cluster) -->
-      <polygon class="zone" data-zone="res1"
-        points="200,140 320,110 340,130 330,210 310,240 230,250 190,220"/>
-      <!-- Zone 6: Residential 2 (mid-left cluster) -->
-      <polygon class="zone" data-zone="res2"
-        points="190,260 290,250 320,270 330,340 300,370 210,380 175,340"/>
-      <!-- Zone 7: Residential 3 (lower-left cluster) -->
-      <polygon class="zone" data-zone="res3"
-        points="175,390 280,380 320,400 340,460 310,510 230,530 170,490"/>
-      <!-- Zone 8: Residential 4 (top cluster) -->
-      <polygon class="zone" data-zone="res4"
-        points="240,80 330,60 350,80 340,120 310,140 250,140 220,120"/>
+    <div class="masterplan-inner">
+    <img src="assets/masterplan-new-hd.jpg" alt="RIVERLAND Masterplan" id="masterplan-img">
+    <svg class="masterplan-svg" viewBox="0 0 1024 1424" preserveAspectRatio="xMidYMid meet" id="masterplan-svg">
+      <!-- FAMILY -->
+      <path class="zone" data-zone="family" fill="#FF8C00" stroke="#FF8C00" stroke-width="2"
+        d="M 383.3,298.5 C 362.2,318.1 300,405.7 276.1,445.6 C 252.2,485.5 254,508.4 240.1,538 C 226.2,567.6 207.7,599.6 192.6,623.2 C 177.5,646.8 162.6,656.6 149.7,679.6 C 136.8,702.6 120.7,734.2 114.9,761.2 C 109.1,788.2 106.4,806.2 114.9,841.6 C 123.4,877 144.5,935.2 165.9,973.6 C 187.3,1012 222.5,1050.4 243.6,1072 C 264.7,1093.6 250.4,1098 292.3,1103.2 C 334.3,1108.4 446.8,1110 495.3,1103.2 C 543.8,1096.4 568.8,1074.8 583.5,1062.4 C 598.2,1050 586.2,1038.8 583.5,1028.8 C 580.8,1018.8 577.9,1013.2 567.3,1002.4 C 556.7,991.6 532.2,973.1 519.7,964 C 507.2,954.9 501.3,958.1 492.5,948 C 483.7,937.9 476.3,914.7 467.1,903.2 C 457.9,891.7 446.1,887.3 437.3,878.8 C 428.5,870.3 419.5,861.8 414.1,852.4 C 408.7,843 411.1,833.2 404.9,822.4 C 398.7,811.6 384.2,819.6 377,787.6 C 369.8,755.6 369.2,666.8 361.8,630.1 C 354.4,593.4 333.4,596.1 332.5,567.6 C 331.6,539.1 341.5,489.7 356.1,458.8 C 370.7,427.9 406.9,399 419.9,382 C 432.9,365 436.9,366.1 434,357 C 431.1,347.9 411.3,337.4 402.8,327.7 C 394.4,317.9 404.4,278.9 383.3,298.5 Z"/>
+      <!-- PREMIUM -->
+      <path class="zone" data-zone="premium" fill="#8B008B" stroke="#8B008B" stroke-width="2"
+        d="M 561.2,317.8 C 548.1,316.6 538.7,313.9 526,317.8 C 513.3,321.7 506.2,321.6 485.1,341.2 C 464,360.8 419.8,414 399.3,435.3 C 378.8,456.6 370.6,446.1 362.1,468.9 C 353.6,491.7 346.8,547.5 348.2,572.1 C 349.6,596.7 365.1,584.9 370.3,616.5 C 375.5,648.1 368.3,717.7 379.5,761.7 C 390.7,805.7 421.8,855.9 437.5,880.5 C 453.2,905.1 461.3,896.3 473.5,909.3 C 485.7,922.3 492,944.3 510.6,958.5 C 529.2,972.7 568.7,989.4 584.9,994.5 C 601.1,999.6 603.5,999 607.6,989 C 611.7,979 606,948.6 609.2,934.5 C 611.7,911.3 623.7,917.1 626.6,904.5 C 629.5,891.9 629.5,869.3 626.6,858.9 C 623.7,848.5 616.4,845.3 609.2,842.1 C 602.1,838.9 599,853.3 583.7,839.7 C 568.4,826.1 528.8,781.5 517.6,760.5 C 506.4,739.5 522.4,726.1 516.4,713.7 C 510.4,701.3 484.9,698.1 481.6,686.1 C 478.3,674.1 480.1,657.3 496.7,641.7 C 513.3,626.1 568.4,604.9 581.4,592.5 C 594.4,580.1 583.9,573.9 574.4,567.3 C 564.9,560.7 536.7,559.7 524.5,552.9 C 512.3,546.1 504.8,532.5 501.3,526.5 C 497.8,520.5 494.6,522.3 503.7,516.9 C 512.8,511.5 539.1,508.3 555.9,494.1 C 572.7,479.9 596.5,459.9 604.6,431.7 C 612.7,403.5 611.8,343.9 604.6,324.9 C 597.4,305.9 574.3,319 561.2,317.8 Z"/>
+      <!-- PREMIUM (top-right part) -->
+      <path class="zone" data-zone="premium" fill="#8B008B" stroke="#8B008B" stroke-width="2"
+        d="M 634.9,179.6 C 632,185.9 635.5,195.8 638.8,204.9 C 642,214 648.9,224.4 654.4,234.2 C 659.9,243.9 665.5,253.3 672,263.4 C 678.5,273.5 688.1,284.5 693.5,294.7 C 698.9,304.9 695.5,312.6 704.6,324.3 C 713.7,336 732.4,354.9 748.1,364.9 C 763.8,374.9 784.2,375.6 798.8,384.4 C 813.4,393.2 819.6,409.7 835.9,417.5 C 852.1,425.3 877.4,432.2 896.3,431.2 C 915.1,430.2 945.1,422.8 949,411.7 C 952.9,400.6 927.2,378.5 919.7,364.9 C 912.2,351.3 910,342.5 904.1,329.8 C 898.3,317.1 895.3,307.7 884.6,288.8 C 873.9,269.9 861.9,231.5 839.8,216.6 C 817.7,201.7 774.7,207.3 752.2,199.5 C 729.7,191.7 720.7,174.9 704.6,169.5 C 688.5,164.1 667.5,165.4 655.9,167.1 C 644.3,168.8 637.8,173.3 634.9,179.6 Z"/>
+      <!-- GREEN AREA -->
+      <path class="zone" data-zone="green-area" fill="#0096FF" stroke="#0096FF" stroke-width="2"
+        d="M 246.7,89.7 C 218.1,106.6 210.3,129.1 225.2,152.2 C 240.1,175.3 286.6,230 336.4,228.2 C 386.2,226.4 487.3,151.5 524,141.4 C 560.7,131.3 547.4,148.2 556.5,167.8 C 565.6,187.4 566.1,228.8 578.5,259 C 590.9,289.2 618.9,325 630.7,349 C 642.5,373 644.3,392.4 649.3,403 C 654.3,413.6 656.3,404.6 660.9,412.6 C 665.5,420.6 672.6,443.2 677.1,451 C 681.6,458.8 684.7,450.8 687.6,459.4 C 690.5,468 691.4,494.2 694.5,502.6 C 697.6,511 691.8,508.6 706.1,509.8 C 720.4,511 761.3,506.6 780.4,509.8 C 799.5,513 807.7,518.4 821,529 C 834.3,539.6 844.8,566 860.4,573.4 C 876,580.8 904.4,574.6 914.9,573.4 C 925.4,572.2 921.7,570.2 923.1,566.2 C 924.5,562.2 925.2,553.6 923.1,549.4 C 921,545.2 913,544.8 910.3,541 C 907.6,537.2 912.2,531.2 906.8,526.6 C 901.4,522 888.8,521.4 877.8,513.4 C 866.8,505.4 851.9,487.4 840.7,478.6 C 829.5,469.8 821.7,475.8 810.5,460.6 C 799.3,445.4 788.3,404 773.4,387.4 C 758.5,370.8 732,367.8 721.2,361 C 710.4,354.2 712.4,353.4 708.5,346.6 C 704.6,339.8 705.5,331.8 698,320.2 C 690.5,308.6 673.1,292.6 663.2,277 C 653.4,261.4 646.3,246.6 638.9,226.6 C 631.5,206.6 620.3,171 619.1,157 C 617.9,143 625.9,145.4 631.9,142.6 C 637.9,139.8 647.2,139 655.1,140.2 C 663,141.4 662.1,141 679.5,149.8 C 696.9,158.6 741.9,188.1 759.7,193.1 C 777.5,198.1 785.6,186 786.2,179.8 C 786.9,173.6 777.1,165.6 763.6,156.1 C 750.1,146.6 721.1,131.2 705.1,122.9 C 689.1,114.7 675.3,111.5 667.9,106.6 C 660.5,101.7 668.3,104 660.9,93.4 C 653.5,82.8 648,52.9 623.2,42.9 C 598.4,32.9 549.7,31.9 512,33.2 C 474.3,34.5 441.1,41.3 396.9,50.7 C 352.7,60.1 275.3,72.8 246.7,89.7 Z"/>
+      <!-- LUXURY -->
+      <path class="zone" data-zone="luxury" fill="#DAA520" stroke="#DAA520" stroke-width="2"
+        d="M 629.5,457.7 C 623.5,463.3 612.7,482.7 601.7,491.3 C 590.7,499.9 571.9,503.9 563.4,509.3 C 554.9,514.7 551.5,516.9 550.7,523.7 C 549.9,530.5 552,539.9 558.8,550.1 C 565.6,560.3 584.3,575.5 591.3,584.9 C 598.3,594.3 599.9,596.9 600.5,606.5 C 601.1,616.1 603,631.5 594.7,642.5 C 586.4,653.5 558,660.3 550.7,672.5 C 543.4,684.7 548.4,703.1 550.7,715.7 C 553,728.3 558.2,737.9 564.6,748.1 C 571,758.3 577.1,766.9 588.9,776.9 C 600.7,786.9 619.4,790.9 635.3,808.1 C 651.2,825.3 675.8,862.9 684.1,880.1 C 692.4,897.3 687.5,904.3 685.2,911.3 C 682.9,918.3 673.8,916.7 670.1,922.1 C 666.4,927.5 658.4,929.3 663.2,943.7 C 668,958.1 687.5,993.1 699.1,1008.5 C 710.7,1023.9 721,1031.5 732.8,1036.1 C 744.6,1040.7 757.1,1041.3 769.9,1036.1 C 782.6,1030.9 802.7,1015.1 809.3,1004.9 C 815.9,994.7 812.8,986.7 809.3,974.9 C 805.8,963.1 797.2,960.7 788.5,934.1 C 779.8,907.5 776.8,852.3 757.1,815.3 C 737.4,778.3 685.2,739.3 670.1,712.1 C 655,684.9 665.3,670.7 666.7,652.1 C 668.1,633.5 676.8,618.1 678.3,600.5 C 679.8,582.9 679,563.9 675.9,546.5 C 672.8,529.1 666.1,510.9 659.7,496.1 C 653.3,481.3 642.7,464.1 637.7,457.7 C 632.7,451.3 635.5,452.1 629.5,457.7 Z"/>
+      <!-- TOGETHER -->
+      <path class="zone" data-zone="together" fill="#999" stroke="#999" stroke-width="2"
+        d="M 369,234.3 C 362.6,227.7 353.3,228.3 330.7,229.5 C 308.1,230.7 258.7,243.5 233.2,241.5 C 207.7,239.5 195,221.5 177.6,217.5 C 160.2,213.5 147.8,208.1 128.8,217.5 C 109.9,226.9 76.8,260.9 63.9,273.9 C 50.9,286.9 54,286.5 51.1,295.5 C 48.2,304.5 44,316.5 46.5,327.9 C 49,339.3 62.5,346.1 66.2,363.9 C 69.9,381.7 70.6,418.5 68.5,434.7 C 66.4,450.9 59.4,454.3 53.4,461.1 C 47.4,467.9 39.2,468.5 32.6,475.5 C 26,482.5 17.1,489.9 14,503.1 C 10.9,516.3 11.7,540.1 14,554.7 C 16.3,569.3 25.2,578.5 27.9,590.7 C 30.6,602.9 27.9,616.9 30.2,627.9 C 32.5,638.9 33.9,650.9 41.8,656.7 C 49.7,662.5 66.8,661.9 77.8,662.7 C 88.8,663.5 102.8,660.1 108,661.5 C 113.2,662.9 106.2,669.5 109.1,671.1 C 112,672.7 118.3,677.5 125.4,671.1 C 132.6,664.7 141.8,650.5 152,632.7 C 162.2,614.9 173.7,586.5 186.8,564.3 C 200,542.1 221.8,516.5 230.9,499.5 C 240,482.5 235.6,477.9 241.4,462.3 C 247.2,446.7 258.6,420.1 265.7,405.9 C 272.8,391.7 268.4,397.3 284.3,377.1 C 300.2,356.9 346.7,302.7 360.8,284.7 C 374.9,266.7 367.6,277.5 369,269.1 C 370.4,260.7 375.4,240.9 369,234.3 Z"/>
+      <!-- WELLNESS -->
+      <path class="zone" data-zone="wellness" fill="#DC143C" stroke="#DC143C" stroke-width="2"
+        d="M 501.1,176.8 C 493.6,172.2 478.3,176 473.3,176.8 C 468.3,177.6 473.9,179.2 471,181.6 C 468.1,184 460,184.8 455.9,191.2 C 451.8,197.6 450.1,213.4 446.6,220 C 443.1,226.6 437.3,227.6 435,230.8 C 432.7,234 434.6,236.8 432.7,239.2 C 430.8,241.6 424.9,243.2 423.4,245.2 C 421.8,247.2 424.4,248.2 423.4,251.2 C 422.4,254.2 419.3,261 417.6,263.2 C 415.9,265.4 414.2,262.8 413,264.4 C 411.8,266 412.2,270.6 410.6,272.8 C 409.1,275 405.8,275.4 403.7,277.6 C 401.6,279.8 399.3,284.6 397.9,286 C 396.5,287.4 396,282.4 395.6,286 C 395.2,289.6 395.2,304 395.6,307.6 C 396,311.2 396.5,306 397.9,307.6 C 399.3,309.2 399.6,312.8 403.7,317.2 C 407.8,321.6 418.1,329.4 422.2,334 C 426.3,338.6 420.1,343 428,344.8 C 435.9,346.6 462.8,345.2 469.8,344.8 C 476.8,344.4 468.3,344.2 469.8,342.4 C 471.4,340.6 477,337 479.1,334 C 481.2,331 471.4,326.6 482.6,324.4 C 493.8,322.2 535.8,323.4 546.4,320.8 C 557,318.2 547,311 546.4,308.8 C 545.8,306.6 543.9,308.8 542.9,307.6 C 541.9,306.4 541.6,306.4 540.6,301.6 C 539.6,296.8 538.9,286.4 537.1,278.8 C 535.4,271.2 531.5,263.6 530.1,256 C 528.8,248.4 530.9,241.8 529,233.2 C 527.1,224.6 523.1,213.8 518.5,204.4 C 513.9,195 508.6,181.4 501.1,176.8 Z"/>
+      <!-- STRATEGIC -->
+      <path class="zone" data-zone="strategic" fill="#333" stroke="#333" stroke-width="2"
+        d="M 689.6,520.1 C 674.3,523.1 679.9,524.7 678,538.1 C 676.1,551.5 675.5,586.5 678,600.5 C 680.5,614.5 690.7,613.9 693,622.1 C 695.3,630.3 693.8,639.5 691.9,649.7 C 690,659.9 682.8,673.5 681.4,683.3 C 680,693.1 678.2,698.5 683.8,708.5 C 689.4,718.5 702.9,722.1 715.1,743.3 C 727.3,764.5 747.7,818.5 756.8,835.7 C 765.9,852.9 765,840.1 769.6,846.5 C 774.3,852.9 777.7,854.7 784.7,874.1 C 791.7,893.5 802.7,940.1 811.4,962.9 C 820.1,985.7 826.3,998.9 836.9,1010.9 C 847.5,1022.9 862.6,1030.9 875.2,1034.9 C 887.8,1038.9 896.4,1044.1 912.3,1034.9 C 928.1,1025.7 954.6,997.3 970.3,979.7 C 985.9,962.1 998.3,942.1 1006.2,929.3 C 1014.1,916.5 1015.9,923.7 1017.8,902.9 C 1019.7,882.1 1020.1,827.9 1017.8,804.5 C 1015.5,781.1 1007.4,789.9 1003.9,762.5 C 1000.4,735.1 999.3,665.5 997,640.1 C 994.7,614.7 994.1,619.9 990,610.1 C 985.9,600.3 977.6,587.7 972.6,581.3 C 967.6,574.9 968.9,574.1 959.8,571.7 C 950.7,569.3 930.9,565.7 918.1,566.9 C 905.4,568.1 893.9,577.1 883.3,578.9 C 872.7,580.7 864.2,581.3 854.3,577.7 C 844.4,574.1 830.3,562.9 824.1,557.3 C 817.9,551.7 824.2,548.3 817.2,544.1 C 810.3,539.9 790.3,536.1 782.4,532.1 C 774.5,528.1 785.1,522.1 769.6,520.1 C 754.1,518.1 704.9,517.1 689.6,520.1 Z"/>
     </svg>
+    </div>
     <div class="zone-tooltip" id="zone-tooltip">
       <div class="zt-label"></div>
       <div class="zt-title"></div>
@@ -802,11 +873,13 @@ footer {
   </div>
   <div class="container">
     <div class="masterplan-legend reveal">
-      <div class="legend-item"><div class="legend-dot" style="background:#A8D08D;"></div> <span data-i18n="masterplan.legend.residential">Οικιστικές Ζώνες</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4472C4;"></div> <span data-i18n="masterplan.legend.strategic">Στρατηγικές Αναπτύξεις</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#70AD47;"></div> <span data-i18n="masterplan.legend.green">Πράσινο & Πάρκα</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4EA0D6;"></div> <span data-i18n="masterplan.legend.river">Ποταμός</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#E8B960;"></div> <span data-i18n="masterplan.legend.road">Οδικό Δίκτυο</span></div>
+      <div class="legend-item" data-zone="family"><div class="legend-dot" style="background:#FF8C00;"></div> <span data-i18n="masterplan.legend.family">Οικογενειακές</span></div>
+      <div class="legend-item" data-zone="together"><div class="legend-dot" style="background:#999;"></div> <span data-i18n="masterplan.legend.together">Μαζί</span></div>
+      <div class="legend-item" data-zone="premium"><div class="legend-dot" style="background:#8B008B;"></div> <span data-i18n="masterplan.legend.premium">Προνομιακές</span></div>
+      <div class="legend-item" data-zone="luxury"><div class="legend-dot" style="background:#DAA520;"></div> <span data-i18n="masterplan.legend.luxury">Πολυτελείς</span></div>
+      <div class="legend-item" data-zone="green-area"><div class="legend-dot" style="background:#0096FF;"></div> <span data-i18n="masterplan.legend.green">Χώροι Πρασίνου</span></div>
+      <div class="legend-item" data-zone="wellness"><div class="legend-dot" style="background:#DC143C;"></div> <span data-i18n="masterplan.legend.wellness">Κέντρο Ευεξίας</span></div>
+      <div class="legend-item" data-zone="strategic"><div class="legend-dot" style="background:#333;"></div> <span data-i18n="masterplan.legend.strategic">Στρατηγικές Αναπτύξεις</span></div>
     </div>
   </div>
 </section>
@@ -1501,6 +1574,14 @@ footer {
   <div class="container">
     <div class="portfolio-grid reveal">
       <div class="portfolio-tile tile-wide">
+        <img src="assets/masterplan-new-hd.jpg" alt="Masterplan RIVER LAND" loading="lazy">
+        <div class="portfolio-overlay">
+          <span class="po-label" data-i18n="portfolio.tile0.label">Masterplan</span>
+          <span class="po-title" data-i18n="portfolio.tile0.title">Γενικό Πολεοδομικό Σχέδιο</span>
+          <span class="po-desc" data-i18n="portfolio.tile0.desc">Η συνολική διάταξη του RIVER LAND</span>
+        </div>
+      </div>
+      <div class="portfolio-tile tile-wide">
         <img src="assets/riverside-villas.jpeg" alt="Κατοικίες στο Ποτάμι" loading="lazy">
         <div class="portfolio-overlay">
           <span class="po-label" data-i18n="portfolio.tile1.label">Τοπίο</span>
@@ -1691,11 +1772,13 @@ const translations = {
     'masterplan.label': 'Ο Σχεδιασμός',
     'masterplan.heading': 'Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
     'masterplan.body': 'Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.',
-    'masterplan.legend.residential': 'Οικιστικές Ζώνες',
+    'masterplan.legend.family': 'Οικογενειακές',
+    'masterplan.legend.together': 'Μαζί',
+    'masterplan.legend.premium': 'Προνομιακές',
+    'masterplan.legend.luxury': 'Πολυτελείς',
+    'masterplan.legend.green': 'Χώροι Πρασίνου',
+    'masterplan.legend.wellness': 'Κέντρο Ευεξίας',
     'masterplan.legend.strategic': 'Στρατηγικές Αναπτύξεις',
-    'masterplan.legend.green': 'Πράσινο & Πάρκα',
-    'masterplan.legend.river': 'Ποταμός',
-    'masterplan.legend.road': 'Οδικό Δίκτυο',
     // Difference
     'difference.label': 'Η Διαφορά Μας',
     'difference.heading': 'Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em>',
@@ -1754,6 +1837,9 @@ const translations = {
     'portfolio.label': 'Χαρτοφυλάκιο',
     'portfolio.heading': 'Εικόνες από το <em style="color:var(--gold);font-style:italic;">Έργο</em>',
     'portfolio.body': 'Μια ματιά στον σχεδιασμό, τις τοποθεσίες και την ταυτότητα του RIVER LAND — μέσα από εικόνες που αποτυπώνουν το όραμά μας.',
+    'portfolio.tile0.label': 'Masterplan',
+    'portfolio.tile0.title': 'Γενικό Πολεοδομικό Σχέδιο',
+    'portfolio.tile0.desc': 'Η συνολική διάταξη του RIVER LAND',
     'portfolio.tile1.label': 'Τοπίο',
     'portfolio.tile1.title': 'Κατοικίες στο Ποτάμι',
     'portfolio.tile1.desc': 'Βίλες με θέα στο φυσικό ποτάμι & κυπαρίσσια',
@@ -1841,11 +1927,13 @@ const translations = {
     'masterplan.label': 'The Design',
     'masterplan.heading': 'Interactive <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
     'masterplan.body': 'Explore the project zones. Hover over each area for details.',
-    'masterplan.legend.residential': 'Residential Zones',
+    'masterplan.legend.family': 'Family',
+    'masterplan.legend.together': 'Together',
+    'masterplan.legend.premium': 'Premium',
+    'masterplan.legend.luxury': 'Luxury',
+    'masterplan.legend.green': 'Green Area',
+    'masterplan.legend.wellness': 'Wellness Center',
     'masterplan.legend.strategic': 'Strategic Developments',
-    'masterplan.legend.green': 'Green & Parks',
-    'masterplan.legend.river': 'River',
-    'masterplan.legend.road': 'Road Network',
     // Difference
     'difference.label': 'Our Difference',
     'difference.heading': 'The \u201cDON\'Ts\u201d in <em style="color:var(--gold);font-style:italic;">Our Plan</em>',
@@ -1904,6 +1992,9 @@ const translations = {
     'portfolio.label': 'Portfolio',
     'portfolio.heading': 'Images from the <em style="color:var(--gold);font-style:italic;">Project</em>',
     'portfolio.body': 'A glimpse at the design, locations and identity of RIVER LAND — through images that capture our vision.',
+    'portfolio.tile0.label': 'Masterplan',
+    'portfolio.tile0.title': 'Master Plan',
+    'portfolio.tile0.desc': 'The complete layout of RIVER LAND',
     'portfolio.tile1.label': 'Landscape',
     'portfolio.tile1.title': 'Riverside Living',
     'portfolio.tile1.desc': 'Villas overlooking the natural river & cypress trees',
@@ -1958,87 +2049,77 @@ const translations = {
 // Bilingual zoneData for masterplan tooltips
 const zoneDataBilingual = {
   el: {
-    'strat1': {
-      label: 'Στρατηγική Ανάπτυξη',
-      title: '1η Στρατηγική Ανάπτυξη',
-      desc: 'Έκταση 25.000 τ.μ. με συντελεστή δόμησης 7.500 τ.μ. Κλινικές, ερευνητικά ινστιτούτα ή εκπαιδευτικοί φορείς.'
-    },
-    'strat2': {
-      label: 'Στρατηγική Ανάπτυξη',
-      title: '2η Στρατηγική Ανάπτυξη',
-      desc: 'Έκταση 25.000 τ.μ. Κέντρα αποκατάστασης, ιδιωτικές σχολές ή κέντρα φροντίδας — αμφιθεατρικός σχεδιασμός.'
-    },
-    'private-green': {
-      label: 'Ιδιωτικός Χώρος',
-      title: 'Ιδιωτικός Χώρος Πρασίνου',
-      desc: 'Γήπεδα, κατασκηνωτικοί χώροι και δίκτυα ποδηλατοδρόμων — μέρος του μεγαλύτερου οργανωμένου πρασίνου στην πόλη.'
-    },
-    'public-green': {
-      label: 'Δημόσιος Χώρος',
-      title: 'Γραμμικό Πάρκο Ποταμού',
-      desc: 'Δημόσιος χώρος πρασίνου κατά μήκος του ποταμού με πεζοδρόμους, ποδηλατοδρόμους και υπαίθρια αμφιθέατρα. 30.000+ τ.μ.'
-    },
-    'res1': {
+    'family': {
       label: 'Οικιστική Ζώνη',
-      title: 'Πρώτο Οικιστικό',
-      desc: 'Οικιστική ανάπτυξη με αυτόνομες μονάδες, πρωτοποριακός σχεδιασμός που εξασφαλίζει ιδιωτικότητα.'
+      title: 'Οικογενειακές Κατοικίες',
+      desc: 'Διώροφες Οικογενειακές Κατοικίες 135τμ. 3ων υπνοδωματίων, ανεξάρτητες, τοποθετημένες σε 400τμ γης. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.'
     },
-    'res2': {
+    'together': {
       label: 'Οικιστική Ζώνη',
-      title: 'Δεύτερο Οικιστικό',
-      desc: 'Ισόγειες κατοικίες ≥100 τ.μ. σε οικόπεδα 250 τ.μ. — σταδιακή κατασκευή και παράδοση.'
+      title: 'Μαζί',
+      desc: 'Οικογενειακό Συγκρότημα με κτίσματα των 95τμ. 3ων υπνοδωματίων με ιδιωτικούς χώρους στάθμευσης και κοινές υπηρεσίες.'
     },
-    'res3': {
+    'premium': {
       label: 'Οικιστική Ζώνη',
-      title: 'Τρίτο Οικιστικό',
-      desc: 'Τοποθετημένο με απόλυτη ανεξαρτησία στον χώρο — μια κοινότητα που δένει και συμπληρώνει το έργο.'
+      title: 'Προνομιακές Κατοικίες',
+      desc: 'Διώροφες Οικογενειακές Κατοικίες 135τμ. 3ων υπνοδωματίων, ανεξάρτητες, τοποθετημένες στα πιο προνομιακά 400τμ γης της ανάπτυξης μας, στα σύνορα με τον ιδιωτικό χώρο πρασίνου και με ξεχωριστή θέα στη θάλασσα και στο βουνό. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.'
     },
-    'res4': {
+    'luxury': {
       label: 'Οικιστική Ζώνη',
-      title: 'Τέταρτο Οικιστικό',
-      desc: 'Πέραν των 210 οικιστικών μονάδων συνολικά, με 28.500 τ.μ. συντελεστή δόμησης.'
+      title: 'Πολυτελείς Κατοικίες',
+      desc: 'Διώροφες Οικογενειακές Κατοικίες 220τμ. 4ων υπνοδωματίων, με ξεχωριστούς χώρους υπηρεσίας, εντελώς ανεξάρτητες, τοποθετημένες στα πιο προνομιακά 800τμ γης της ανάπτυξης μας, με επιπλέον ιδιωτικό χώρο πρασίνου και με ξεχωριστή θέα στη θάλασσα και στο βουνό. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.'
+    },
+    'green-area': {
+      label: 'Πράσινο',
+      title: 'Χώροι Πρασίνου',
+      desc: 'Στα 40 χιλιάδες τμ δημόσια προσβάσιμου χώρου πρασίνου, προσθέτουμε επιπλέον 30 χιλιάδες ιδιωτικού πρασίνου. Διαμορφωμένοι ποδηλατόδρομοι και πεζόδρομοι κατά μήκος της κοίτης του ποταμού, 4 ιδιωτικά γήπεδα και υπαίθρια αμφιθέατρα. Εκδρομικοί χώροι και χώροι υπαίθριας άσκησης.'
+    },
+    'wellness': {
+      label: 'Ευεξία',
+      title: 'Κέντρο Ευεξίας',
+      desc: '1000 τμ υπηρεσίες ευεξίας και ενδυνάμωσης. Πρότυποι γυμναστηριακοί χώροι άθλησης, τοποθετημένοι στο πράσινο της περιοχής.'
+    },
+    'strategic': {
+      label: 'Στρατηγική',
+      title: 'Στρατηγικές Αναπτύξεις',
+      desc: 'Τοποθετημένες σε 40 χιλιάδες τμ γης και με κτίσματα περίπου 14 χιλιάδων τμ, οι αναπτύξεις ολοκληρώνουν το οικοσύστημά μας δημιουργώντας μοναδικό αποτύπωμα, συνδυαζόμενων επιχειρηματικά χρήσεων.'
     }
   },
   en: {
-    'strat1': {
-      label: 'Strategic Development',
-      title: '1st Strategic Development',
-      desc: 'Area of 25,000 sq.m. with a building coefficient of 7,500 sq.m. Clinics, research institutes or educational bodies.'
-    },
-    'strat2': {
-      label: 'Strategic Development',
-      title: '2nd Strategic Development',
-      desc: 'Area of 25,000 sq.m. Rehabilitation centres, private schools or care facilities — amphitheatrical design.'
-    },
-    'private-green': {
-      label: 'Private Space',
-      title: 'Private Green Space',
-      desc: 'Sports courts, camping areas and cycling path networks — part of the city\'s largest organised green space.'
-    },
-    'public-green': {
-      label: 'Public Space',
-      title: 'River Linear Park',
-      desc: 'Public green space along the river with pedestrian walkways, cycling paths and open-air amphitheatres. 30,000+ sq.m.'
-    },
-    'res1': {
+    'family': {
       label: 'Residential Zone',
-      title: 'First Residential',
-      desc: 'Residential development with autonomous units, pioneering design ensuring privacy.'
+      title: 'Family',
+      desc: 'Two-storey family homes of 135 sq.m. with 3 bedrooms, detached, set on 400 sq.m. plots. With roof garden and private parking.'
     },
-    'res2': {
+    'together': {
       label: 'Residential Zone',
-      title: 'Second Residential',
-      desc: 'Single-storey dwellings ≥100 sq.m. on 250 sq.m. plots — phased construction and delivery.'
+      title: 'Together',
+      desc: 'Family complex with 95 sq.m. units, 3 bedrooms, private parking and shared amenities.'
     },
-    'res3': {
+    'premium': {
       label: 'Residential Zone',
-      title: 'Third Residential',
-      desc: 'Positioned with absolute spatial independence — a community that ties and completes the project.'
+      title: 'Premium',
+      desc: 'Two-storey family homes of 135 sq.m. with 3 bedrooms, detached, on the most privileged 400 sq.m. plots, bordering the private green space with sea and mountain views. With roof garden and private parking.'
     },
-    'res4': {
+    'luxury': {
       label: 'Residential Zone',
-      title: 'Fourth Residential',
-      desc: 'Over 210 residential units in total, with a 28,500 sq.m. building coefficient.'
+      title: 'Luxury',
+      desc: 'Two-storey family homes of 220 sq.m. with 4 bedrooms and service areas, fully detached on 800 sq.m. premium plots with private green space and sea & mountain views. With roof garden and private parking.'
+    },
+    'green-area': {
+      label: 'Green',
+      title: 'Green Area',
+      desc: 'Adding 30,000 sq.m. of private green to the 40,000 sq.m. of public green space. Cycling and pedestrian paths along the riverbed, 4 private courts, open-air amphitheatres, picnic areas and outdoor fitness.'
+    },
+    'wellness': {
+      label: 'Wellness',
+      title: 'Wellness Center',
+      desc: '1,000 sq.m. of wellness and fitness services. State-of-the-art gym facilities set within the green landscape.'
+    },
+    'strategic': {
+      label: 'Strategic',
+      title: 'Strategic Developments',
+      desc: 'Set on 40,000 sq.m. of land with approximately 14,000 sq.m. of buildings, the developments complete our ecosystem creating a unique footprint of combined business uses.'
     }
   }
 };
@@ -2120,73 +2201,128 @@ if (tlWrap) {
 
 // ---- MASTERPLAN INTERACTIVE ZONES ----
 const zoneData = {
-  'strat1': {
-    label: 'Στρατηγική Ανάπτυξη',
-    title: '1η Στρατηγική Ανάπτυξη',
-    desc: 'Έκταση 25.000 τ.μ. με συντελεστή δόμησης 7.500 τ.μ. Κλινικές, ερευνητικά ινστιτούτα ή εκπαιδευτικοί φορείς.'
-  },
-  'strat2': {
-    label: 'Στρατηγική Ανάπτυξη',
-    title: '2η Στρατηγική Ανάπτυξη',
-    desc: 'Έκταση 25.000 τ.μ. Κέντρα αποκατάστασης, ιδιωτικές σχολές ή κέντρα φροντίδας — αμφιθεατρικός σχεδιασμός.'
-  },
-  'private-green': {
-    label: 'Ιδιωτικός Χώρος',
-    title: 'Ιδιωτικός Χώρος Πρασίνου',
-    desc: 'Γήπεδα, κατασκηνωτικοί χώροι και δίκτυα ποδηλατοδρόμων — μέρος του μεγαλύτερου οργανωμένου πρασίνου στην πόλη.'
-  },
-  'public-green': {
-    label: 'Δημόσιος Χώρος',
-    title: 'Γραμμικό Πάρκο Ποταμού',
-    desc: 'Δημόσιος χώρος πρασίνου κατά μήκος του ποταμού με πεζοδρόμους, ποδηλατοδρόμους και υπαίθρια αμφιθέατρα. 30.000+ τ.μ.'
-  },
-  'res1': {
-    label: 'Οικιστική Ζώνη',
-    title: 'Πρώτο Οικιστικό',
-    desc: 'Οικιστική ανάπτυξη με αυτόνομες μονάδες, πρωτοποριακός σχεδιασμός που εξασφαλίζει ιδιωτικότητα.'
-  },
-  'res2': {
-    label: 'Οικιστική Ζώνη',
-    title: 'Δεύτερο Οικιστικό',
-    desc: 'Ισόγειες κατοικίες ≥100 τ.μ. σε οικόπεδα 250 τ.μ. — σταδιακή κατασκευή και παράδοση.'
-  },
-  'res3': {
-    label: 'Οικιστική Ζώνη',
-    title: 'Τρίτο Οικιστικό',
-    desc: 'Τοποθετημένο με απόλυτη ανεξαρτησία στον χώρο — μια κοινότητα που δένει και συμπληρώνει το έργο.'
-  },
-  'res4': {
-    label: 'Οικιστική Ζώνη',
-    title: 'Τέταρτο Οικιστικό',
-    desc: 'Πέραν των 210 οικιστικών μονάδων συνολικά, με 28.500 τ.μ. συντελεστή δόμησης.'
-  }
+  'family': { label: 'Οικιστική Ζώνη', title: 'Οικογενειακές Κατοικίες', desc: 'Διώροφες Οικογενειακές Κατοικίες 135τμ. 3ων υπνοδωματίων, ανεξάρτητες, τοποθετημένες σε 400τμ γης. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.' },
+  'together': { label: 'Οικιστική Ζώνη', title: 'Οικογενειακό Συγκρότημα', desc: 'Οικογενειακό Συγκρότημα με κτίσματα των 95τμ. 3ων υπνοδωματίων με ιδιωτικούς χώρους στάθμευσης και κοινές υπηρεσίες.' },
+  'premium': { label: 'Οικιστική Ζώνη', title: 'Προνομιακές Κατοικίες', desc: 'Διώροφες Οικογενειακές Κατοικίες 135τμ. 3ων υπνοδωματίων, ανεξάρτητες, τοποθετημένες στα πιο προνομιακά 400τμ γης, στα σύνορα με τον ιδιωτικό χώρο πρασίνου και με ξεχωριστή θέα στη θάλασσα και στο βουνό. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.' },
+  'luxury': { label: 'Οικιστική Ζώνη', title: 'Πολυτελείς Κατοικίες', desc: 'Διώροφες Οικογενειακές Κατοικίες 220τμ. 4ων υπνοδωματίων, με ξεχωριστούς χώρους υπηρεσίας, εντελώς ανεξάρτητες, τοποθετημένες στα πιο προνομιακά 800τμ γης, με επιπλέον ιδιωτικό χώρο πρασίνου και θέα στη θάλασσα και στο βουνό. Με Roof Garden και ξεχωριστούς χώρους στάθμευσης.' },
+  'green-area': { label: 'Πράσινο', title: 'Χώροι Πρασίνου', desc: 'Στα 40 χιλιάδες τμ δημόσια προσβάσιμου χώρου πρασίνου, προσθέτουμε επιπλέον 30 χιλιάδες ιδιωτικού πρασίνου. Ποδηλατόδρομοι και πεζόδρομοι κατά μήκος της κοίτης του ποταμού, 4 ιδιωτικά γήπεδα και υπαίθρια αμφιθέατρα.' },
+  'wellness': { label: 'Ευεξία', title: 'Κέντρο Ευεξίας', desc: '1000 τμ υπηρεσίες ευεξίας και ενδυνάμωσης. Πρότυποι γυμναστηριακοί χώροι άθλησης, τοποθετημένοι στο πράσινο της περιοχής.' },
+  'strategic': { label: 'Στρατηγική', title: 'Στρατηγικές Αναπτύξεις', desc: 'Τοποθετημένες σε 40 χιλιάδες τμ γης και με κτίσματα περίπου 14 χιλιάδων τμ, οι αναπτύξεις ολοκληρώνουν το οικοσύστημά μας δημιουργώντας μοναδικό αποτύπωμα.' }
 };
 
 const container = document.getElementById('masterplan-container');
 const tooltip = document.getElementById('zone-tooltip');
 const zones = document.querySelectorAll('.zone');
 
+function highlightZone(zoneName) {
+  zones.forEach(z => {
+    if (z.dataset.zone === zoneName) {
+      z.classList.add('active');
+      z.classList.remove('dimmed');
+    } else {
+      z.classList.add('dimmed');
+      z.classList.remove('active');
+    }
+  });
+  // Highlight legend item
+  document.querySelectorAll('.legend-item[data-zone]').forEach(li => {
+    li.classList.toggle('active', li.dataset.zone === zoneName);
+  });
+}
+
+function clearHighlight() {
+  zones.forEach(z => {
+    z.classList.remove('active', 'dimmed');
+  });
+  document.querySelectorAll('.legend-item[data-zone]').forEach(li => {
+    li.classList.remove('active');
+  });
+  tooltip.classList.remove('visible');
+}
+
+// Track locked (clicked) zone
+let lockedZone = null;
+
+function showTooltip(zoneName, e) {
+  const data = zoneData[zoneName];
+  if (!data) return;
+  highlightZone(zoneName);
+  tooltip.querySelector('.zt-label').textContent = data.label;
+  tooltip.querySelector('.zt-title').textContent = data.title;
+  tooltip.querySelector('.zt-desc').textContent = data.desc;
+  tooltip.classList.add('visible');
+  if (e) positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  const rect = container.getBoundingClientRect();
+  let x = e.clientX - rect.left + 16;
+  let y = e.clientY - rect.top - 10;
+  if (x + 260 > rect.width) x = e.clientX - rect.left - 270;
+  if (y + 140 > rect.height) y = e.clientY - rect.top - 140;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+// Zone SVG hover + click
 zones.forEach(zone => {
   zone.addEventListener('mouseenter', (e) => {
-    const data = zoneData[zone.dataset.zone];
-    if (!data) return;
-    tooltip.querySelector('.zt-label').textContent = data.label;
-    tooltip.querySelector('.zt-title').textContent = data.title;
-    tooltip.querySelector('.zt-desc').textContent = data.desc;
-    tooltip.classList.add('visible');
+    if (!lockedZone) showTooltip(zone.dataset.zone, e);
   });
   zone.addEventListener('mousemove', (e) => {
-    const rect = container.getBoundingClientRect();
-    let x = e.clientX - rect.left + 16;
-    let y = e.clientY - rect.top - 10;
-    if (x + 260 > rect.width) x = e.clientX - rect.left - 270;
-    if (y + 140 > rect.height) y = e.clientY - rect.top - 140;
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
+    if (!lockedZone) positionTooltip(e);
   });
   zone.addEventListener('mouseleave', () => {
-    tooltip.classList.remove('visible');
+    if (!lockedZone) clearHighlight();
   });
+  zone.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = zone.dataset.zone;
+    if (lockedZone === name) {
+      // Clicking same zone again unlocks
+      lockedZone = null;
+      clearHighlight();
+    } else {
+      lockedZone = name;
+      showTooltip(name, e);
+    }
+  });
+});
+
+// Legend hover + click → highlight zone on map
+document.querySelectorAll('.legend-item[data-zone]').forEach(li => {
+  li.addEventListener('mouseenter', () => {
+    if (!lockedZone) highlightZone(li.dataset.zone);
+  });
+  li.addEventListener('mouseleave', () => {
+    if (!lockedZone) clearHighlight();
+  });
+  li.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = li.dataset.zone;
+    if (lockedZone === name) {
+      lockedZone = null;
+      clearHighlight();
+    } else {
+      lockedZone = name;
+      // Position tooltip at center of the first matching zone path
+      const zoneEl = document.querySelector('.zone[data-zone="'+name+'"]');
+      if (zoneEl) {
+        const bbox = zoneEl.getBoundingClientRect();
+        showTooltip(name, {clientX: bbox.left + bbox.width/2, clientY: bbox.top + bbox.height/2});
+      } else {
+        showTooltip(name, e);
+      }
+    }
+  });
+});
+
+// Click anywhere else to unlock
+document.addEventListener('click', (e) => {
+  if (lockedZone && !e.target.closest('.zone') && !e.target.closest('.legend-item[data-zone]')) {
+    lockedZone = null;
+    clearHighlight();
+  }
 });
 
 // ---- ANIMATED MAP ----
@@ -2257,6 +2393,73 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+// ---- LIGHTBOX ----
+(function() {
+  const lbOverlay = document.createElement('div');
+  lbOverlay.className = 'lightbox-overlay';
+  lbOverlay.innerHTML = `
+    <div class="lightbox-content">
+      <button class="lightbox-close">&times;</button>
+      <button class="lightbox-nav prev">&#8249;</button>
+      <button class="lightbox-nav next">&#8250;</button>
+      <img src="" alt="">
+      <div class="lightbox-caption">
+        <div class="lb-label"></div>
+        <div class="lb-title"></div>
+        <div class="lb-desc"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(lbOverlay);
+
+  const tiles = Array.from(document.querySelectorAll('.portfolio-tile'));
+  let currentIdx = 0;
+
+  function openLightbox(idx) {
+    currentIdx = idx;
+    const tile = tiles[idx];
+    const img = tile.querySelector('img');
+    const label = tile.querySelector('.po-label');
+    const title = tile.querySelector('.po-title');
+    const desc = tile.querySelector('.po-desc');
+    lbOverlay.querySelector('img').src = img.src;
+    lbOverlay.querySelector('img').alt = img.alt;
+    lbOverlay.querySelector('.lb-label').textContent = label ? label.textContent : '';
+    lbOverlay.querySelector('.lb-title').textContent = title ? title.textContent : '';
+    lbOverlay.querySelector('.lb-desc').textContent = desc ? desc.textContent : '';
+    lbOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lbOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function navigate(dir) {
+    currentIdx = (currentIdx + dir + tiles.length) % tiles.length;
+    openLightbox(currentIdx);
+  }
+
+  tiles.forEach((tile, i) => {
+    tile.addEventListener('click', () => openLightbox(i));
+  });
+
+  lbOverlay.addEventListener('click', (e) => {
+    if (e.target === lbOverlay) closeLightbox();
+  });
+  lbOverlay.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+  lbOverlay.querySelector('.lightbox-nav.prev').addEventListener('click', (e) => { e.stopPropagation(); navigate(-1); });
+  lbOverlay.querySelector('.lightbox-nav.next').addEventListener('click', (e) => { e.stopPropagation(); navigate(1); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lbOverlay.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navigate(-1);
+    if (e.key === 'ArrowRight') navigate(1);
+  });
+})();
 
 // ---- LANGUAGE INIT (after all JS is ready) ----
 (function() {

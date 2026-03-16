@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Zone Tracer — River Land</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+
+#toolbar {
+  position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
+  background: rgba(0,0,0,0.92); padding: 15px; z-index: 100;
+  overflow-y: auto; border-right: 1px solid #333;
+}
+#toolbar h2 { font-size: 15px; color: #c8a96e; margin-bottom: 12px; }
+#toolbar h3 { font-size: 12px; color: #888; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+
+.zone-btn {
+  display: block; width: 100%; padding: 8px 10px; margin: 3px 0;
+  border: 2px solid; border-radius: 4px; cursor: pointer;
+  font-size: 13px; font-weight: 600; text-align: left;
+  background: transparent; color: #fff; transition: 0.2s;
+}
+.zone-btn:hover { filter: brightness(1.3); }
+.zone-btn.active { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.zone-btn .count { float: right; font-weight: 400; font-size: 11px; opacity: 0.6; }
+
+.action-btn {
+  display: inline-block; padding: 6px 12px; margin: 3px 2px;
+  border: 1px solid #555; border-radius: 3px; cursor: pointer;
+  font-size: 12px; background: #333; color: #fff; transition: 0.2s;
+}
+.action-btn:hover { background: #555; }
+.action-btn.primary { background: #c8a96e; color: #000; border-color: #c8a96e; }
+.action-btn.danger { border-color: #c44; color: #c44; }
+
+#coords {
+  margin-top: 10px; font-size: 10px; color: #666;
+  max-height: 120px; overflow-y: auto; word-break: break-all;
+}
+#status {
+  position: fixed; bottom: 0; left: 0; width: 260px;
+  background: rgba(0,0,0,0.95); padding: 10px 15px;
+  font-size: 12px; color: #0f0; border-top: 1px solid #333; z-index: 101;
+}
+#export-output {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 80vw; max-height: 80vh; background: #111; border: 2px solid #c8a96e;
+  border-radius: 8px; padding: 20px; z-index: 200; display: none;
+  overflow-y: auto; font-family: monospace; font-size: 11px; white-space: pre-wrap;
+}
+#export-output .close-btn {
+  position: absolute; top: 10px; right: 15px; cursor: pointer;
+  font-size: 20px; color: #c8a96e;
+}
+
+canvas { display: block; cursor: crosshair; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h2>🏗️ ZONE TRACER</h2>
+  <p style="font-size:11px;color:#999;margin-bottom:10px;">Click on the masterplan to trace zone boundaries. Select a zone, click points around its edge, then close it.</p>
+
+  <h3>Select Zone</h3>
+  <button class="zone-btn" data-zone="family" style="border-color:#FF8C00;color:#FF8C00;">
+    🟠 Family <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="premium" style="border-color:#8B008B;color:#8B008B;">
+    🟣 Premium <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="green-area" style="border-color:#0096FF;color:#0096FF;">
+    🔵 Green Area <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="luxury" style="border-color:#DAA520;color:#DAA520;">
+    🟡 Luxury <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="together" style="border-color:#999;color:#999;">
+    ⚪ Together <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="wellness" style="border-color:#DC143C;color:#DC143C;">
+    🔴 Wellness <span class="count">0 pts</span>
+  </button>
+  <button class="zone-btn" data-zone="strategic" style="border-color:#555;color:#aaa;">
+    ⚫ Strategic <span class="count">0 pts</span>
+  </button>
+
+  <h3>Actions</h3>
+  <button class="action-btn" id="undoBtn">↩ Undo</button>
+  <button class="action-btn" id="closeBtn">⬡ Close Zone</button>
+  <button class="action-btn danger" id="clearZoneBtn">🗑 Clear Zone</button>
+  <br>
+  <button class="action-btn" id="clearAllBtn">Clear All</button>
+  <button class="action-btn primary" id="exportBtn">📋 Export SVG</button>
+
+  <h3>Display</h3>
+  <label style="font-size:12px;display:block;margin:4px 0;">
+    <input type="checkbox" id="showOverlay" checked> Show zone overlay
+  </label>
+  <label style="font-size:12px;display:block;margin:4px 0;">
+    Overlay opacity: <input type="range" id="overlayOpacity" min="0" max="100" value="40" style="width:120px;vertical-align:middle;">
+  </label>
+  <label style="font-size:12px;display:block;margin:4px 0;">
+    <input type="checkbox" id="showGuide"> Show zone drawings guide
+  </label>
+  <label style="font-size:12px;display:block;margin:4px 0;">
+    Guide opacity: <input type="range" id="guideOpacity" min="0" max="100" value="50" style="width:120px;vertical-align:middle;">
+  </label>
+
+  <div id="coords"></div>
+</div>
+
+<div id="status">Ready — select a zone and start clicking</div>
+
+<div id="export-output">
+  <span class="close-btn" onclick="this.parentElement.style.display='none'">&times;</span>
+  <div id="export-content"></div>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Images
+const mpImg = new Image();
+const zdImg = new Image();
+let mpLoaded = false, zdLoaded = false;
+
+// Zone data
+const ZONES = {
+  'family':     { color: '#FF8C00', fill: 'rgba(255,140,0,0.15)', points: [], closed: false },
+  'premium':    { color: '#8B008B', fill: 'rgba(128,0,128,0.15)', points: [], closed: false },
+  'green-area': { color: '#0096FF', fill: 'rgba(0,150,255,0.15)', points: [], closed: false },
+  'luxury':     { color: '#DAA520', fill: 'rgba(255,215,0,0.15)', points: [], closed: false },
+  'together':   { color: '#999999', fill: 'rgba(160,160,160,0.15)', points: [], closed: false },
+  'wellness':   { color: '#DC143C', fill: 'rgba(220,20,60,0.15)', points: [], closed: false },
+  'strategic':  { color: '#555555', fill: 'rgba(40,40,40,0.15)', points: [], closed: false },
+};
+
+let activeZone = null;
+let displayScale = 1;
+let panX = 0, panY = 0;
+let mouseX = 0, mouseY = 0;
+let isPanning = false, panStartX = 0, panStartY = 0;
+
+// Zone drawings guide transform (from detection: scale 1.16/1.20, offset 0/160)
+let guideSX = 1.16, guideSY = 1.20, guideOX = 0, guideOY = 160;
+
+mpImg.onload = () => { mpLoaded = true; init(); };
+zdImg.onload = () => { zdLoaded = true; init(); };
+mpImg.src = 'assets/masterplan-zones.jpg';
+zdImg.src = 'assets/masterpanPNG/zone drawings.png';
+
+function init() {
+  if (!mpLoaded || !zdLoaded) return;
+  resize();
+  window.addEventListener('resize', resize);
+  draw();
+}
+
+function resize() {
+  const availW = window.innerWidth - 260; // toolbar width
+  const availH = window.innerHeight;
+  displayScale = Math.min(availW / mpImg.width, availH / mpImg.height);
+  canvas.width = availW;
+  canvas.height = availH;
+  canvas.style.marginLeft = '260px';
+  draw();
+}
+
+function toCanvas(mx, my) {
+  return [(mx * displayScale) + panX + (canvas.width - mpImg.width * displayScale) / 2,
+          (my * displayScale) + panY + (canvas.height - mpImg.height * displayScale) / 2];
+}
+
+function toMasterplan(cx, cy) {
+  const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
+  const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
+  return [Math.round((cx - ox) / displayScale), Math.round((cy - oy) / displayScale)];
+}
+
+function draw() {
+  if (!mpLoaded) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+
+  const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
+  const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
+
+  // Draw masterplan
+  ctx.drawImage(mpImg, ox, oy, mpImg.width * displayScale, mpImg.height * displayScale);
+
+  // Draw zone drawings guide overlay
+  if (document.getElementById('showGuide')?.checked) {
+    const ga = (document.getElementById('guideOpacity')?.value || 50) / 100;
+    ctx.globalAlpha = ga;
+    const gw = zdImg.width * guideSX * displayScale;
+    const gh = zdImg.height * guideSY * displayScale;
+    const gx = ox + guideOX * displayScale;
+    const gy = oy + guideOY * displayScale;
+    ctx.drawImage(zdImg, gx, gy, gw, gh);
+    ctx.globalAlpha = 1;
+  }
+
+  // Draw all zones
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (zone.points.length === 0) continue;
+    const isActive = name === activeZone;
+    const showFill = document.getElementById('showOverlay')?.checked;
+    const fillAlpha = (document.getElementById('overlayOpacity')?.value || 40) / 100;
+
+    // Draw filled area
+    if (zone.points.length >= 3 && showFill) {
+      ctx.beginPath();
+      const [sx, sy] = toCanvas(zone.points[0][0], zone.points[0][1]);
+      ctx.moveTo(sx, sy);
+      for (let i = 1; i < zone.points.length; i++) {
+        const [px, py] = toCanvas(zone.points[i][0], zone.points[i][1]);
+        ctx.lineTo(px, py);
+      }
+      if (zone.closed) ctx.closePath();
+      ctx.fillStyle = zone.fill.replace('0.15', fillAlpha.toFixed(2));
+      ctx.fill();
+    }
+
+    // Draw outline
+    ctx.beginPath();
+    const [sx, sy] = toCanvas(zone.points[0][0], zone.points[0][1]);
+    ctx.moveTo(sx, sy);
+    for (let i = 1; i < zone.points.length; i++) {
+      const [px, py] = toCanvas(zone.points[i][0], zone.points[i][1]);
+      ctx.lineTo(px, py);
+    }
+    if (zone.closed) ctx.closePath();
+    ctx.strokeStyle = zone.color;
+    ctx.lineWidth = isActive ? 3 : 2;
+    ctx.stroke();
+
+    // Draw points
+    for (let i = 0; i < zone.points.length; i++) {
+      const [px, py] = toCanvas(zone.points[i][0], zone.points[i][1]);
+      ctx.beginPath();
+      ctx.arc(px, py, isActive ? 5 : 3, 0, Math.PI * 2);
+      ctx.fillStyle = zone.color;
+      ctx.fill();
+      if (isActive) {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Draw zone label
+    if (zone.points.length > 0) {
+      const cx = zone.points.reduce((s, p) => s + p[0], 0) / zone.points.length;
+      const cy = zone.points.reduce((s, p) => s + p[1], 0) / zone.points.length;
+      const [lx, ly] = toCanvas(cx, cy);
+      ctx.font = 'bold 12px Segoe UI';
+      ctx.fillStyle = zone.color;
+      ctx.textAlign = 'center';
+      ctx.fillText(name.toUpperCase(), lx, ly);
+    }
+  }
+
+  // Draw cursor crosshair if active zone
+  if (activeZone) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(mouseX, 0); ctx.lineTo(mouseX, canvas.height);
+    ctx.moveTo(0, mouseY); ctx.lineTo(canvas.width, mouseY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Show preview line from last point to cursor
+    const pts = ZONES[activeZone].points;
+    if (pts.length > 0 && !ZONES[activeZone].closed) {
+      const [lx, ly] = toCanvas(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+      ctx.strokeStyle = ZONES[activeZone].color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(mouseX, mouseY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  ctx.restore();
+}
+
+// Zone button handlers
+document.querySelectorAll('.zone-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeZone = btn.dataset.zone;
+    updateStatus();
+    draw();
+  });
+});
+
+function updateStatus() {
+  const st = document.getElementById('status');
+  if (!activeZone) {
+    st.textContent = 'Ready — select a zone and start clicking';
+    st.style.color = '#0f0';
+    return;
+  }
+  const zone = ZONES[activeZone];
+  if (zone.closed) {
+    st.textContent = `${activeZone}: CLOSED (${zone.points.length} points) — click another zone or export`;
+    st.style.color = '#c8a96e';
+  } else {
+    st.textContent = `${activeZone}: Drawing... (${zone.points.length} points) — click to add, right-click to close`;
+    st.style.color = ZONES[activeZone].color;
+  }
+  updateCounts();
+}
+
+function updateCounts() {
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    const z = btn.dataset.zone;
+    const count = ZONES[z].points.length;
+    const closed = ZONES[z].closed ? ' ✓' : '';
+    btn.querySelector('.count').textContent = `${count} pts${closed}`;
+  });
+}
+
+// Canvas click — add point
+canvas.addEventListener('click', e => {
+  if (!activeZone || ZONES[activeZone].closed) return;
+  const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+  if (mx < 0 || mx > 1024 || my < 0 || my > 1424) return;
+  ZONES[activeZone].points.push([mx, my]);
+  updateStatus();
+  draw();
+});
+
+// Right-click — close zone
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (!activeZone || ZONES[activeZone].points.length < 3) return;
+  ZONES[activeZone].closed = true;
+  updateStatus();
+  draw();
+});
+
+// Mouse move — update cursor
+canvas.addEventListener('mousemove', e => {
+  mouseX = e.offsetX;
+  mouseY = e.offsetY;
+  const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+  if (activeZone) {
+    document.getElementById('coords').textContent = `Cursor: (${mx}, ${my})`;
+  }
+  draw();
+});
+
+// Scroll to zoom
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const oldScale = displayScale;
+  displayScale *= delta;
+  displayScale = Math.max(0.3, Math.min(5, displayScale));
+  // Zoom toward cursor
+  const cx = e.offsetX, cy = e.offsetY;
+  panX = cx - (cx - panX) * (displayScale / oldScale);
+  panY = cy - (cy - panY) * (displayScale / oldScale);
+  draw();
+}, { passive: false });
+
+// Middle mouse / shift+click to pan
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+    isPanning = true;
+    panStartX = e.offsetX - panX;
+    panStartY = e.offsetY - panY;
+    canvas.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  if (isPanning) {
+    panX = e.offsetX - panStartX;
+    panY = e.offsetY - panStartY;
+    draw();
+  }
+});
+canvas.addEventListener('mouseup', e => {
+  if (isPanning) {
+    isPanning = false;
+    canvas.style.cursor = 'crosshair';
+  }
+});
+
+// Undo
+document.getElementById('undoBtn').addEventListener('click', () => {
+  if (!activeZone) return;
+  ZONES[activeZone].closed = false;
+  ZONES[activeZone].points.pop();
+  updateStatus();
+  draw();
+});
+
+// Close zone
+document.getElementById('closeBtn').addEventListener('click', () => {
+  if (!activeZone || ZONES[activeZone].points.length < 3) return;
+  ZONES[activeZone].closed = true;
+  updateStatus();
+  draw();
+});
+
+// Clear zone
+document.getElementById('clearZoneBtn').addEventListener('click', () => {
+  if (!activeZone) return;
+  if (!confirm(`Clear all points for ${activeZone}?`)) return;
+  ZONES[activeZone].points = [];
+  ZONES[activeZone].closed = false;
+  updateStatus();
+  draw();
+});
+
+// Clear all
+document.getElementById('clearAllBtn').addEventListener('click', () => {
+  if (!confirm('Clear ALL zones?')) return;
+  for (const z of Object.values(ZONES)) {
+    z.points = [];
+    z.closed = false;
+  }
+  updateStatus();
+  draw();
+});
+
+// Display toggles
+['showOverlay', 'overlayOpacity', 'showGuide', 'guideOpacity'].forEach(id => {
+  document.getElementById(id).addEventListener('input', draw);
+});
+
+// Export SVG
+document.getElementById('exportBtn').addEventListener('click', () => {
+  let svg = '';
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (zone.points.length < 3) continue;
+    const pts = zone.points.map(p => `${p[0]},${p[1]}`).join(' ');
+    svg += `      <polygon class="zone" data-zone="${name}" fill="${zone.fill}" stroke="${zone.color}"\n`;
+    svg += `        points="${pts}"/>\n`;
+  }
+
+  const el = document.getElementById('export-output');
+  const content = document.getElementById('export-content');
+  content.textContent = svg || 'No zones drawn yet. Draw at least 3 points per zone.';
+  el.style.display = 'block';
+
+  // Also copy to clipboard
+  navigator.clipboard?.writeText(svg).then(() => {
+    document.getElementById('status').textContent = '✅ SVG copied to clipboard!';
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'z' && e.ctrlKey) {
+    document.getElementById('undoBtn').click();
+  } else if (e.key === 'Escape') {
+    document.getElementById('export-output').style.display = 'none';
+  } else if (e.key >= '1' && e.key <= '7') {
+    const btns = document.querySelectorAll('.zone-btn');
+    btns[parseInt(e.key) - 1]?.click();
+  } else if (e.key === 'Enter' && activeZone) {
+    document.getElementById('closeBtn').click();
+  }
+});
+
+updateCounts();
+</script>
+</body>
+</html>

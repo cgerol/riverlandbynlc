@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Zone Editor — River Land</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+
+#toolbar {
+  position: fixed; top: 0; left: 0; width: 260px; height: 100vh;
+  background: rgba(0,0,0,0.92); padding: 15px; z-index: 100;
+  overflow-y: auto; border-right: 1px solid #333;
+}
+#toolbar h2 { font-size: 15px; color: #c8a96e; margin-bottom: 8px; }
+#toolbar p.sub { font-size: 11px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+#toolbar h3 { font-size: 11px; color: #666; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+
+.zone-btn {
+  display: block; width: 100%; padding: 7px 10px; margin: 2px 0;
+  border: 2px solid; border-radius: 4px; cursor: pointer;
+  font-size: 12px; font-weight: 600; text-align: left;
+  background: transparent; color: #fff; transition: 0.2s;
+}
+.zone-btn:hover { filter: brightness(1.3); }
+.zone-btn.active { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+.zone-btn .info { float: right; font-weight: 400; font-size: 10px; opacity: 0.6; }
+
+.action-btn {
+  display: inline-block; padding: 5px 10px; margin: 2px 1px;
+  border: 1px solid #555; border-radius: 3px; cursor: pointer;
+  font-size: 11px; background: #333; color: #fff; transition: 0.2s;
+}
+.action-btn:hover { background: #555; }
+.action-btn.primary { background: #c8a96e; color: #000; border-color: #c8a96e; font-weight: 600; }
+.action-btn.danger { border-color: #c44; color: #c44; }
+
+#status {
+  position: fixed; bottom: 0; left: 0; width: 260px;
+  background: rgba(0,0,0,0.95); padding: 8px 15px;
+  font-size: 11px; color: #0f0; border-top: 1px solid #333; z-index: 101;
+}
+
+#export-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 85vw; max-height: 85vh; background: #111; border: 2px solid #c8a96e;
+  border-radius: 8px; padding: 20px; z-index: 200; display: none;
+  overflow-y: auto; font-family: monospace; font-size: 11px;
+}
+#export-modal .close-btn {
+  position: absolute; top: 8px; right: 12px; cursor: pointer;
+  font-size: 22px; color: #c8a96e; background: none; border: none;
+}
+#export-modal pre { white-space: pre-wrap; word-break: break-all; color: #0f0; }
+#export-modal h3 { color: #c8a96e; margin-bottom: 10px; font-size: 14px; }
+
+.help-section { font-size: 11px; color: #777; line-height: 1.6; margin-top: 8px; }
+.help-section kbd {
+  background: #444; padding: 1px 5px; border-radius: 3px; font-size: 10px;
+  border: 1px solid #666; color: #ddd;
+}
+
+canvas { display: block; cursor: crosshair; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h2>✏️ ZONE EDITOR</h2>
+  <p class="sub">Drag control points to adjust auto-detected zone boundaries. Add or remove points as needed.</p>
+
+  <h3>Zones</h3>
+  <div id="zone-buttons"></div>
+
+  <h3>Edit</h3>
+  <button class="action-btn" id="addPointBtn">+ Add Point</button>
+  <button class="action-btn" id="deletePointBtn">− Delete Point</button>
+  <button class="action-btn" id="moveZoneBtn">✥ Move Zone</button>
+  <button class="action-btn" id="undoBtn">↩ Undo</button>
+  <button class="action-btn" id="redoBtn">↪ Redo</button>
+
+  <h3>View</h3>
+  <label style="font-size:11px;display:block;margin:3px 0;">
+    Fill opacity: <input type="range" id="fillOpacity" min="0" max="100" value="15" style="width:100px;vertical-align:middle;">
+  </label>
+  <label style="font-size:11px;display:block;margin:3px 0;">
+    <input type="checkbox" id="showGuide"> Zone drawings overlay
+  </label>
+  <label style="font-size:11px;display:block;margin:3px 0;">
+    Guide opacity: <input type="range" id="guideOpacity" min="0" max="100" value="40" style="width:100px;vertical-align:middle;">
+  </label>
+  <label style="font-size:11px;display:block;margin:3px 0;">
+    <input type="checkbox" id="showHandles" checked> Show control handles
+  </label>
+
+  <h3>Export</h3>
+  <button class="action-btn primary" id="exportBtn">📋 Export SVG Paths</button>
+  <button class="action-btn" id="exportPolyBtn">Export Polygons</button>
+
+  <div class="help-section">
+    <h3>Shortcuts</h3>
+    <kbd>1</kbd>-<kbd>9</kbd> Select zone<br>
+    <kbd>A</kbd> Add point mode<br>
+    <kbd>D</kbd> / <kbd>Del</kbd> Delete selected point<br>
+    <kbd>Ctrl+Z</kbd> Undo<br>
+    <kbd>Ctrl+Y</kbd> Redo<br>
+    <kbd>Scroll</kbd> Zoom<br>
+    <kbd>Shift+Drag</kbd> Pan<br>
+    <kbd>Esc</kbd> Deselect / close modal
+  </div>
+</div>
+
+<div id="status">Ready — select a zone to edit</div>
+
+<div id="export-modal">
+  <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+  <h3 id="export-title">Export</h3>
+  <pre id="export-content"></pre>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+// ==================== ZONE DATA (auto-detected paths) ====================
+const ZONES_INIT = {
+  'family': {
+    color: '#FF8C00', fill: 'rgba(255,140,0,', label: 'Family',
+    points: [[395.6,430],[255.2,626.8],[219.2,719.2],[171.7,804.4],[128.8,860.8],[94,942.4],[94,1022.8],[145,1154.8],[222.7,1253.2],[271.4,1284.4],[474.4,1284.4],[562.6,1243.6],[562.6,1210],[546.4,1183.6],[498.8,1145.2],[477.9,1100.8],[457,1079.2],[416.4,1060],[393.2,1033.6],[384,1003.6],[356.1,968.8],[331.8,898],[343.4,739.6],[335.2,640],[399,563.2],[439.6,487.6],[437.3,470.8],[396.7,442]]
+  },
+  'premium': {
+    color: '#8B008B', fill: 'rgba(128,0,128,', label: 'Premium',
+    points: [[517.4,445.6],[489.5,473.2],[444.3,487.6],[372.4,606.4],[335.2,640],[321.3,743.2],[343.4,787.6],[352.6,932.8],[410.6,1051.6],[446.6,1080.4],[483.7,1129.6],[558,1165.6],[576.5,1214.8],[584.6,1214.8],[582.3,1105.6],[599.7,1075.6],[599.7,1030],[582.3,1013.2],[556.8,1010.8],[490.7,931.6],[489.5,884.8],[454.7,857.2],[469.8,812.8],[554.5,763.6],[547.5,738.4],[497.6,724],[474.4,697.6],[476.8,688],[529,665.2],[577.7,602.8],[577.7,496],[554.5,445.6]]
+  },
+  'green-area': {
+    color: '#0096FF', fill: 'rgba(0,150,255,', label: 'Green Area',
+    points: [[527.8,236.8],[498.8,269.2],[498.8,290.8],[512.7,311.2],[545.2,337.6],[567.2,428.8],[619.4,518.8],[638,572.8],[649.6,582.4],[665.8,620.8],[676.3,629.2],[683.2,672.4],[694.8,679.6],[769.1,679.6],[809.7,698.8],[849.1,743.2],[903.6,743.2],[911.8,736],[911.8,719.2],[899,710.8],[895.5,696.4],[866.5,683.2],[829.4,648.4],[799.2,630.4],[762.1,557.2],[709.9,530.8],[697.2,516.4],[686.7,490],[651.9,446.8],[627.6,396.4],[607.8,326.8],[620.6,312.4],[643.8,310],[668.2,319.6],[715.7,324.4],[774.9,349.6],[827.1,353.2],[830.6,346],[812,317.2],[749.4,281.2],[656.6,276.4],[649.6,263.2],[667,241.6],[668.2,216.4],[581.2,216.4]]
+  },
+  'luxury': {
+    color: '#DAA520', fill: 'rgba(255,215,0,', label: 'Luxury',
+    points: [[613.6,624.4],[585.8,658],[547.5,676],[534.8,690.4],[542.9,716.8],[575.4,751.6],[584.6,773.2],[578.8,809.2],[534.8,839.2],[534.8,882.4],[548.7,914.8],[573,943.6],[619.4,974.8],[668.2,1046.8],[669.3,1078],[654.2,1088.8],[647.3,1110.4],[683.2,1175.2],[716.9,1202.8],[754,1202.8],[793.4,1171.6],[793.4,1141.6],[772.6,1100.8],[741.2,982],[654.2,878.8],[650.8,818.8],[662.4,767.2],[660,713.2],[643.8,662.8],[621.8,624.4]]
+  },
+  'together': {
+    color: '#999999', fill: 'rgba(160,160,160,', label: 'Together',
+    points: [[355,378.4],[316.7,373.6],[219.2,385.6],[163.6,361.6],[114.8,361.6],[49.9,418],[37.1,439.6],[32.5,472],[52.2,508],[54.5,578.8],[39.4,605.2],[18.6,619.6],[0,647.2],[0,698.8],[13.9,734.8],[16.2,772],[27.8,800.8],[63.8,806.8],[94,805.6],[95.1,815.2],[111.4,815.2],[138,776.8],[172.8,708.4],[216.9,643.6],[227.4,606.4],[251.7,550],[270.3,521.2],[346.8,428.8],[355,413.2]]
+  },
+  'wellness': {
+    color: '#DC143C', fill: 'rgba(220,20,60,', label: 'Wellness',
+    points: [[501.1,304],[473.3,304],[471,308.8],[455.9,318.4],[446.6,347.2],[435,358],[432.7,366.4],[423.4,372.4],[423.4,378.4],[417.6,390.4],[413,391.6],[410.6,400],[403.7,404.8],[397.9,413.2],[395.6,413.2],[395.6,434.8],[397.9,434.8],[403.7,444.4],[422.2,461.2],[428,472],[469.8,472],[469.8,469.6],[479.1,461.2],[482.6,451.6],[546.4,448],[546.4,436],[542.9,434.8],[540.6,428.8],[537.1,406],[530.1,383.2],[529,360.4],[518.5,331.6]]
+  },
+  'strategic': {
+    color: '#555555', fill: 'rgba(40,40,40,', label: 'Strategic',
+    points: [[691.4,684.4],[679.8,702.4],[679.8,764.8],[694.8,786.4],[693.7,814],[683.2,847.6],[685.6,872.8],[716.9,907.6],[758.6,1000],[771.4,1010.8],[786.5,1038.4],[813.2,1127.2],[838.7,1175.2],[877,1199.2],[914.1,1199.2],[972.1,1144],[1008,1093.6],[1019.6,1067.2],[1019.6,968.8],[1005.7,926.8],[998.8,804.4],[991.8,774.4],[974.4,745.6],[961.6,736],[919.9,731.2],[885.1,743.2],[856.1,742],[825.9,721.6],[819,708.4],[784.2,696.4],[771.4,684.4]]
+  },
+  'premium2': {
+    color: '#8B008B', fill: 'rgba(128,0,128,', label: 'Premium (top-right)',
+    points: [[612.5,189.8],[611.3,212.6],[633.4,254.6],[638.0,277.4],[657.7,300.2],[694.8,324.2],[718.0,374.6],[735.4,391.4],[841.0,423.8],[861.9,416.6],[883.9,398.6],[893.2,378.2],[906.0,375.8],[877.0,333.8],[853.8,284.6],[810.8,228.2],[742.4,199.4],[694.8,169.4],[646.1,167.0]]
+  },
+  'boundary': {
+    color: '#ffffff', fill: 'rgba(255,255,255,', label: 'Boundary (clip mask)',
+    points: [[520,20],[360,55],[210,100],[100,200],[30,360],[0,500],[0,700],[15,780],[65,810],[95,815],[140,780],[175,700],[225,600],[260,530],[350,430],[400,290],[450,340],[500,330],[530,300],[560,300],[590,350],[610,470],[640,570],[670,630],[690,680],[770,680],[810,700],[850,740],[910,740],[920,720],[900,700],[870,680],[830,650],[800,630],[760,555],[710,530],[690,490],[650,445],[630,400],[600,330],[610,310],[640,310],[670,320],[720,325],[780,350],[830,355],[830,345],[810,315],[750,280],[660,275],[650,260],[670,240],[670,215],[650,115],[640,100],[520,20]]
+  }
+};
+
+// Deep clone
+const ZONES = {};
+for (const [k, v] of Object.entries(ZONES_INIT)) {
+  ZONES[k] = { ...v, points: v.points.map(p => [...p]) };
+}
+
+// ==================== STATE ====================
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const mpImg = new Image();
+const zdImg = new Image();
+let mpLoaded = false, zdLoaded = false;
+
+let activeZone = null;
+let selectedPoint = -1;
+let dragging = false;
+let addPointMode = false;
+let moveZoneMode = false;
+let moveStartMP = null;
+let displayScale = 1;
+let panX = 0, panY = 0;
+let mouseX = 0, mouseY = 0;
+let isPanning = false, panStartX = 0, panStartY = 0;
+
+// Undo/redo
+let undoStack = [];
+let redoStack = [];
+
+// Guide overlay transform
+const guideSX = 1.16, guideSY = 1.20, guideOX = 0, guideOY = 160;
+
+mpImg.onload = () => { mpLoaded = true; init(); };
+zdImg.onload = () => { zdLoaded = true; };
+mpImg.src = 'assets/masterplan-new-hd.jpg';
+zdImg.src = 'assets/masterpanPNG/zone drawings.png';
+
+// ==================== INIT ====================
+function init() {
+  if (!mpLoaded) return;
+  buildZoneButtons();
+  resize();
+  window.addEventListener('resize', resize);
+  draw();
+}
+
+function resize() {
+  const availW = window.innerWidth - 260;
+  const availH = window.innerHeight;
+  displayScale = Math.min(availW / mpImg.width, availH / mpImg.height);
+  canvas.width = availW;
+  canvas.height = availH;
+  canvas.style.marginLeft = '260px';
+  draw();
+}
+
+// ==================== COORDINATE TRANSFORMS ====================
+function toCanvas(mx, my) {
+  const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
+  const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
+  return [mx * displayScale + ox, my * displayScale + oy];
+}
+
+function toMasterplan(cx, cy) {
+  const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
+  const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
+  return [(cx - ox) / displayScale, (cy - oy) / displayScale];
+}
+
+// ==================== CATMULL-ROM SPLINE ====================
+function getCatmullRomPoint(p0, p1, p2, p3, t) {
+  const t2 = t * t, t3 = t2 * t;
+  return [
+    0.5 * ((2*p1[0]) + (-p0[0]+p2[0])*t + (2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2 + (-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+    0.5 * ((2*p1[1]) + (-p0[1]+p2[1])*t + (2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2 + (-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)
+  ];
+}
+
+function drawSmoothZone(pts, color, fillColor, fillOpacity, isActive) {
+  if (pts.length < 3) return;
+  const n = pts.length;
+  const steps = 12; // subdivisions between each pair
+
+  // Build smooth curve points
+  const curvePoints = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    const p3 = pts[(i + 2) % n];
+    for (let s = 0; s < steps; s++) {
+      curvePoints.push(getCatmullRomPoint(p0, p1, p2, p3, s / steps));
+    }
+  }
+
+  // Draw filled area
+  const opacity = document.getElementById('fillOpacity').value / 100;
+  ctx.beginPath();
+  const [sx, sy] = toCanvas(curvePoints[0][0], curvePoints[0][1]);
+  ctx.moveTo(sx, sy);
+  for (let i = 1; i < curvePoints.length; i++) {
+    const [cx, cy] = toCanvas(curvePoints[i][0], curvePoints[i][1]);
+    ctx.lineTo(cx, cy);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fillColor + opacity + ')';
+  ctx.fill();
+
+  // Draw outline
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isActive ? 3 : 1.5;
+  ctx.globalAlpha = isActive ? 1 : 0.7;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function drawBoundaryZone(pts, isActive) {
+  if (pts.length < 3) return;
+  const n = pts.length;
+  const steps = 12;
+  const curvePoints = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    const p3 = pts[(i + 2) % n];
+    for (let s = 0; s < steps; s++) {
+      curvePoints.push(getCatmullRomPoint(p0, p1, p2, p3, s / steps));
+    }
+  }
+
+  // Draw dashed white/cyan outline
+  ctx.beginPath();
+  const [sx, sy] = toCanvas(curvePoints[0][0], curvePoints[0][1]);
+  ctx.moveTo(sx, sy);
+  for (let i = 1; i < curvePoints.length; i++) {
+    const [cx, cy] = toCanvas(curvePoints[i][0], curvePoints[i][1]);
+    ctx.lineTo(cx, cy);
+  }
+  ctx.closePath();
+
+  // Dim area outside the boundary
+  ctx.save();
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#000';
+  // Fill the entire canvas, then cut out the boundary
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.globalAlpha = 0.3;
+  ctx.fill();
+  ctx.restore();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Stroke the boundary
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  for (let i = 1; i < curvePoints.length; i++) {
+    const [cx, cy] = toCanvas(curvePoints[i][0], curvePoints[i][1]);
+    ctx.lineTo(cx, cy);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = isActive ? '#00ffff' : 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = isActive ? 3 : 2;
+  ctx.setLineDash([8, 6]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ==================== DRAW ====================
+function draw() {
+  if (!mpLoaded) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
+  const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
+
+  // Masterplan
+  ctx.drawImage(mpImg, ox, oy, mpImg.width * displayScale, mpImg.height * displayScale);
+
+  // Guide overlay
+  if (zdLoaded && document.getElementById('showGuide')?.checked) {
+    const ga = (document.getElementById('guideOpacity')?.value || 40) / 100;
+    ctx.globalAlpha = ga;
+    const gw = zdImg.width * guideSX * displayScale;
+    const gh = zdImg.height * guideSY * displayScale;
+    ctx.drawImage(zdImg, ox + guideOX * displayScale, oy + guideOY * displayScale, gw, gh);
+    ctx.globalAlpha = 1;
+  }
+
+  // Draw all zones
+  const showHandles = document.getElementById('showHandles')?.checked;
+  const fillOpacity = document.getElementById('fillOpacity').value / 100;
+
+  for (const [name, zone] of Object.entries(ZONES)) {
+    const isActive = name === activeZone;
+    if (name === 'boundary') {
+      drawBoundaryZone(zone.points, isActive);
+    } else {
+      drawSmoothZone(zone.points, zone.color, zone.fill, fillOpacity, isActive);
+    }
+
+    // Draw control points
+    if (showHandles || isActive) {
+      for (let i = 0; i < zone.points.length; i++) {
+        const [px, py] = toCanvas(zone.points[i][0], zone.points[i][1]);
+        const isSelected = isActive && i === selectedPoint;
+        const r = isSelected ? 7 : (isActive ? 5 : 3);
+
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+
+        if (isSelected) {
+          ctx.fillStyle = '#fff';
+          ctx.fill();
+          ctx.strokeStyle = zone.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else if (isActive) {
+          ctx.fillStyle = zone.color;
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = zone.color;
+          ctx.globalAlpha = 0.5;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        // Point index label (only for active zone)
+        if (isActive && displayScale > 0.5) {
+          ctx.font = '9px Segoe UI';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.fillText(i, px, py - r - 3);
+        }
+      }
+    }
+
+    // Zone label
+    if (zone.points.length > 0) {
+      const cx = zone.points.reduce((s, p) => s + p[0], 0) / zone.points.length;
+      const cy = zone.points.reduce((s, p) => s + p[1], 0) / zone.points.length;
+      const [lx, ly] = toCanvas(cx, cy);
+      ctx.font = `bold ${isActive ? 13 : 11}px Segoe UI`;
+      ctx.fillStyle = zone.color;
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = isActive ? 1 : 0.6;
+      ctx.fillText(zone.label.toUpperCase(), lx, ly);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Add-point mode cursor
+  if (addPointMode && activeZone) {
+    ctx.beginPath();
+    ctx.arc(mouseX, mouseY, 8, 0, Math.PI * 2);
+    ctx.strokeStyle = ZONES[activeZone].color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText('+', mouseX, mouseY + 4);
+  }
+
+  // Crosshair
+  if (activeZone) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(mouseX, 0); ctx.lineTo(mouseX, canvas.height);
+    ctx.moveTo(0, mouseY); ctx.lineTo(canvas.width, mouseY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// ==================== UNDO/REDO ====================
+function saveState() {
+  const state = {};
+  for (const [k, v] of Object.entries(ZONES)) {
+    state[k] = v.points.map(p => [...p]);
+  }
+  undoStack.push(JSON.stringify(state));
+  redoStack = [];
+  if (undoStack.length > 50) undoStack.shift();
+}
+
+function restoreState(json) {
+  const state = JSON.parse(json);
+  for (const [k, pts] of Object.entries(state)) {
+    ZONES[k].points = pts;
+  }
+  updateButtons();
+  draw();
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  const current = {};
+  for (const [k, v] of Object.entries(ZONES)) current[k] = v.points.map(p => [...p]);
+  redoStack.push(JSON.stringify(current));
+  restoreState(undoStack.pop());
+  setStatus('Undo');
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  const current = {};
+  for (const [k, v] of Object.entries(ZONES)) current[k] = v.points.map(p => [...p]);
+  undoStack.push(JSON.stringify(current));
+  restoreState(redoStack.pop());
+  setStatus('Redo');
+}
+
+// ==================== ZONE BUTTONS ====================
+function buildZoneButtons() {
+  const container = document.getElementById('zone-buttons');
+  container.innerHTML = '';
+  const order = ['family','premium','green-area','luxury','together','wellness','strategic','premium2','boundary'];
+  order.forEach((name, idx) => {
+    const zone = ZONES[name];
+    const btn = document.createElement('button');
+    btn.className = 'zone-btn';
+    btn.dataset.zone = name;
+    btn.style.borderColor = zone.color;
+    btn.style.color = zone.color;
+    btn.innerHTML = `${idx+1}. ${zone.label} <span class="info">${zone.points.length} pts</span>`;
+    btn.addEventListener('click', () => selectZone(name));
+    container.appendChild(btn);
+  });
+}
+
+function updateButtons() {
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    const z = btn.dataset.zone;
+    const zone = ZONES[z];
+    btn.querySelector('.info').textContent = `${zone.points.length} pts`;
+    btn.classList.toggle('active', z === activeZone);
+  });
+}
+
+function selectZone(name) {
+  activeZone = name;
+  selectedPoint = -1;
+  addPointMode = false;
+  updateButtons();
+  setStatus(`Editing: ${ZONES[name].label} (${ZONES[name].points.length} points)`);
+  draw();
+}
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+// ==================== FIND NEAREST POINT ====================
+function findNearestPoint(cx, cy, maxDist = 15) {
+  if (!activeZone) return -1;
+  const pts = ZONES[activeZone].points;
+  let best = -1, bestDist = maxDist;
+  for (let i = 0; i < pts.length; i++) {
+    const [px, py] = toCanvas(pts[i][0], pts[i][1]);
+    const d = Math.hypot(cx - px, cy - py);
+    if (d < bestDist) { bestDist = d; best = i; }
+  }
+  return best;
+}
+
+// ==================== FIND INSERT POSITION ====================
+function findInsertIndex(mx, my) {
+  if (!activeZone) return -1;
+  const pts = ZONES[activeZone].points;
+  const n = pts.length;
+  if (n < 2) return n;
+
+  let bestIdx = 0, bestDist = Infinity;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const ax = pts[i][0], ay = pts[i][1];
+    const bx = pts[j][0], by = pts[j][1];
+    // Distance from point to line segment
+    const dx = bx - ax, dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    let t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / len2));
+    const px = ax + t * dx, py = ay + t * dy;
+    const d = Math.hypot(mx - px, my - py);
+    if (d < bestDist) { bestDist = d; bestIdx = j; }
+  }
+  return bestIdx;
+}
+
+// ==================== MOUSE EVENTS ====================
+canvas.addEventListener('mousedown', e => {
+  // Pan with middle button or shift+left
+  if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+    isPanning = true;
+    panStartX = e.offsetX - panX;
+    panStartY = e.offsetY - panY;
+    canvas.style.cursor = 'grabbing';
+    e.preventDefault();
+    return;
+  }
+
+  if (e.button !== 0 || !activeZone) return;
+
+  if (addPointMode) {
+    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+    const idx = findInsertIndex(mx, my);
+    saveState();
+    ZONES[activeZone].points.splice(idx, 0, [Math.round(mx*10)/10, Math.round(my*10)/10]);
+    selectedPoint = idx;
+    addPointMode = false;
+    updateButtons();
+    setStatus(`Added point ${idx} to ${ZONES[activeZone].label}`);
+    draw();
+    return;
+  }
+
+  if (moveZoneMode) {
+    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+    moveStartMP = [mx, my];
+    dragging = true;
+    saveState();
+    canvas.style.cursor = 'move';
+    return;
+  }
+
+  // Try to select/drag a point
+  const idx = findNearestPoint(e.offsetX, e.offsetY);
+  if (idx >= 0) {
+    selectedPoint = idx;
+    dragging = true;
+    saveState();
+    canvas.style.cursor = 'move';
+    draw();
+  } else {
+    selectedPoint = -1;
+    draw();
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  mouseX = e.offsetX;
+  mouseY = e.offsetY;
+
+  if (isPanning) {
+    panX = e.offsetX - panStartX;
+    panY = e.offsetY - panStartY;
+    draw();
+    return;
+  }
+
+  if (dragging && activeZone && moveZoneMode && moveStartMP) {
+    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+    const dx = mx - moveStartMP[0];
+    const dy = my - moveStartMP[1];
+    moveStartMP = [mx, my];
+    for (const p of ZONES[activeZone].points) {
+      p[0] = Math.round((p[0] + dx) * 10) / 10;
+      p[1] = Math.round((p[1] + dy) * 10) / 10;
+    }
+    draw();
+    return;
+  }
+
+  if (dragging && activeZone && selectedPoint >= 0) {
+    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+    ZONES[activeZone].points[selectedPoint] = [Math.round(mx*10)/10, Math.round(my*10)/10];
+    draw();
+    return;
+  }
+
+  // Update cursor based on hover
+  if (activeZone && !addPointMode) {
+    const idx = findNearestPoint(e.offsetX, e.offsetY);
+    canvas.style.cursor = idx >= 0 ? 'move' : 'crosshair';
+  }
+
+  // Status with coords
+  if (activeZone) {
+    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
+    const base = `${ZONES[activeZone].label}`;
+    if (selectedPoint >= 0) {
+      const p = ZONES[activeZone].points[selectedPoint];
+      setStatus(`${base} — Point ${selectedPoint}: (${p[0]}, ${p[1]})`);
+    } else {
+      setStatus(`${base} — Cursor: (${Math.round(mx)}, ${Math.round(my)})`);
+    }
+  }
+
+  draw();
+});
+
+canvas.addEventListener('mouseup', e => {
+  if (isPanning) {
+    isPanning = false;
+    canvas.style.cursor = activeZone ? 'crosshair' : 'default';
+  }
+  if (dragging) {
+    dragging = false;
+    moveStartMP = null;
+    canvas.style.cursor = activeZone ? 'crosshair' : 'default';
+    updateButtons();
+  }
+});
+
+// Zoom
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const old = displayScale;
+  displayScale = Math.max(0.2, Math.min(6, displayScale * delta));
+  panX = e.offsetX - (e.offsetX - panX) * (displayScale / old);
+  panY = e.offsetY - (e.offsetY - panY) * (displayScale / old);
+  draw();
+}, { passive: false });
+
+// ==================== BUTTONS ====================
+document.getElementById('addPointBtn').addEventListener('click', () => {
+  if (!activeZone) return;
+  addPointMode = !addPointMode;
+  setStatus(addPointMode ? 'Click on the curve to add a point' : `Editing: ${ZONES[activeZone].label}`);
+  draw();
+});
+
+document.getElementById('deletePointBtn').addEventListener('click', deleteSelectedPoint);
+
+document.getElementById('moveZoneBtn').addEventListener('click', () => {
+  if (!activeZone) return;
+  moveZoneMode = !moveZoneMode;
+  addPointMode = false;
+  document.getElementById('moveZoneBtn').style.background = moveZoneMode ? '#c8a96e' : '#333';
+  document.getElementById('moveZoneBtn').style.color = moveZoneMode ? '#000' : '#fff';
+  setStatus(moveZoneMode ? `MOVE MODE — drag anywhere to move ${ZONES[activeZone].label}` : `Editing: ${ZONES[activeZone].label}`);
+  draw();
+});
+
+function deleteSelectedPoint() {
+  if (!activeZone || selectedPoint < 0) return;
+  if (ZONES[activeZone].points.length <= 3) {
+    setStatus('Cannot delete — need at least 3 points');
+    return;
+  }
+  saveState();
+  ZONES[activeZone].points.splice(selectedPoint, 1);
+  selectedPoint = -1;
+  updateButtons();
+  setStatus(`Deleted point from ${ZONES[activeZone].label}`);
+  draw();
+}
+
+document.getElementById('undoBtn').addEventListener('click', undo);
+document.getElementById('redoBtn').addEventListener('click', redo);
+
+// View toggles
+['fillOpacity', 'showGuide', 'guideOpacity', 'showHandles'].forEach(id => {
+  document.getElementById(id).addEventListener('input', draw);
+});
+
+// ==================== EXPORT ====================
+function pointsToSVGPath(pts) {
+  const n = pts.length;
+  if (n < 3) return '';
+  let d = `M ${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % n];
+    const p3 = pts[(i + 2) % n];
+    const cp1x = +(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1);
+    const cp1y = +(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1);
+    const cp2x = +(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1);
+    const cp2y = +(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1);
+    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]}`;
+  }
+  d += ' Z';
+  return d;
+}
+
+const ZONE_FILLS = {
+  'family': 'rgba(255,140,0,0.15)',
+  'premium': 'rgba(128,0,128,0.15)',
+  'green-area': 'rgba(0,150,255,0.15)',
+  'luxury': 'rgba(255,215,0,0.15)',
+  'together': 'rgba(160,160,160,0.15)',
+  'wellness': 'rgba(220,20,60,0.15)',
+  'strategic': 'rgba(40,40,40,0.15)',
+  'premium2': 'rgba(128,0,128,0.15)',
+  'boundary': 'rgba(255,255,255,0.05)',
+};
+
+const ZONE_STROKES = {
+  'family': '#FF8C00',
+  'premium': '#8B008B',
+  'green-area': '#0096FF',
+  'luxury': '#DAA520',
+  'together': '#999',
+  'wellness': '#DC143C',
+  'strategic': '#333',
+  'premium2': '#8B008B',
+  'boundary': '#ffffff',
+};
+
+// Map zone keys to data-zone attribute (premium2 exports as "premium")
+const ZONE_DATA_NAMES = {
+  'premium2': 'premium',
+};
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  let svg = '';
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (name === 'boundary' || zone.points.length < 3) continue;
+    const d = pointsToSVGPath(zone.points);
+    const dataZone = ZONE_DATA_NAMES[name] || name;
+    svg += `      <!-- ${zone.label.toUpperCase()} -->\n`;
+    svg += `      <path class="zone" data-zone="${dataZone}" fill="${ZONE_FILLS[name]}" stroke="${ZONE_STROKES[name]}" stroke-width="2"\n`;
+    svg += `        d="${d}"/>\n`;
+  }
+  // Also export boundary as clipPath
+  if (ZONES.boundary && ZONES.boundary.points.length >= 3) {
+    const bd = pointsToSVGPath(ZONES.boundary.points);
+    svg += `\n      <!-- BOUNDARY CLIP PATH -->\n`;
+    svg += `      <defs>\n`;
+    svg += `        <clipPath id="masterplan-clip">\n`;
+    svg += `          <path d="${bd}"/>\n`;
+    svg += `        </clipPath>\n`;
+    svg += `      </defs>\n`;
+  }
+  showExport('SVG Paths (Smooth Curves) + Boundary ClipPath', svg);
+});
+
+document.getElementById('exportPolyBtn').addEventListener('click', () => {
+  let svg = '';
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (name === 'boundary' || zone.points.length < 3) continue;
+    const pts = zone.points.map(p => `${Math.round(p[0])},${Math.round(p[1])}`).join(' ');
+    const dataZone = ZONE_DATA_NAMES[name] || name;
+    svg += `      <!-- ${zone.label.toUpperCase()} -->\n`;
+    svg += `      <polygon class="zone" data-zone="${dataZone}" fill="${ZONE_FILLS[name]}" stroke="${ZONE_STROKES[name]}" stroke-width="2"\n`;
+    svg += `        points="${pts}"/>\n`;
+  }
+  showExport('SVG Polygons', svg);
+});
+
+function showExport(title, content) {
+  document.getElementById('export-title').textContent = title;
+  document.getElementById('export-content').textContent = content;
+  document.getElementById('export-modal').style.display = 'block';
+  navigator.clipboard?.writeText(content).then(() => {
+    setStatus('✅ Copied to clipboard!');
+  });
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+
+  if (e.key >= '1' && e.key <= '9') {
+    const names = ['family','premium','green-area','luxury','together','wellness','strategic','premium2','boundary'];
+    selectZone(names[parseInt(e.key) - 1]);
+  } else if (e.key === 'm' || e.key === 'M') {
+    document.getElementById('moveZoneBtn').click();
+  } else if (e.key === 'a' || e.key === 'A') {
+    document.getElementById('addPointBtn').click();
+  } else if (e.key === 'd' || e.key === 'D' || e.key === 'Delete') {
+    deleteSelectedPoint();
+  } else if (e.key === 'z' && e.ctrlKey) {
+    e.preventDefault(); undo();
+  } else if (e.key === 'y' && e.ctrlKey) {
+    e.preventDefault(); redo();
+  } else if (e.key === 'Escape') {
+    addPointMode = false;
+    selectedPoint = -1;
+    document.getElementById('export-modal').style.display = 'none';
+    draw();
+  }
+});
+
+</script>
+</body>
+</html>
