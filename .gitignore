@@ -40,3 +40,14 @@ _ai_outputs/
 
 # --- Bulky source archives (keep extracted versions in assets/kml/) -------
 assets/Gmail.zip
+
+# --- Investor / confidential materials (NEVER public) ---------------------
+*Inv_*.pptx
+*PRELIMINARY*
+*B-Model*
+assets/300.docx
+assets/masterpan_new.pub
+assets/'masterplan.pdf
+assets/pub_embedded.pdf
+/pub_embedded.pdf
+riverland_presentation/*Inv*
