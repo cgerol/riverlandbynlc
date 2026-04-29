@@ -252,7 +252,7 @@ nav .nav-links a:hover::after { width: 100%; }
 .photo-strip img:hover { filter: saturate(1.1); transform: scale(1.02); }
 
 /* ==================== INTERACTIVE MASTERPLAN ==================== */
-.masterplan-section { padding: 6rem 0; background: var(--bg-deep); }
+.masterplan-section { padding: 4rem 0 2rem; background: var(--bg-deep); }
 .masterplan-wrapper {
   position: relative; max-width: 800px; margin: 3rem auto 0;
   background: transparent; border-radius: 4px; overflow: hidden;
@@ -711,7 +711,498 @@ footer {
   .portfolio-tile.tile-wide { grid-column: span 1; }
   .section { padding: 5rem 0; }
 }
+
+/* ==================== MASTERPLAN STATS + MODALS ==================== */
+/* Three-column frame: stats left · masterplan center · pin-index + buttons right.
+   Columns size to their content (align-items: start) so the right column
+   doesn't squeeze the pin list — all 7 pins + description panel + buttons
+   render at full natural height. The masterplan image stays constrained
+   by its own max-height so it never blows out the viewport. */
+.masterplan-frame {
+  display: grid;
+  grid-template-columns: 200px 1fr 280px;
+  gap: 1.2rem;
+  align-items: start;
+  max-width: 1400px; margin: 1.2rem auto 0;
+  padding: 0 1.2rem;
+}
+/* Center cell — masterplan image keeps its native aspect ratio.  The cell
+   is given an explicit viewport-friendly height so the inner element has
+   something to derive its width from via aspect-ratio. */
+.masterplan-wrapper-cell {
+  max-width: none !important; margin: 0 !important;
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 460px; max-height: 880px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: visible;
+}
+.masterplan-wrapper-cell .masterplan-inner {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 1024 / 1424;
+  max-width: 100%;
+}
+.masterplan-wrapper-cell .masterplan-inner img,
+.masterplan-wrapper-cell .masterplan-svg {
+  position: absolute !important; inset: 0;
+  width: 100% !important; height: 100% !important;
+  object-fit: contain; display: block;
+}
+.masterplan-wrapper-cell .masterplan-svg { pointer-events: none; }
+.masterplan-wrapper-cell .masterplan-svg .zone { pointer-events: auto; }
+.masterplan-wrapper-cell .masterplan-inner::after { display: none; }
+.mp-col-left, .mp-col-right { display: flex; flex-direction: column; gap: 0.6rem; min-height: 0; }
+.mp-col-left { padding-top: 0.4rem; }
+/* Right column flows naturally — every pin + the description panel + the
+   action buttons render at full height, no internal scroll. */
+.mp-col-right { gap: 0.4rem; padding-top: 0.4rem; }
+
+/* Vertical stat cells */
+.masterplan-stats {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.mp-stat {
+  background: rgba(43, 60, 43, 0.4); padding: 1.1rem 0.9rem; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  border: 1px solid rgba(196, 168, 107, 0.14);
+  border-radius: 4px;
+  transition: 0.3s;
+}
+.mp-stat:hover {
+  background: rgba(196, 168, 107, 0.06);
+  border-color: rgba(196, 168, 107, 0.35);
+}
+.mp-stat .mp-icon { width: 24px; height: 24px; color: var(--gold); opacity: 0.85; }
+.mp-stat .mp-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.7rem;
+  color: var(--gold-light); font-weight: 500; line-height: 1;
+}
+.mp-stat .mp-num em {
+  font-size: 0.72rem; font-style: normal; color: var(--text-secondary); margin-left: 0.25rem;
+}
+.mp-stat .mp-lbl {
+  font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-secondary); line-height: 1.5;
+}
+
+/* Numbered pin-style zone index (right column) */
+.zone-pins {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 0.6rem; background: rgba(43, 60, 43, 0.4);
+  border: 1px solid rgba(196, 168, 107, 0.14); border-radius: 4px;
+}
+.zone-pins .pins-head {
+  font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-muted); padding: 0.3rem 0.5rem 0.6rem;
+  border-bottom: 1px solid rgba(196, 168, 107, 0.12);
+  margin-bottom: 0.3rem;
+}
+.pin-row {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.5rem 0.6rem; cursor: pointer;
+  border-left: 2px solid transparent;
+  border-radius: 3px;
+  transition: 0.25s;
+}
+.pin-row:hover, .pin-row.active {
+  background: rgba(196, 168, 107, 0.08);
+  border-left-color: var(--gold);
+}
+.pin-row .pin-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%; border: 1px solid var(--zone-color, var(--gold));
+  background: rgba(196, 168, 107, 0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+  color: var(--zone-color, var(--gold));
+  transition: 0.25s;
+}
+.pin-row:hover .pin-num, .pin-row.active .pin-num {
+  background: var(--zone-color, var(--gold));
+  color: var(--bg-deep);
+  border-color: var(--zone-color, var(--gold));
+  box-shadow: 0 0 0 3px rgba(196, 168, 107, 0.18);
+}
+.pin-row .pin-label {
+  flex: 1; font-size: 0.78rem; color: var(--cream);
+  letter-spacing: 0.04em; line-height: 1.35;
+}
+.pin-row .pin-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: var(--zone-color, var(--gold));
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25);
+}
+.pin-item { position: relative; }
+
+/* Per-pin description elements are no longer used — replaced by a single
+   shared panel below the pin list (.pin-desc-panel) so other pins stay
+   clickable while a description is open. */
+.pin-desc { display: none; }
+
+/* Single shared description panel sitting BELOW the pin list and ABOVE the
+   action buttons.  Always present in the layout; content swaps to whichever
+   zone is being hovered or has been clicked.  No overlay on the pins. */
+.pin-desc-panel {
+  --zone-color: var(--gold);
+  margin-top: 0.4rem;
+  padding: 0; max-height: 0; opacity: 0; overflow: hidden;
+  background: rgba(43, 60, 43, 0.55);
+  border: 1px solid rgba(196, 168, 107, 0.18);
+  border-left: 2px solid var(--zone-color);
+  border-radius: 4px;
+  transition: max-height 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
+              opacity 0.25s, padding 0.25s, margin 0.25s;
+}
+.pin-desc-panel.shown {
+  max-height: 320px; opacity: 1;
+  padding: 0.7rem 0.9rem 0.85rem;
+}
+.pin-desc-panel .pd-eyebrow {
+  font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--zone-color); margin-bottom: 0.3rem;
+}
+.pin-desc-panel .pd-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
+  color: var(--cream); font-weight: 500; line-height: 1.25;
+  margin-bottom: 0.4rem;
+}
+.pin-desc-panel .pd-body {
+  font-size: 0.78rem; color: var(--text-secondary);
+  font-weight: 300; line-height: 1.5;
+}
+
+/* Hide the floating zone-tooltip — descriptions now show inline in the legend. */
+#zone-tooltip { display: none !important; }
+
+/* Tablet & landscape phones — single column stack */
+@media (max-width: 1024px) {
+  .masterplan-frame {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'center' 'right' 'left';
+    height: auto;
+    min-height: 0; max-height: none;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .mp-col-left  { grid-area: left; }
+  .mp-col-right { grid-area: right; }
+  .masterplan-wrapper-cell {
+    grid-area: center;
+    width: 100%;
+    aspect-ratio: 1024 / 1424;
+    height: auto !important;
+    max-height: 65vh;
+  }
+  /* Stats become a 4-up horizontal strip at tablet, then 2x2 at phone */
+  .masterplan-stats { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
+  .mp-col-left .mp-stat { flex: 1 1 calc(25% - 0.4rem); min-width: 130px; }
+  .mp-stat { padding: 0.85rem 0.7rem; }
+  /* Pin descriptions show as a normal block on mobile (no hover, but tap works
+     thanks to JS-toggled .expanded class) */
+}
+
+/* Phone — tighter typography & 2-column stat grid */
+@media (max-width: 700px) {
+  .masterplan-section { padding: 3rem 0 1.5rem; }
+  .masterplan-frame { padding: 0 0.7rem; gap: 0.7rem; }
+  .mp-col-left .mp-stat { flex: 1 1 calc(50% - 0.25rem); }
+  .mp-stat .mp-icon { width: 22px; height: 22px; }
+  .mp-stat .mp-num { font-size: 1.4rem; }
+  .mp-stat .mp-lbl { font-size: 0.52rem; letter-spacing: 0.14em; }
+  .zone-pins { padding: 0.5rem; }
+  .pin-row { padding: 0.55rem 0.5rem; gap: 0.6rem; }
+  .pin-row .pin-num { width: 26px; height: 26px; font-size: 0.85rem; }
+  .pin-row .pin-label { font-size: 0.78rem; }
+  .pin-desc .pd-title { font-size: 1.1rem; }
+  .pin-desc .pd-body  { font-size: 0.82rem; line-height: 1.5; }
+  .pin-desc { margin-left: 0.5rem !important; padding: 0.7rem 0.85rem 0.85rem !important; }
+  .mp-action-btn { padding: 0.85rem 1rem; font-size: 0.72rem; }
+  .masterplan-wrapper-cell { max-height: 70vh; }
+  /* Modals fill the screen on phone */
+  .mp-modal-backdrop { padding: 1.5vh 1.5vw; }
+  .mp-modal-frame { width: 100%; height: 96vh; max-height: 96vh; border-radius: 4px; }
+  .mp-modal-head { padding: 0.7rem 1rem; }
+  .mp-modal-head h3 { font-size: 1.05rem; }
+  .mp-video-options { grid-template-columns: 1fr; gap: 0.7rem; padding: 1rem; }
+  .mp-video-card { padding: 1.1rem; }
+  #mp-routes-toolbar, #mp-routes-legend { font-size: 0.65rem; padding: 0.5rem 0.7rem; }
+  #mp-routes-legend { left: 8px; bottom: 8px; }
+  #mp-routes-toolbar { top: 8px; right: 8px; }
+}
+
+/* Touch devices — show a small chevron as a tap-to-expand affordance,
+   since there's no hover signal */
+@media (hover: none) {
+  .pin-row::after {
+    content: '⌄'; margin-left: 0.4rem; opacity: 0.45; font-size: 0.9rem;
+    transition: transform 0.25s; line-height: 1;
+  }
+  .pin-item.expanded .pin-row::after { transform: rotate(180deg); opacity: 1; }
+}
+
+.mp-actions {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.mp-action-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  background: transparent; border: 1px solid var(--gold); color: var(--gold);
+  border-radius: 30px; font-family: 'Outfit', sans-serif; font-size: 0.74rem;
+  letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+  cursor: pointer; transition: 0.3s;
+}
+.mp-action-btn:hover { background: var(--gold); color: var(--bg-deep); }
+.mp-action-btn .ico { width: 14px; height: 14px; }
+
+/* Modal */
+.mp-modal-backdrop {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(14, 26, 14, 0.55);
+  backdrop-filter: blur(10px) saturate(0.85);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease-out;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4vh 4vw;
+}
+.mp-modal-backdrop.open { opacity: 1; pointer-events: auto; }
+.mp-modal-frame {
+  position: relative; width: 100%; max-width: 1180px; height: 80vh; max-height: 880px;
+  background: var(--bg-primary);
+  border: 1px solid rgba(196, 168, 107, 0.3); border-radius: 6px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  overflow: hidden; display: flex; flex-direction: column;
+  transform: scale(0.96); transition: transform 0.4s ease-out;
+}
+.mp-modal-backdrop.open .mp-modal-frame { transform: scale(1); }
+.mp-modal-head {
+  padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(196, 168, 107, 0.15);
+}
+.mp-modal-head h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--gold);
+  font-weight: 500; letter-spacing: 0.04em;
+}
+.mp-modal-close {
+  background: none; border: 1px solid rgba(196, 168, 107, 0.3); color: var(--cream);
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  transition: 0.3s;
+}
+.mp-modal-close:hover { border-color: var(--gold); color: var(--gold); transform: rotate(90deg); }
+.mp-modal-body { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
+
+/* Modal route-draw animation — matched to the #location map's
+   .map-route timing (2.8s ease-in-out) so both maps feel like the same
+   piece of design. */
+@keyframes mpDrawRoute { to { stroke-dashoffset: 0; } }
+#mp-routes-map .leaflet-overlay-pane svg path.mp-route {
+  stroke-linecap: round; stroke-linejoin: round; fill: none;
+  /* dasharray + offset are set via JS once we know the path length */
+}
+#mp-routes-map .leaflet-overlay-pane svg path.mp-route.drawing {
+  animation: mpDrawRoute 2.8s ease-in-out forwards;
+}
+/* Place markers fade in like community-boundary in #location section */
+@keyframes mpPlaceIn { from { opacity: 0; transform: translateY(6px); }
+                       to   { opacity: 1; transform: translateY(0); } }
+.mp-place .mpp-wrap {
+  animation: mpPlaceIn 0.9s ease-out backwards;
+}
+
+/* Routes modal innards — match the dark, hand-painted feel of the #location map */
+#mp-routes-map { position: absolute; inset: 0; background: #081a10; }
+/* Default tint — Voyager tiles pushed deep into the #location map palette
+   (#0d2218 → #081a10).  Darker, cooler, and noticeably greener while still
+   keeping roads/labels barely legible. */
+#mp-routes-map .leaflet-tile-pane[data-style="brand"] {
+  filter: saturate(0.85) brightness(0.5) contrast(1.08) hue-rotate(-10deg);
+}
+/* Strong dark-green wash on top of the tiles — emulates the painted feel of
+   the #location SVG map (the tiles read as land relief beneath it). */
+#mp-routes-map.brand-skin .leaflet-tile-pane::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 50%,
+      rgba(13, 34, 24, 0.35) 0%,
+      rgba(8, 26, 16, 0.55) 60%,
+      rgba(8, 26, 16, 0.78) 100%);
+  pointer-events: none; mix-blend-mode: multiply;
+}
+#mp-routes-map .leaflet-tile-pane[data-style="otm"]   { filter: saturate(0.85) brightness(0.92); }
+#mp-routes-map .leaflet-tile-pane[data-style="osm"]   { filter: brightness(0.85) saturate(0.85); }
+#mp-routes-map .leaflet-tile-pane[data-style="cyclo"] { filter: saturate(0.9); }
+#mp-routes-map::after {
+  /* Subtle vignette to echo the location-section vignette */
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(8, 26, 16, 0.55) 100%);
+  z-index: 500;
+}
+#mp-routes-map .leaflet-control-attribution {
+  background: rgba(14,26,14,0.7) !important; color: var(--text-secondary) !important;
+  font-size: 10px !important;
+}
+#mp-routes-map .leaflet-control-attribution a { color: var(--gold) !important; }
+/* Brand-styled +/- zoom controls — bigger, gold-bordered, clearly visible */
+#mp-routes-map .leaflet-control-zoom {
+  border: none !important; box-shadow: 0 4px 14px rgba(0,0,0,0.5) !important;
+  border-radius: 6px !important; overflow: hidden;
+}
+#mp-routes-map .leaflet-control-zoom a {
+  width: 34px !important; height: 34px !important; line-height: 34px !important;
+  background: rgba(14, 26, 14, 0.92) !important;
+  border: 1px solid rgba(196, 168, 107, 0.4) !important;
+  color: var(--gold) !important;
+  font-size: 18px !important; font-weight: 500 !important;
+  transition: 0.2s;
+}
+#mp-routes-map .leaflet-control-zoom a:first-child {
+  border-radius: 6px 6px 0 0 !important;
+  border-bottom: none !important;
+}
+#mp-routes-map .leaflet-control-zoom a:last-child {
+  border-radius: 0 0 6px 6px !important;
+}
+#mp-routes-map .leaflet-control-zoom a:hover {
+  background: var(--gold) !important;
+  color: var(--bg-deep) !important;
+  border-color: var(--gold) !important;
+}
+#mp-routes-toolbar {
+  position: absolute; top: 14px; right: 14px; z-index: 1000;
+  background: rgba(14,26,14,0.92); padding: 0.6rem 0.8rem; border-radius: 4px;
+  border: 1px solid rgba(196, 168, 107, 0.25); font-size: 0.7rem;
+}
+#mp-routes-toolbar select {
+  background: var(--bg-card); border: 1px solid rgba(196,168,107,0.3);
+  color: var(--cream); padding: 3px 6px; font-family: inherit;
+  font-size: 0.7rem; border-radius: 3px;
+}
+#mp-routes-legend {
+  position: absolute; left: 14px; bottom: 26px; z-index: 1000;
+  background: rgba(14, 26, 14, 0.92); padding: 0.85rem 1.1rem; border-radius: 4px;
+  border: 1px solid rgba(196, 168, 107, 0.25);
+  font-size: 0.7rem; line-height: 1.7; color: var(--cream);
+}
+#mp-routes-legend .row { display: flex; align-items: center; gap: 0.6rem; }
+#mp-routes-legend .row .lbl { flex: 1; }
+#mp-routes-legend .row .km {
+  font-family: 'Outfit', sans-serif; font-size: 0.62rem;
+  font-weight: 600; color: var(--gold); letter-spacing: 0.05em;
+  margin-left: 0.5rem; opacity: 0.85;
+}
+#mp-routes-legend .swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+#mp-routes-legend .swatch.parcel {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); box-shadow: 0 0 0 3px rgba(196, 168, 107, 0.25);
+}
+#mp-routes-legend .swatch-logo {
+  width: 22px; height: 22px; flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 0 3px rgba(196, 168, 107, 0.5));
+}
+#mp-routes-loading {
+  position: absolute; top: 50%; left: 50%; z-index: 1500;
+  transform: translate(-50%, -50%);
+  background: rgba(14,26,14,0.92); color: var(--cream);
+  padding: 0.8rem 1.2rem; border-radius: 4px; font-size: 0.78rem;
+  border: 1px solid var(--gold); display: none;
+}
+#mp-routes-loading.shown { display: block; }
+.mp-parcel-marker-icon { width: 48px; height: 48px; }
+.leaflet-tooltip.mp-rl-tooltip {
+  background: var(--bg-deep) !important; color: var(--gold) !important;
+  border: 1px solid var(--gold) !important;
+  font: 600 0.7rem/1 'Outfit', sans-serif !important;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 4px 10px !important; box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important;
+}
+.leaflet-tooltip.mp-rl-tooltip::before { border-top-color: var(--gold) !important; }
+
+/* Grey logo markers — flat monochrome icons in the brand's secondary text
+   colour, sitting on a small dark backplate so they read on any base map. */
+.mp-place { pointer-events: auto; }
+.mp-place .mpp-wrap {
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: default;
+}
+.mp-place .mpp-svg {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(14, 26, 14, 0.78);
+  border: 1px solid rgba(196, 168, 107, 0.32);
+  border-radius: 50%;
+  color: #B5B0A0;                     /* the grey logo tone */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  transition: 0.25s;
+}
+.mp-place .mpp-svg svg { width: 18px; height: 18px; }
+.mp-place:hover .mpp-svg {
+  color: var(--gold-light);
+  border-color: var(--gold);
+  background: rgba(14, 26, 14, 0.92);
+  transform: translateY(-2px) scale(1.06);
+}
+.mp-place .mpp-name {
+  font: 600 0.6rem/1.2 'Outfit', sans-serif;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--cream-light);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+  white-space: nowrap; padding: 2px 7px;
+  background: rgba(14, 26, 14, 0.7);
+  border-radius: 3px;
+  opacity: 0.85; transition: 0.25s;
+}
+.mp-place:hover .mpp-name { opacity: 1; color: var(--gold-light); }
+
+/* Videos modal innards */
+.mp-video-options {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  padding: 1.4rem; height: 100%; align-items: stretch;
+}
+@media (max-width: 700px) { .mp-video-options { grid-template-columns: 1fr; } }
+.mp-video-card {
+  background: var(--bg-card); border: 1px solid rgba(196, 168, 107, 0.18);
+  border-radius: 6px; padding: 1.4rem; cursor: pointer;
+  display: flex; flex-direction: column; gap: 0.7rem;
+  transition: 0.3s; position: relative; overflow: hidden;
+}
+.mp-video-card::before {
+  content: ''; position: absolute; inset: 0; opacity: 0.18;
+  background-position: center; background-size: cover;
+  filter: saturate(0.85);
+  transition: 0.3s;
+}
+.mp-video-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+.mp-video-card:hover::before { opacity: 0.32; }
+.mp-video-card[data-alt="low"]::before  { background-image: linear-gradient(180deg, transparent, var(--bg-card)), url('assets/aerial-villas-sea.jpeg'); }
+.mp-video-card[data-alt="mid"]::before  { background-image: linear-gradient(180deg, transparent, var(--bg-card)), url('assets/community-aerial.jpeg'); }
+.mp-video-card[data-alt="high"]::before { background-image: linear-gradient(180deg, transparent, var(--bg-card)), url('assets/aerial-playground.jpeg'); }
+.mp-video-card > * { position: relative; z-index: 1; }
+.mp-video-card h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--cream); font-weight: 500; }
+.mp-video-card .alt {
+  font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+}
+.mp-video-card p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.55; flex: 1; }
+.mp-video-card .play {
+  align-self: flex-start; padding: 0.4rem 0.9rem;
+  background: rgba(196, 168, 107, 0.1); border: 1px solid var(--gold);
+  color: var(--gold); border-radius: 30px; font-size: 0.7rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.mp-video-card:hover .play { background: var(--gold); color: var(--bg-deep); }
+#mp-video-stage {
+  position: absolute; inset: 0; display: none; background: #000;
+  align-items: center; justify-content: center;
+}
+#mp-video-stage.shown { display: flex; }
+#mp-video-stage video { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; }
+
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 <body>
 
@@ -835,7 +1326,36 @@ footer {
     <div class="gold-divider reveal"></div>
     <p class="body-text reveal" style="max-width:600px;" data-i18n="masterplan.body">Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.</p>
   </div>
-  <div class="masterplan-wrapper reveal" id="masterplan-container">
+  <div class="masterplan-frame reveal">
+
+  <!-- ===== LEFT COLUMN: vertical stat counters ===== -->
+  <aside class="mp-col-left">
+    <div class="masterplan-stats">
+      <div class="mp-stat">
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2L4 9v11h6v-7h4v7h6V9z"/><circle cx="12" cy="13" r="2.5"/></svg>
+        <div class="mp-num"><span class="mp-counter" data-count="70000" data-locale="el-GR">0</span><em>τμ</em></div>
+        <div class="mp-lbl">οργανωμένου<br>χώρου πρασίνου</div>
+      </div>
+      <div class="mp-stat">
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-7h6l3 7"/><path d="M9 10L12 5h3"/></svg>
+        <div class="mp-num"><span class="mp-counter" data-count="7000" data-locale="el-GR">0</span><em>μ</em></div>
+        <div class="mp-lbl">ποδηλατο­δρόμων<br>&amp; πεζοδρόμων</div>
+      </div>
+      <div class="mp-stat">
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5 5l14 14M19 5L5 19"/></svg>
+        <div class="mp-num"><span class="mp-counter" data-count="9">0</span></div>
+        <div class="mp-lbl">γήπεδα &amp; εξωτ.<br>δραστηριότητες</div>
+      </div>
+      <div class="mp-stat">
+        <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 21h18M3 12h18M3 12V7l9-5 9 5v5M9 21v-7M15 21v-7"/></svg>
+        <div class="mp-num"><span class="mp-counter" data-count="8">0</span></div>
+        <div class="mp-lbl">υπηρεσίες resort<br>στο σπίτι σας</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== CENTER: existing masterplan image + zones ===== -->
+  <div class="masterplan-wrapper masterplan-wrapper-cell" id="masterplan-container">
     <div class="masterplan-inner">
     <img src="assets/masterplan-new-hd.jpg" alt="RIVERLAND Masterplan" id="masterplan-img">
     <svg class="masterplan-svg" viewBox="0 0 1024 1424" preserveAspectRatio="xMidYMid meet" id="masterplan-svg">
@@ -871,17 +1391,61 @@ footer {
       <div class="zt-desc"></div>
     </div>
   </div>
-  <div class="container">
-    <div class="masterplan-legend reveal">
-      <div class="legend-item" data-zone="family"><div class="legend-dot" style="background:#FF8C00;"></div> <span data-i18n="masterplan.legend.family">Οικογενειακές</span></div>
-      <div class="legend-item" data-zone="together"><div class="legend-dot" style="background:#999;"></div> <span data-i18n="masterplan.legend.together">Μαζί</span></div>
-      <div class="legend-item" data-zone="premium"><div class="legend-dot" style="background:#8B008B;"></div> <span data-i18n="masterplan.legend.premium">Προνομιακές</span></div>
-      <div class="legend-item" data-zone="luxury"><div class="legend-dot" style="background:#DAA520;"></div> <span data-i18n="masterplan.legend.luxury">Πολυτελείς</span></div>
-      <div class="legend-item" data-zone="green-area"><div class="legend-dot" style="background:#0096FF;"></div> <span data-i18n="masterplan.legend.green">Χώροι Πρασίνου</span></div>
-      <div class="legend-item" data-zone="wellness"><div class="legend-dot" style="background:#DC143C;"></div> <span data-i18n="masterplan.legend.wellness">Κέντρο Ευεξίας</span></div>
-      <div class="legend-item" data-zone="strategic"><div class="legend-dot" style="background:#333;"></div> <span data-i18n="masterplan.legend.strategic">Στρατηγικές Αναπτύξεις</span></div>
+
+  <!-- ===== RIGHT COLUMN: pin-style legend + action buttons ===== -->
+  <aside class="mp-col-right">
+    <div class="zone-pins">
+      <div class="pins-head" data-i18n="masterplan.indexLabel">Ευρετήριο</div>
+      <div class="pin-row legend-item" data-zone="family"   style="--zone-color:#FF8C00;">
+        <span class="pin-num">1</span>
+        <span class="pin-label" data-i18n="masterplan.legend.family">Οικογενειακές</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="together" style="--zone-color:#999999;">
+        <span class="pin-num">2</span>
+        <span class="pin-label" data-i18n="masterplan.legend.together">Μαζί</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="premium"  style="--zone-color:#B86BB8;">
+        <span class="pin-num">3</span>
+        <span class="pin-label" data-i18n="masterplan.legend.premium">Προνομιακές</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="luxury"   style="--zone-color:#DAA520;">
+        <span class="pin-num">4</span>
+        <span class="pin-label" data-i18n="masterplan.legend.luxury">Πολυτελείς</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="green-area" style="--zone-color:#5BA3E5;">
+        <span class="pin-num">5</span>
+        <span class="pin-label" data-i18n="masterplan.legend.green">Χώροι Πρασίνου</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="wellness" style="--zone-color:#DC143C;">
+        <span class="pin-num">6</span>
+        <span class="pin-label" data-i18n="masterplan.legend.wellness">Κέντρο Ευεξίας</span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-row legend-item" data-zone="strategic" style="--zone-color:#888888;">
+        <span class="pin-num">7</span>
+        <span class="pin-label" data-i18n="masterplan.legend.strategic">Στρατηγικές</span>
+        <span class="pin-dot"></span>
+      </div>
     </div>
-  </div>
+
+    <div class="mp-actions">
+      <button class="mp-action-btn" id="mp-open-routes" type="button">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span data-i18n="masterplan.routes">ΔΙΑΔΡΟΜΕΣ</span>
+      </button>
+      <button class="mp-action-btn" id="mp-open-videos" type="button">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span data-i18n="masterplan.videos">ΒΙΝΤΕΟ</span>
+      </button>
+    </div>
+  </aside>
+
+  </div><!-- /masterplan-frame -->
 </section>
 
 <!-- ==================== DIFFERENCE ==================== -->
@@ -1779,6 +2343,30 @@ const translations = {
     'masterplan.legend.green': 'Χώροι Πρασίνου',
     'masterplan.legend.wellness': 'Κέντρο Ευεξίας',
     'masterplan.legend.strategic': 'Στρατηγικές Αναπτύξεις',
+    'masterplan.routes': 'ΔΙΑΔΡΟΜΕΣ',
+    'masterplan.videos': 'ΒΙΝΤΕΟ',
+    'masterplan.routes_title': 'Διαδρομές προς Riverland',
+    'masterplan.videos_title': 'Εναέριες λήψεις',
+    'masterplan.routes.moni': '→ Μονή',
+    'masterplan.routes.parekklisia': '→ Παρεκκλησιά',
+    'masterplan.routes.pirgos': '→ Πύργος',
+    'masterplan.routes.internal': 'Εσωτερική πρόσβαση',
+    'masterplan.places.forest': 'Δάσος Μαυροτίκλας',
+    'masterplan.places.olive': 'Ελαιώνες',
+    'masterplan.places.chapel': 'Παλαιό εκκλησάκι',
+    'masterplan.places.river': 'Κοίτη Γαρύλλη',
+    'masterplan.places.vineyard': 'Αμπελώνες',
+    'masterplan.places.moniMon': 'Μονή',
+    'masterplan.places.moniFC': 'Γήπεδο Μονής',
+    'masterplan.places.pyrgosVil': 'Πύργος Λεμεσού',
+    'masterplan.places.pyrgosFC': 'Αθλ. κέντρο Πύργου',
+    'masterplan.places.parekklisiaVil': 'Παρεκκλησιά',
+    'masterplan.places.parekklisiaFC': 'Γήπεδο Παρεκκλησιάς',
+    'masterplan.basemap.brand': 'Προεπιλογή',
+    'masterplan.basemap.otm': 'Τοπογραφικός',
+    'masterplan.basemap.osm': 'OpenStreetMap',
+    'masterplan.basemap.cyclo': 'Ποδηλατικός',
+    'masterplan.indexLabel': 'Ευρετήριο',
     // Difference
     'difference.label': 'Η Διαφορά Μας',
     'difference.heading': 'Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em>',
@@ -1934,6 +2522,30 @@ const translations = {
     'masterplan.legend.green': 'Green Area',
     'masterplan.legend.wellness': 'Wellness Center',
     'masterplan.legend.strategic': 'Strategic Developments',
+    'masterplan.routes': 'ROUTES',
+    'masterplan.videos': 'VIDEOS',
+    'masterplan.routes_title': 'Routes to Riverland',
+    'masterplan.videos_title': 'Aerial views',
+    'masterplan.routes.moni': '→ Moni',
+    'masterplan.routes.parekklisia': '→ Parekklisia',
+    'masterplan.routes.pirgos': '→ Pirgos',
+    'masterplan.routes.internal': 'Internal access',
+    'masterplan.places.forest': 'Mavrotikla forest',
+    'masterplan.places.olive': 'Olive groves',
+    'masterplan.places.chapel': 'Old chapel',
+    'masterplan.places.river': 'Garyllis riverbed',
+    'masterplan.places.vineyard': 'Vineyard terraces',
+    'masterplan.places.moniMon': 'Moni',
+    'masterplan.places.moniFC': 'Moni football field',
+    'masterplan.places.pyrgosVil': 'Pyrgos Lemesou',
+    'masterplan.places.pyrgosFC': 'Pyrgos sports centre',
+    'masterplan.places.parekklisiaVil': 'Parekklisia',
+    'masterplan.places.parekklisiaFC': 'Parekklisia football field',
+    'masterplan.basemap.brand': 'Default',
+    'masterplan.basemap.otm': 'Topographic',
+    'masterplan.basemap.osm': 'OpenStreetMap',
+    'masterplan.basemap.cyclo': 'Cycle / outdoor',
+    'masterplan.indexLabel': 'Index',
     // Difference
     'difference.label': 'Our Difference',
     'difference.heading': 'The \u201cDON\'Ts\u201d in <em style="color:var(--gold);font-style:italic;">Our Plan</em>',
@@ -2467,5 +3079,680 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   setLanguage(saved);
 })();
 </script>
+
+<!-- ==================== MASTERPLAN: ROUTES + VIDEOS MODALS ==================== -->
+<div class="mp-modal-backdrop" id="mp-routes-modal" aria-hidden="true">
+  <div class="mp-modal-frame">
+    <div class="mp-modal-head">
+      <h3 data-i18n="masterplan.routes_title">ΔΙΑΔΡΟΜΕΣ προς Riverland</h3>
+      <button class="mp-modal-close" data-mp-close="mp-routes-modal" aria-label="Close">×</button>
+    </div>
+    <div class="mp-modal-body">
+      <div id="mp-routes-map"></div>
+      <div id="mp-routes-toolbar">
+        <select id="mp-routes-basemap" aria-label="Map style">
+          <option value="brand" data-i18n="masterplan.basemap.brand" selected>Προεπιλογή</option>
+          <option value="otm"   data-i18n="masterplan.basemap.otm">Τοπογραφικός</option>
+          <option value="osm"   data-i18n="masterplan.basemap.osm">OpenStreetMap</option>
+          <option value="cyclo" data-i18n="masterplan.basemap.cyclo">Ποδηλατικός</option>
+        </select>
+      </div>
+      <div id="mp-routes-legend">
+        <div class="row">
+          <img class="swatch swatch-logo" src="assets/riverland_logo.png" alt="">
+          <span class="lbl">RIVERLAND</span>
+        </div>
+        <div class="row" data-route-id="moni">
+          <span class="swatch" style="background:#D99644;"></span>
+          <span class="lbl" data-i18n="masterplan.routes.moni">→ Μονή</span><span class="km"></span>
+        </div>
+        <div class="row" data-route-id="parekklisia">
+          <span class="swatch" style="background:#7FB069;"></span>
+          <span class="lbl" data-i18n="masterplan.routes.parekklisia">→ Παρεκκλησιά</span><span class="km"></span>
+        </div>
+        <div class="row" data-route-id="pirgos">
+          <span class="swatch" style="background:#C4754D;"></span>
+          <span class="lbl" data-i18n="masterplan.routes.pirgos">→ Πύργος</span><span class="km"></span>
+        </div>
+        <div class="row" data-route-id="essoterikos" style="opacity:0.85;">
+          <span class="swatch" style="background:#fff;background-image:repeating-linear-gradient(90deg,#fff 0,#fff 4px,transparent 4px,transparent 7px);"></span>
+          <span class="lbl" data-i18n="masterplan.routes.internal">Εσωτερική πρόσβαση</span><span class="km"></span>
+        </div>
+      </div>
+      <div id="mp-routes-loading">Calculating routes via OSRM…</div>
+    </div>
+  </div>
+</div>
+
+<div class="mp-modal-backdrop" id="mp-videos-modal" aria-hidden="true">
+  <div class="mp-modal-frame">
+    <div class="mp-modal-head">
+      <h3 id="mp-videos-title" data-i18n="masterplan.videos_title">Εναέριες λήψεις</h3>
+      <button class="mp-modal-close" data-mp-close="mp-videos-modal" aria-label="Close">×</button>
+    </div>
+    <div class="mp-modal-body">
+      <div class="mp-video-options" id="mp-video-options">
+        <div class="mp-video-card" data-alt="low" data-src="">
+          <div class="alt">Χαμηλή πτήση</div>
+          <h4>Ground level</h4>
+          <p>Skimming through the olive groves and along the riverbed — closest to walking the property.</p>
+          <div class="play">▶  Play</div>
+        </div>
+        <div class="mp-video-card" data-alt="mid" data-src="">
+          <div class="alt">Μέση πτήση</div>
+          <h4>Resort altitude</h4>
+          <p>Mid-height aerial showing the residential clusters, amenities, and how the routes radiate to the surrounding villages.</p>
+          <div class="play">▶  Play</div>
+        </div>
+        <div class="mp-video-card" data-alt="high" data-src="">
+          <div class="alt">Υψηλή πτήση</div>
+          <h4>Regional context</h4>
+          <p>Wide perspective of the Limassol coast — Riverland in relation to the sea, neighboring villages, and the highway.</p>
+          <div class="play">▶  Play</div>
+        </div>
+      </div>
+      <div id="mp-video-stage">
+        <video id="mp-video-player" controls preload="metadata"></video>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- Pin descriptions in a SHARED panel below the pin list ----------
+  // Lookups via the page-level `zoneData` const.  Hovering a zone (on the
+  // SVG masterplan) or hovering a pin shows that zone's description in the
+  // shared panel.  Clicking a pin LOCKS the panel open until you click the
+  // same pin again or click another pin.  Other pins stay fully clickable.
+  function getZoneData() {
+    try { return typeof zoneData !== 'undefined' ? zoneData : null; }
+    catch (e) { return null; }
+  }
+  let _lockedZone = null;
+
+  function showZoneInPanel(zone) {
+    const panel = document.querySelector('.pin-desc-panel');
+    const zd = getZoneData();
+    if (!panel || !zd) return;
+    const data = zd[zone];
+    if (!data) { hidePanel(); return; }
+    const row = document.querySelector(`.pin-row[data-zone="${zone}"]`);
+    const color = row?.style?.getPropertyValue('--zone-color')?.trim() || '#C4A86B';
+    panel.style.setProperty('--zone-color', color);
+    panel.querySelector('.pd-eyebrow').textContent = data.label || '';
+    panel.querySelector('.pd-title').textContent = data.title || '';
+    panel.querySelector('.pd-body').textContent = data.desc || '';
+    panel.classList.add('shown');
+    // Highlight the active pin row
+    document.querySelectorAll('.pin-row').forEach(r =>
+      r.classList.toggle('active', r.dataset.zone === zone));
+  }
+  function hidePanel() {
+    document.querySelector('.pin-desc-panel')?.classList.remove('shown');
+    document.querySelectorAll('.pin-row.active').forEach(r => r.classList.remove('active'));
+  }
+  // Updates panel content if the user toggles language while a zone is shown.
+  function refreshPinDescriptions() {
+    const active = document.querySelector('.pin-row.active');
+    if (active) showZoneInPanel(active.dataset.zone);
+  }
+
+  function wrapPinsWithDescriptions() {
+    const zd = getZoneData();
+    if (!zd) return setTimeout(wrapPinsWithDescriptions, 50);
+
+    // Wrap each row in a .pin-item (mostly cosmetic — keeps the existing
+    // layout/CSS intact) and wire up hover/click → shared panel.
+    document.querySelectorAll('.zone-pins .pin-row').forEach(row => {
+      const zone = row.dataset.zone;
+      if (!zone || row.dataset.wrapped) return;
+      row.dataset.wrapped = '1';
+      const item = document.createElement('div');
+      item.className = 'pin-item';
+      item.dataset.zone = zone;
+      item.style.setProperty('--zone-color', getComputedStyle(row).getPropertyValue('--zone-color').trim());
+      row.parentNode.insertBefore(item, row);
+      item.appendChild(row);
+
+      row.addEventListener('mouseenter', () => {
+        if (_lockedZone) return;
+        showZoneInPanel(zone);
+      });
+      row.addEventListener('mouseleave', () => {
+        if (_lockedZone) return;
+        hidePanel();
+      });
+      row.addEventListener('click', () => {
+        if (_lockedZone === zone) {
+          _lockedZone = null;
+          hidePanel();
+        } else {
+          _lockedZone = zone;
+          showZoneInPanel(zone);
+        }
+      });
+    });
+
+    // Inject the shared panel right after .zone-pins (before .mp-actions).
+    const list = document.querySelector('.zone-pins');
+    if (list && !list.parentNode.querySelector('.pin-desc-panel')) {
+      const panel = document.createElement('div');
+      panel.className = 'pin-desc-panel';
+      panel.innerHTML =
+        `<div class="pd-eyebrow"></div>` +
+        `<div class="pd-title"></div>` +
+        `<div class="pd-body"></div>`;
+      list.insertAdjacentElement('afterend', panel);
+    }
+    wireZoneHoverToPins();
+  }
+
+  // ---- Hovering a zone on the SVG masterplan also drives the panel ----
+  function wireZoneHoverToPins() {
+    const zones = document.querySelectorAll('#masterplan-svg .zone');
+    if (!zones.length) return;
+    zones.forEach(zone => {
+      zone.addEventListener('mouseenter', () => {
+        if (_lockedZone) return;
+        showZoneInPanel(zone.dataset.zone);
+      });
+      zone.addEventListener('mouseleave', () => {
+        if (_lockedZone) return;
+        hidePanel();
+      });
+    });
+  }
+  wrapPinsWithDescriptions();
+
+  // Refresh descriptions when the user toggles language. The lang-toggle button
+  // flips its data-lang attribute on click; we observe that.
+  const langBtn = document.getElementById('lang-toggle');
+  if (langBtn) {
+    new MutationObserver(() => {
+      // setLanguage() mutates zoneData synchronously; refresh on next tick to be safe
+      setTimeout(refreshPinDescriptions, 0);
+    }).observe(langBtn, { attributes: true, attributeFilter: ['data-lang'] });
+  }
+
+  // ---------- Counter animation (Greek-locale formatted) ----------
+  function animateCounter(el) {
+    if (el.dataset.animated) return;
+    el.dataset.animated = '1';
+    const target = parseInt(el.dataset.count, 10) || 0;
+    const locale = el.dataset.locale || 'en-US';
+    const dur = target < 50 ? 1100 : 1900;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(target * eased).toLocaleString(locale);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  const cobs = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) animateCounter(e.target); });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.mp-counter').forEach(el => cobs.observe(el));
+
+  // ---------- Modal open/close ----------
+  function openModal(id) {
+    const m = document.getElementById(id); if (!m) return;
+    m.classList.add('open'); m.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (id === 'mp-routes-modal') setTimeout(initRoutesMap, 60);
+  }
+  function closeModal(m) {
+    m.classList.remove('open'); m.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.mp-modal-backdrop').forEach(b => {
+    b.addEventListener('click', e => { if (e.target === b) closeModal(b); });
+  });
+  document.querySelectorAll('[data-mp-close]').forEach(btn =>
+    btn.addEventListener('click', () => closeModal(document.getElementById(btn.dataset.mpClose))));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.mp-modal-backdrop.open').forEach(closeModal);
+  });
+
+  document.getElementById('mp-open-routes').onclick = () => openModal('mp-routes-modal');
+  document.getElementById('mp-open-videos').onclick = () => {
+    document.getElementById('mp-video-options').style.display = 'grid';
+    document.getElementById('mp-video-stage').classList.remove('shown');
+    const v = document.getElementById('mp-video-player'); v.pause(); v.removeAttribute('src'); v.load();
+    openModal('mp-videos-modal');
+  };
+
+  // ---------- Videos: pick → play ----------
+  document.querySelectorAll('.mp-video-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const src = card.dataset.src || '';
+      const player = document.getElementById('mp-video-player');
+      document.getElementById('mp-video-options').style.display = 'none';
+      document.getElementById('mp-video-stage').classList.add('shown');
+      if (src) { player.src = src; player.play().catch(() => {}); }
+      else {
+        document.getElementById('mp-videos-title').textContent =
+          `${card.querySelector('h4').textContent} — drop the file at assets/videos/${card.dataset.alt}.mp4`;
+      }
+    });
+  });
+
+  // ---------- Routes modal: live OSM + the client's hand-drawn KML routes ----------
+  // The KMLs in assets/kml/ were drawn by the architect/client to show the exact
+  // routes from the parcel to each surrounding destination — we plot those
+  // coordinates directly rather than letting OSRM pick its own paths.
+  const PARCEL_RV1 = [
+    [33.19197068352715, 34.76361876522253],
+    [33.19502721411456, 34.77184132314996],
+    [33.18944215051140, 34.77249321636536],
+    [33.18331945696433, 34.77340472796986],
+    [33.17993795904745, 34.76163234023668],
+  ];
+  const PARCEL_CENTER = (() => {
+    const lon = PARCEL_RV1.reduce((s, p) => s + p[0], 0) / PARCEL_RV1.length;
+    const lat = PARCEL_RV1.reduce((s, p) => s + p[1], 0) / PARCEL_RV1.length;
+    return [lon, lat];
+  })();
+  // Hand-traced routes — coordinates inlined from assets/kml/*.kml so the
+  // page works under file:// protocol (where fetch is blocked) AND when
+  // served via HTTP.  Edit/regenerate via: scripts/inline_kml_routes.py
+  const KML_ROUTES_DATA = {"moni":[[33.189432,34.772316],[33.190421,34.770193],[33.190906,34.768792],[33.190751,34.767213],[33.191648,34.766279],[33.191659,34.765248],[33.192364,34.76433],[33.193647,34.763314],[33.195161,34.760647],[33.196157,34.75981],[33.195802,34.757964],[33.196768,34.756766],[33.196096,34.753483],[33.197192,34.750552],[33.199084,34.747494],[33.200145,34.744381],[33.201281,34.7388],[33.203025,34.737598],[33.206955,34.736465],[33.205389,34.733988],[33.204758,34.731322],[33.205002,34.727776],[33.205415,34.727238],[33.202423,34.723159],[33.202657,34.722478]],"parekklisia":[[33.18915,34.772061],[33.188447,34.772499],[33.188277,34.772678],[33.187487,34.772922],[33.187054,34.773126],[33.185557,34.773203],[33.183442,34.773298],[33.181541,34.772282],[33.18146,34.772721],[33.181425,34.77308],[33.181627,34.773701],[33.181018,34.773808],[33.180648,34.774092],[33.18052,34.774469],[33.180395,34.775024],[33.179665,34.775297],[33.179423,34.77544],[33.17958,34.775609],[33.179051,34.775658],[33.178227,34.776281],[33.177683,34.776431],[33.177249,34.776061],[33.17711,34.775555],[33.17664,34.775721],[33.176683,34.775297],[33.176436,34.775088],[33.175734,34.775044],[33.175503,34.7749],[33.175566,34.774605],[33.175159,34.774237],[33.174604,34.773998],[33.174092,34.774],[33.173735,34.77223],[33.173356,34.771162],[33.173643,34.767004],[33.173615,34.766363],[33.172986,34.765285],[33.172325,34.763696],[33.171534,34.761401],[33.168904,34.757979],[33.166883,34.755272],[33.163383,34.752962],[33.162379,34.752232],[33.161057,34.749329],[33.157033,34.746328],[33.155661,34.745015],[33.155195,34.742963],[33.155869,34.741629],[33.15826,34.739972],[33.161161,34.738478],[33.161556,34.737499],[33.161382,34.736486],[33.161166,34.735534],[33.160912,34.734594],[33.160518,34.733772],[33.160226,34.732359],[33.160011,34.731247],[33.160817,34.729994],[33.161247,34.729568],[33.160985,34.728108],[33.160998,34.726217],[33.163009,34.724508],[33.163924,34.722522],[33.163841,34.720484],[33.163435,34.71907],[33.162653,34.716586]],"pirgos":[[33.189406,34.772324],[33.185391,34.765769],[33.184168,34.766875],[33.182855,34.767382],[33.181628,34.76577],[33.181225,34.763927],[33.180529,34.762129],[33.17938,34.761255],[33.176864,34.760451],[33.176666,34.7584],[33.176675,34.756401],[33.175985,34.754408],[33.175084,34.754041],[33.175816,34.753425],[33.175899,34.753495],[33.174678,34.75287],[33.174382,34.751885],[33.175383,34.750569],[33.174964,34.747669],[33.174346,34.74697],[33.174415,34.746158],[33.174482,34.745276],[33.172994,34.746172],[33.172259,34.746288],[33.171101,34.746868],[33.168469,34.746904],[33.167044,34.74678],[33.165577,34.746413],[33.163554,34.745323],[33.16185,34.745094],[33.161666,34.743148],[33.161057,34.741864],[33.161136,34.739342],[33.161251,34.738107],[33.161002,34.735266],[33.160212,34.732855],[33.160063,34.730833],[33.161413,34.729375],[33.160805,34.727977],[33.16133,34.725361],[33.163481,34.72416],[33.164074,34.722237],[33.163705,34.720085],[33.162736,34.716463]],"essoterikos":[[33.18946,34.772256],[33.188219,34.770923],[33.185464,34.765906],[33.185795,34.763293],[33.186066,34.7612],[33.187062,34.759651],[33.188551,34.758097],[33.189094,34.756861],[33.189004,34.755394],[33.188479,34.753485],[33.18805,34.751414],[33.18658,34.74915],[33.185264,34.747245],[33.184062,34.745094],[33.183308,34.744155],[33.183509,34.743514],[33.183814,34.741265],[33.182019,34.741306],[33.181805,34.740631],[33.180704,34.740387],[33.178923,34.739249],[33.17802,34.737586],[33.177847,34.735904],[33.177581,34.734911],[33.175795,34.734371],[33.173784,34.733386],[33.17202,34.732646],[33.170988,34.731683],[33.170624,34.72969],[33.169328,34.728829],[33.167872,34.727521],[33.167425,34.725953],[33.164971,34.724094],[33.16453,34.722986],[33.163903,34.721829],[33.163702,34.720554],[33.163402,34.718571],[33.162688,34.716552]]};
+
+  const ROUTE_KMLS = [
+    { id: 'moni',        label: 'Moni',            color: '#D99644' },
+    { id: 'parekklisia', label: 'Parekklisia',     color: '#7FB069' },
+    { id: 'pirgos',      label: 'Pirgos',          color: '#C4754D' },
+    { id: 'essoterikos', label: 'Internal access', color: '#FFFFFF' },
+  ];
+  const TILE_PROVIDERS = {
+    // Default — brand-matched but readable.  Voyager has roads, labels, and
+    // points-of-interest visible; we then push it toward the brand palette
+    // via the CSS filter on .leaflet-tile-pane[data-style="brand"].
+    brand: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+             subdomains: 'abcd', maxZoom: 19,
+             attribution: '© <a href="https://carto.com/attributions">CARTO</a> · © OpenStreetMap' },
+    otm:   { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+             subdomains: 'abc', maxZoom: 17,
+             attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> · © OpenStreetMap' },
+    // Light/clean OSM-style — Positron mirrors the standard OpenStreetMap.org
+    // look but is served by CartoDB which doesn't require a Referer header
+    // (the official OSM tile server blocks file:// loads).
+    osm:   { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+             subdomains: 'abcd', maxZoom: 19,
+             attribution: '© <a href="https://carto.com/attributions">CARTO</a> · © OpenStreetMap' },
+    cyclo: { url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+             subdomains: 'abc', maxZoom: 18,
+             attribution: '© CyclOSM · © OpenStreetMap' },
+  };
+  const TILE_STYLE_KEYS = { brand: 'brand', otm: 'otm', osm: 'osm', cyclo: 'cyclo' };
+  let routesMap = null, routesBaseLayer = null, routedFeatures = null;
+
+  // ---------- "Things near the project" ----------
+  // Coordinates verified via OpenStreetMap (Overpass API) — village centers
+  // and named features tagged in OSM.  See the comment at each entry for
+  // the OSM source.
+  const NEARBY_PLACES = [
+    // Moni — village is south, football pitch is ~750 m north → labels can
+    // sit naturally below each (no risk of overlap).
+    { kind: 'monastery', labelKey: 'masterplan.places.moniMon',           lonlat: [33.202002, 34.737989] },
+    { kind: 'football',  labelKey: 'masterplan.places.moniFC',            lonlat: [33.202178, 34.744707], labelPos: 'above' },
+    // Pyrgos Lemesou — OSM place=village
+    { kind: 'village',   labelKey: 'masterplan.places.pyrgosVil',         lonlat: [33.183607, 34.738219] },
+    // Parekklisia — village + football pitch sit only ~90 m apart, so the
+    // village label points NORTH (above) and the football label points
+    // SOUTH (below) so they don't collide between the two icons.
+    { kind: 'village',   labelKey: 'masterplan.places.parekklisiaVil',    lonlat: [33.161366, 34.742872], labelPos: 'above' },
+    { kind: 'football',  labelKey: 'masterplan.places.parekklisiaFC',     lonlat: [33.160483, 34.742068] },
+  ];
+
+  // Village centers (OSM) used as the destinations for the *real* driving
+  // distances shown in the legend.  KML routes still render visually as the
+  // hand-drawn paths above.
+  const VILLAGE_CENTERS = {
+    moni:        [33.202002, 34.737989],
+    parekklisia: [33.161366, 34.742872],
+    pirgos:      [33.183607, 34.738219],   // route-id 'pirgos' uses the
+                                            // OSM "Πύργος Λεμεσού" centre
+  };
+
+  // Pre-built SVGs per kind — flat, monochrome grey logos.  Single fill
+  // (--np-grey) so they read as a coherent set, like the simple symbols in
+  // the #location SVG map.  Sized at 28px in CSS.
+  const PLACE_SVGS = {
+    monastery: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <path d="M14 2v3h-3v2h3v3h-1l-2-2v-2H7v3l-2 1v18h22V10l-2-1V7h-4v2l-2 2h-1V7h3V5h-3V2h-4zm-7 11h6v3H7v-3zm12 0h6v3h-6v-3zm-9 5h6v10h-6V18z"/>
+    </svg>`,
+    village: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <path d="M6 14L11 9l5 5v10H6V14zm12-2L24 6l6 6v12H18V12zm-6 4h2v3h-2v-3zm10 0h2v4h-2v-4z"/>
+    </svg>`,
+    football: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="3" y="8" width="26" height="16" rx="1"/>
+      <line x1="16" y1="8" x2="16" y2="24"/>
+      <circle cx="16" cy="16" r="3.2"/>
+      <rect x="3" y="12" width="3.5" height="8"/>
+      <rect x="25.5" y="12" width="3.5" height="8"/>
+    </svg>`,
+    chapel: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <path d="M15 2v3h-3v2h3v3l-3 3v17h8V13l-3-3V7h3V5h-3V2h-2z"/>
+    </svg>`,
+    forest: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <path d="M8 22L4 22L7 16L4 16L8 8L12 16L9 16L12 22zM20 26L13 26L17 18L13 18L17 8L21 18L17 18L21 26L20 26zM26 22L22 22L25 16L22 16L26 8L30 16L27 16L30 22z"/>
+    </svg>`,
+    olive: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+      <ellipse cx="8" cy="14" rx="5" ry="4"/>
+      <rect x="7" y="18" width="2" height="8"/>
+      <ellipse cx="22" cy="11" rx="6" ry="5"/>
+      <rect x="21" y="16" width="2" height="10"/>
+    </svg>`,
+    river: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M2 12 Q8 6 14 12 T26 12 T30 10"/>
+      <path d="M2 20 Q8 14 14 20 T26 20 T30 18" opacity="0.55"/>
+    </svg>`,
+    vineyard: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="9"  x2="29" y2="9"/>
+      <line x1="3" y1="15" x2="29" y2="15"/>
+      <line x1="3" y1="21" x2="29" y2="21"/>
+      <line x1="3" y1="27" x2="29" y2="27"/>
+    </svg>`,
+  };
+
+  // Look up via the page-level `translations` object that setLanguage uses.
+  // Falls back to the English string, then the key, then empty.
+  function placeLabel(p) {
+    if (p.label) return p.label;
+    if (!p.labelKey) return '';
+    try {
+      const lang = document.getElementById('lang-toggle')?.dataset?.lang || 'el';
+      const t = (typeof translations !== 'undefined') ? translations : null;
+      return t?.[lang]?.[p.labelKey] || t?.en?.[p.labelKey] || p.labelKey;
+    } catch (e) { return p.labelKey; }
+  }
+
+  function refreshPlaceLabels() {
+    NEARBY_PLACES.forEach(p => {
+      if (!p.labelKey) return;
+      // Find rendered names by data-i18n attribute and update textContent
+      document.querySelectorAll(`.mp-place .mpp-name[data-i18n="${p.labelKey}"]`)
+        .forEach(el => { el.textContent = placeLabel(p); });
+    });
+  }
+  // Re-translate place names when EL/EN toggles
+  const _placeLangObserver = new MutationObserver(refreshPlaceLabels);
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('lang-toggle');
+    if (btn) _placeLangObserver.observe(btn, { attributes: true, attributeFilter: ['data-lang'] });
+  });
+
+  function addNearbyPlaces() {
+    NEARBY_PLACES.forEach(p => {
+      const svg = PLACE_SVGS[p.kind] || '';
+      const above = p.labelPos === 'above';
+      const inner = above
+        ? `<div class="mpp-name" data-i18n="${p.labelKey || ''}">${placeLabel(p)}</div>
+           <div class="mpp-svg">${svg}</div>`
+        : `<div class="mpp-svg">${svg}</div>
+           <div class="mpp-name" data-i18n="${p.labelKey || ''}">${placeLabel(p)}</div>`;
+      const icon = L.divIcon({
+        className: `mp-place mp-place-${p.kind}` + (above ? ' mpp-label-above' : ''),
+        html: `<div class="mpp-wrap">${inner}</div>`,
+        iconSize: null, iconAnchor: [0, 0],
+      });
+      L.marker([p.lonlat[1], p.lonlat[0]], { icon })
+        .addTo(routedFeatures.layerGroup);
+    });
+  }
+
+  // ---------- OSRM road snapping ----------
+  // OSRM follows real road geometry — the user's KML traces are hand-drawn
+  // approximations.  We use the KML's last point as the destination (which
+  // the user has confirmed is correct) and let OSRM produce smooth, real-road
+  // geometry from the parcel to that point.  Falls back to the smoothed KML
+  // coords if OSRM is unreachable.
+  const osrmCache = new Map();
+  async function fetchOsrmRoute(from, to) {
+    const k = `${from[0]},${from[1]}_${to[0]},${to[1]}`;
+    if (osrmCache.has(k)) return osrmCache.get(k);
+    const url =
+      `https://router.project-osrm.org/route/v1/driving/` +
+      `${from[0]},${from[1]};${to[0]},${to[1]}` +
+      `?overview=full&geometries=geojson`;
+    try {
+      const r = await fetch(url, { mode: 'cors' });
+      if (!r.ok) throw new Error('OSRM ' + r.status);
+      const data = await r.json();
+      const route = data.routes?.[0];
+      if (!route) throw new Error('OSRM: no route');
+      const out = {
+        coords: route.geometry.coordinates,        // [[lon,lat],...]
+        distance: route.distance, duration: route.duration,
+      };
+      osrmCache.set(k, out);
+      return out;
+    } catch (e) {
+      console.warn('OSRM failed:', e.message);
+      return null;
+    }
+  }
+
+  // Catmull-Rom smoothing — turns the hand-traced KML polylines into a
+  // smooth road-like curve.  Inserts `steps` interpolated points between
+  // each pair of source points; ~10 is plenty for visible smoothness.
+  function smoothPolyline(pts, steps = 10) {
+    if (pts.length < 3) return pts.slice();
+    const n = pts.length;
+    const out = [];
+    for (let i = 0; i < n - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(n - 1, i + 2)];
+      for (let s = 0; s < steps; s++) {
+        const t = s / steps, t2 = t * t, t3 = t2 * t;
+        const x = 0.5 * ((2*p1[0]) + (-p0[0]+p2[0])*t +
+                  (2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2 +
+                  (-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3);
+        const y = 0.5 * ((2*p1[1]) + (-p0[1]+p2[1])*t +
+                  (2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2 +
+                  (-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3);
+        out.push([x, y]);
+      }
+    }
+    out.push(pts[n - 1]);
+    return out;
+  }
+
+  // Rough length in km from a polyline in [lon,lat] pairs (haversine)
+  function polylineLengthKm(pts) {
+    let m = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const [lo1, la1] = pts[i - 1], [lo2, la2] = pts[i];
+      const R = 6371000;
+      const φ1 = la1 * Math.PI / 180, φ2 = la2 * Math.PI / 180;
+      const dφ = (la2 - la1) * Math.PI / 180;
+      const dλ = (lo2 - lo1) * Math.PI / 180;
+      const a = Math.sin(dφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(dλ / 2) ** 2;
+      m += R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    return m / 1000;
+  }
+
+  function setBasemap(key) {
+    const cfg = TILE_PROVIDERS[key]; if (!cfg) return;
+    if (routesBaseLayer) routesMap.removeLayer(routesBaseLayer);
+    routesBaseLayer = L.tileLayer(cfg.url, {
+      subdomains: cfg.subdomains, maxZoom: cfg.maxZoom, attribution: cfg.attribution,
+    }).addTo(routesMap);
+    // Tag the tile pane so the CSS filter applies per-provider, and add the
+    // location-section-style green wash overlay only on `brand`.
+    const pane = routesMap.getPane('tilePane');
+    if (pane) pane.dataset.style = TILE_STYLE_KEYS[key] || 'brand';
+    document.getElementById('mp-routes-map')?.classList.toggle('brand-skin', key === 'brand');
+    if (routedFeatures?.layerGroup) routedFeatures.layerGroup.bringToFront();
+  }
+
+  async function initRoutesMap() {
+    if (typeof L === 'undefined') { setTimeout(initRoutesMap, 200); return; }
+    if (routesMap) { routesMap.invalidateSize(); return; }
+
+    routesMap = L.map('mp-routes-map', {
+      zoomControl: true, scrollWheelZoom: true,
+      // SVG renderer (preferCanvas:false) so polylines become real <path> nodes,
+      // which we can animate with stroke-dasharray like the #location map.
+      preferCanvas: false,
+      minZoom: 11, maxZoom: 18,
+    });
+    // Center on the parcel.  Zoom 14 frames the project + immediate
+    // surroundings without the routes overpowering the view; visitor zooms
+    // out to follow the routes to the villages.
+    routesMap.setView([PARCEL_CENTER[1], PARCEL_CENTER[0]], 14);
+    setBasemap('brand');
+
+    routedFeatures = { layerGroup: L.layerGroup().addTo(routesMap) };
+
+    // Soft project-area fill — gives a sense of where the project sits
+    // without revealing the exact parcel boundary.  No stroke, low opacity,
+    // gold tint blending into the dark basemap.
+    L.polygon(PARCEL_RV1.map(([lo, la]) => [la, lo]), {
+      stroke: false, fillColor: '#C4A86B', fillOpacity: 0.22,
+      interactive: false, className: 'mp-project-area',
+    }).addTo(routedFeatures.layerGroup);
+
+    // Routes converge at a single starting point on the parcel — use that as
+    // the logo anchor so the medallion's bottom edge touches the start of
+    // every drawn route.
+    const routeStartPts = ROUTE_KMLS
+      .map(r => KML_ROUTES_DATA[r.id]?.[0])
+      .filter(Boolean);
+    const ROUTE_START = routeStartPts.length ? [
+      routeStartPts.reduce((s, p) => s + p[0], 0) / routeStartPts.length,
+      routeStartPts.reduce((s, p) => s + p[1], 0) / routeStartPts.length,
+    ] : PARCEL_CENTER;
+
+    // Parcel marker — Riverland logo, anchored at its BOTTOM-center so the
+    // bottom edge of the medallion sits right on the route start point.
+    const logoIcon = L.divIcon({
+      className: 'mp-parcel-marker-icon',
+      html: `<div style="position:relative;width:48px;height:48px;
+               filter:drop-shadow(0 2px 10px rgba(0,0,0,0.7));">
+        <div style="position:absolute;inset:-6px;border-radius:50%;
+                    background:radial-gradient(circle,rgba(196,168,107,0.45) 0%,
+                    rgba(196,168,107,0) 70%);"></div>
+        <div style="position:absolute;inset:0;border-radius:50%;
+                    background:rgba(14,26,14,0.8);
+                    border:2px solid rgba(196,168,107,0.85);
+                    display:flex;align-items:center;justify-content:center;">
+          <img src="assets/riverland_logo.png" alt="River Land"
+               style="width:34px;height:34px;object-fit:contain;
+                      filter:drop-shadow(0 0 4px rgba(196,168,107,0.6));"/>
+        </div></div>`,
+      iconSize: [48, 48], iconAnchor: [24, 48],
+    });
+    L.marker([ROUTE_START[1], ROUTE_START[0]], { icon: logoIcon })
+      .addTo(routedFeatures.layerGroup);
+
+    // ---- Stylized place markers near the project, painted in the same
+    // dark-green / gold palette as the #location SVG map.  These are real
+    // nearby features a visitor would find walking from the parcel —
+    // not skyscrapers, not made up.
+    addNearbyPlaces();
+
+    // Load each hand-traced KML route and plot it
+    document.getElementById('mp-routes-loading').classList.add('shown');
+    const routeStats = {};   // id -> { km }
+    const drawableLines = []; // { id, polyline, distanceKm }
+    // Plot the client's hand-drawn KML routes (smoothed for road-like
+     // curves).  No OSRM — the KMLs are the authoritative paths.
+    ROUTE_KMLS.forEach(route => {
+      const rawPts = KML_ROUTES_DATA[route.id];
+      if (!rawPts || rawPts.length < 2) return;
+      const pts = smoothPolyline(rawPts, 12);
+      const latlngs = pts.map(([lo, la]) => [la, lo]);
+      const km = polylineLengthKm(rawPts);
+      routeStats[route.id] = { km };
+      const isInternal = route.id === 'essoterikos';
+      // Dark casing under the colored highlight for legibility
+      L.polyline(latlngs, {
+        color: '#0E1A0E', weight: isInternal ? 3.5 : 4.5,
+        opacity: 0.55, lineCap: 'round', lineJoin: 'round',
+      }).addTo(routedFeatures.layerGroup);
+      const line = L.polyline(latlngs, {
+        color: route.color, weight: isInternal ? 1.5 : 2.5,
+        opacity: 1, lineCap: 'round', lineJoin: 'round',
+        dashArray: isInternal ? '6 5' : null,
+        className: 'mp-route',
+      })
+      .bindTooltip(`${route.label} — ${km.toFixed(1)} km`, { sticky: true })
+      .addTo(routedFeatures.layerGroup);
+      drawableLines.push({ id: route.id, polyline: line });
+    });
+
+    // Animate the route strokes drawing in, staggered.  We grab Leaflet's
+    // generated <path> for each polyline, set stroke-dasharray to its actual
+    // length, then trigger the CSS animation by adding the .drawing class.
+    drawableLines.forEach((d, i) => {
+      const path = d.polyline.getElement?.();
+      if (!path || !path.getTotalLength) return;
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      // stagger
+      setTimeout(() => path.classList.add('drawing'), 180 + i * 220);
+    });
+
+    // Initial legend km from KML lengths (instant); then refine each village
+    // row with the OSRM driving distance from the parcel-start to the
+    // village CENTER as soon as the OSRM responses arrive.
+    document.querySelectorAll('#mp-routes-legend .row[data-route-id]').forEach(row => {
+      const id = row.dataset.routeId;
+      const stat = routeStats[id];
+      const km = row.querySelector('.km');
+      if (stat && km) km.textContent = stat.km.toFixed(1) + ' km';
+    });
+    // Real OSRM driving distances — keys are route ids, values are the
+    // OSM-tagged village CENTRES (see VILLAGE_CENTERS).
+    Object.entries(VILLAGE_CENTERS).forEach(async ([routeId, dest]) => {
+      try {
+        const r = await fetchOsrmRoute(ROUTE_START, dest);
+        if (!r) return;
+        const cell = document.querySelector(
+          `#mp-routes-legend .row[data-route-id="${routeId}"] .km`);
+        if (cell) cell.textContent = (r.distance / 1000).toFixed(1) + ' km';
+      } catch (e) { /* keep the KML fallback */ }
+    });
+    // Default view stays on the project (set above) so the masterplan is the
+    // focus; the visitor zooms out to follow the routes if they want.
+    document.getElementById('mp-routes-loading').classList.remove('shown');
+
+    // After the routes finish drawing (last route ends ~3.6 s in, see the
+    // 180 + i*220 ms stagger and 2.8 s draw), ease out to a wider frame
+    // that includes the surrounding landmarks.  Triggering this earlier
+    // interrupts the stroke animation and makes routes look glitchy.
+    setTimeout(() => {
+      const pts = [
+        ...PARCEL_RV1,
+        ...NEARBY_PLACES.map(p => p.lonlat),
+        ...Object.values(VILLAGE_CENTERS),
+      ];
+      const lats = pts.map(p => p[1]);
+      const lngs = pts.map(p => p[0]);
+      routesMap.flyToBounds([
+        [Math.min(...lats), Math.min(...lngs)],
+        [Math.max(...lats), Math.max(...lngs)],
+      ], { padding: [60, 60], duration: 1.8, maxZoom: 14, easeLinearity: 0.35 });
+    }, 3700);
+  }
+
+  document.getElementById('mp-routes-basemap').addEventListener('change',
+    e => setBasemap(e.target.value));
+
+  // Re-run setLanguage so the modal HTML (parsed AFTER the main script's
+  // setLanguage call) picks up its data-i18n translations on first load.
+  const _curLang = document.getElementById('lang-toggle')?.dataset?.lang || 'el';
+  if (typeof setLanguage === 'function') setLanguage(_curLang);
+})();
+</script>
+
 </body>
 </html>

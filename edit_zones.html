@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>Zone Editor — River Land</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.0.0/dist/maplibre-gl.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
@@ -61,13 +63,30 @@ body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', sans-serif; ov
 }
 
 canvas { display: block; cursor: crosshair; }
+#map3d { position: fixed; top: 0; left: 260px; right: 0; bottom: 0; display: none; }
+#map3d.active { display: block; }
+.maplibregl-ctrl-attrib { font-size: 10px !important; }
+.layer-btn { background: #2a2a2a; }
+.layer-btn.active { background: #c8a96e; color: #000; border-color: #c8a96e; font-weight: 600; }
+#load-error {
+  position: fixed; top: 50%; left: calc(50% + 130px); transform: translate(-50%, -50%);
+  background: #2a1010; border: 2px solid #c44; padding: 22px 26px; border-radius: 8px;
+  color: #fff; font-size: 13px; line-height: 1.6; max-width: 460px; display: none; z-index: 300;
+}
+#load-error h3 { color: #ff8888; margin-bottom: 8px; }
+#load-error code { background: #000; padding: 2px 6px; border-radius: 3px; color: #c8a96e; }
 </style>
 </head>
 <body>
+<!-- Bounds metadata loaded as a JS global so the editor works under file:// (no fetch needed) -->
+<script src="assets/masterplan/masterplan_bounds.js"></script>
 
 <div id="toolbar">
-  <h2>✏️ ZONE EDITOR</h2>
-  <p class="sub">Drag control points to adjust auto-detected zone boundaries. Add or remove points as needed.</p>
+  <h2>🗺️ MASTERPLAN ZONE EDITOR</h2>
+  <p class="sub">Zones drawn on real terrain. Coordinates are stored in lat/lon and survive any future re-render.</p>
+
+  <h3>Site</h3>
+  <div id="site-info" style="font-size:11px;color:#aaa;line-height:1.5;margin-bottom:8px;">Loading…</div>
 
   <h3>Zones</h3>
   <div id="zone-buttons"></div>
@@ -80,14 +99,31 @@ canvas { display: block; cursor: crosshair; }
   <button class="action-btn" id="redoBtn">↪ Redo</button>
 
   <h3>View</h3>
+  <div style="display:flex;gap:4px;margin:4px 0 8px;flex-wrap:wrap;">
+    <button class="action-btn layer-btn active" data-layer="contour" style="flex:1;min-width:70px;">🗻 Contour</button>
+    <button class="action-btn layer-btn" data-layer="satellite" style="flex:1;min-width:70px;">🛰️ Satellite</button>
+    <button class="action-btn layer-btn" data-layer="3d" style="flex:1;min-width:60px;">🧊 3D</button>
+  </div>
+  <div id="threed-controls" style="display:none;margin:4px 0 8px;">
+    <label style="font-size:11px;display:block;margin:3px 0;">
+      Exaggeration: <input type="range" id="exag" min="1" max="5" step="0.1" value="2" style="width:80px;vertical-align:middle;">
+      <span id="exagVal">2.0×</span>
+    </label>
+    <label style="font-size:11px;display:block;margin:3px 0;">
+      3D base: <select id="threed-base" style="background:#222;color:#fff;border:1px solid #555;padding:2px 4px;font-size:11px;">
+        <option value="contour">Contour</option>
+        <option value="satellite" selected>Satellite</option>
+      </select>
+    </label>
+    <p style="font-size:10px;color:#888;margin-top:4px;line-height:1.5;">
+      Right-click + drag to tilt/rotate · Scroll to zoom · Editing disabled in 3D
+    </p>
+  </div>
   <label style="font-size:11px;display:block;margin:3px 0;">
-    Fill opacity: <input type="range" id="fillOpacity" min="0" max="100" value="15" style="width:100px;vertical-align:middle;">
+    Fill opacity: <input type="range" id="fillOpacity" min="0" max="100" value="35" style="width:100px;vertical-align:middle;">
   </label>
   <label style="font-size:11px;display:block;margin:3px 0;">
-    <input type="checkbox" id="showGuide"> Zone drawings overlay
-  </label>
-  <label style="font-size:11px;display:block;margin:3px 0;">
-    Guide opacity: <input type="range" id="guideOpacity" min="0" max="100" value="40" style="width:100px;vertical-align:middle;">
+    <input type="checkbox" id="showParcel" checked> Show parcel outline
   </label>
   <label style="font-size:11px;display:block;margin:3px 0;">
     <input type="checkbox" id="showHandles" checked> Show control handles
@@ -96,6 +132,10 @@ canvas { display: block; cursor: crosshair; }
   <h3>Export</h3>
   <button class="action-btn primary" id="exportBtn">📋 Export SVG Paths</button>
   <button class="action-btn" id="exportPolyBtn">Export Polygons</button>
+  <button class="action-btn" id="exportGeoBtn">🌍 Export GeoJSON</button>
+  <button class="action-btn" id="saveZonesBtn">💾 Save (download)</button>
+  <button class="action-btn" id="loadZonesBtn">📂 Load…</button>
+  <input type="file" id="loadZonesInput" accept=".json" style="display:none;">
 
   <div class="help-section">
     <h3>Shortcuts</h3>
@@ -112,6 +152,18 @@ canvas { display: block; cursor: crosshair; }
 
 <div id="status">Ready — select a zone to edit</div>
 
+<div id="load-error">
+  <h3>⚠️ Couldn't load the masterplan base</h3>
+  <p>The editor expects two files in <code>assets/masterplan/</code>:</p>
+  <ul style="margin:6px 0 6px 18px;">
+    <li><code>masterplan_contour.png</code></li>
+    <li><code>masterplan_satellite.png</code></li>
+    <li><code>masterplan_bounds.js</code></li>
+  </ul>
+  <p>Run <code>python build_masterplan.py</code> to generate them, then reload.<br>
+  If you opened this file directly (not via a server), check that the <code>assets/</code> folder is alongside <code>edit_zones.html</code>.</p>
+</div>
+
 <div id="export-modal">
   <button class="close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
   <h3 id="export-title">Export</h3>
@@ -119,6 +171,7 @@ canvas { display: block; cursor: crosshair; }
 </div>
 
 <canvas id="c"></canvas>
+<div id="map3d"></div>
 
 <script>
 // ==================== ZONE DATA (auto-detected paths) ====================
@@ -171,8 +224,8 @@ for (const [k, v] of Object.entries(ZONES_INIT)) {
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const mpImg = new Image();
-const zdImg = new Image();
-let mpLoaded = false, zdLoaded = false;
+let mpLoaded = false;
+let bounds = null;             // { minLon, maxLon, minLat, maxLat, width, height, polygon, ... }
 
 let activeZone = null;
 let selectedPoint = -1;
@@ -189,17 +242,264 @@ let isPanning = false, panStartX = 0, panStartY = 0;
 let undoStack = [];
 let redoStack = [];
 
-// Guide overlay transform
-const guideSX = 1.16, guideSY = 1.20, guideOX = 0, guideOY = 160;
+// ---------- Geo helpers ----------
+function pxToLonLat(px, py) {
+  const u = px / bounds.width;
+  const v = py / bounds.height;
+  return [
+    bounds.minLon + u * (bounds.maxLon - bounds.minLon),
+    bounds.maxLat - v * (bounds.maxLat - bounds.minLat),
+  ];
+}
+function lonLatToPx(lon, lat) {
+  return [
+    (lon - bounds.minLon) / (bounds.maxLon - bounds.minLon) * bounds.width,
+    (bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat) * bounds.height,
+  ];
+}
 
-mpImg.onload = () => { mpLoaded = true; init(); };
-zdImg.onload = () => { zdLoaded = true; };
-mpImg.src = 'assets/masterplan-new-hd.jpg';
-zdImg.src = 'assets/masterpanPNG/zone drawings.png';
+// Old zones were drawn against a 1024x1295 raster.  We carry their shapes onto
+// the new geo-aligned base by uniform-scaling them into the parcel bbox so they
+// give a starting layout the user can fine-tune.
+const OLD_W = 1024, OLD_H = 1295;
+function seedZonesFromInit() {
+  // bbox of parcel polygon (lat/lon)
+  const lons = bounds.polygon.map(p => p.lon);
+  const lats = bounds.polygon.map(p => p.lat);
+  const pMinLon = Math.min(...lons), pMaxLon = Math.max(...lons);
+  const pMinLat = Math.min(...lats), pMaxLat = Math.max(...lats);
+  // Map old-pixel space [0..OLD_W]x[0..OLD_H] -> parcel bbox in image-pixel space
+  const [pMinX, pMinY] = lonLatToPx(pMinLon, pMaxLat); // top-left of bbox
+  const [pMaxX, pMaxY] = lonLatToPx(pMaxLon, pMinLat); // bottom-right of bbox
+  const sx = (pMaxX - pMinX) / OLD_W;
+  const sy = (pMaxY - pMinY) / OLD_H;
+  for (const [name, zone] of Object.entries(ZONES)) {
+    zone.points = zone.points.map(([x, y]) => {
+      const px = pMinX + x * sx;
+      const py = pMinY + y * sy;
+      return pxToLonLat(px, py);   // store as [lon, lat]
+    });
+  }
+}
+
+// Active base layer + filename map (filled from bounds metadata)
+let activeLayer = 'contour';
+let layerFiles = {};
+
+async function loadAll() {
+  // Prefer the inlined global (works under file://); fall back to fetch.
+  if (window.MASTERPLAN_BOUNDS) {
+    bounds = window.MASTERPLAN_BOUNDS;
+  } else {
+    try {
+      const r = await fetch('assets/masterplan/masterplan_bounds.json');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      bounds = await r.json();
+    } catch (err) {
+      document.getElementById('load-error').style.display = 'block';
+      console.error('Bounds load failed:', err);
+      return;
+    }
+  }
+  // Build filename lookup from bounds.layers
+  if (bounds.layers && bounds.layers.length) {
+    for (const L of bounds.layers) layerFiles[L.key] = L.filename;
+  } else {
+    // Backward-compat with the old single-base output
+    layerFiles.contour = 'masterplan_base.png';
+  }
+  if (!layerFiles[activeLayer]) activeLayer = Object.keys(layerFiles)[0];
+  mpImg.onload = () => { mpLoaded = true; init(); };
+  mpImg.onerror = () => {
+    document.getElementById('load-error').style.display = 'block';
+    document.getElementById('load-error').querySelector('p').innerHTML =
+      'Could not load <code>assets/masterplan/' + layerFiles[activeLayer] + '</code>. ' +
+      'Run <code>python build_masterplan.py</code> to generate it.';
+  };
+  mpImg.src = 'assets/masterplan/' + layerFiles[activeLayer];
+}
+
+function switchLayer(key) {
+  if (key === activeLayer) return;
+  // 3D mode: show the MapLibre container, hide the canvas
+  if (key === '3d') {
+    activeLayer = '3d';
+    document.querySelectorAll('.layer-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.layer === key));
+    document.getElementById('threed-controls').style.display = 'block';
+    document.getElementById('c').style.display = 'none';
+    document.getElementById('map3d').classList.add('active');
+    init3D();
+    setStatus('3D view — right-click drag to tilt/rotate · scroll to zoom');
+    return;
+  }
+  // Going back to a 2D layer
+  if (!layerFiles[key]) return;
+  activeLayer = key;
+  document.getElementById('threed-controls').style.display = 'none';
+  document.getElementById('c').style.display = 'block';
+  document.getElementById('map3d').classList.remove('active');
+  mpLoaded = false;
+  mpImg.src = 'assets/masterplan/' + layerFiles[key];
+  document.querySelectorAll('.layer-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.layer === key));
+  setStatus('Switched to ' + key + ' view');
+}
+
+// ==================== 3D (MapLibre GL JS) ====================
+let map3d = null;
+
+function zonesGeoJSON() {
+  const features = [];
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (zone.points.length < 3) continue;
+    const ring = zone.points.map(p => [p[0], p[1]]);
+    ring.push(ring[0]);
+    features.push({
+      type: 'Feature',
+      properties: { id: name, label: zone.label, color: zone.color },
+      geometry: { type: 'Polygon', coordinates: [ring] },
+    });
+  }
+  return { type: 'FeatureCollection', features };
+}
+
+function parcelGeoJSON() {
+  const ring = bounds.polygon.map(p => [p.lon, p.lat]);
+  ring.push(ring[0]);
+  return {
+    type: 'FeatureCollection',
+    features: [{
+      type: 'Feature', properties: { kind: 'parcel' },
+      geometry: { type: 'Polygon', coordinates: [ring] },
+    }],
+  };
+}
+
+function init3D() {
+  if (map3d) {
+    // Already initialized — refresh zones (in case user edited in 2D)
+    if (map3d.getSource('zones')) {
+      map3d.getSource('zones').setData(zonesGeoJSON());
+    }
+    map3d.resize();
+    return;
+  }
+  if (!window.maplibregl) {
+    setStatus('⚠️ MapLibre GL not loaded (check internet)');
+    return;
+  }
+
+  const baseSrc = document.getElementById('threed-base').value;
+  const tilesContour = ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'];
+  const tilesSat = ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'];
+
+  const style = {
+    version: 8,
+    sources: {
+      'base-contour': { type: 'raster', tiles: tilesContour, tileSize: 256, maxzoom: 17,
+        attribution: '© OpenTopoMap (CC-BY-SA), © OSM contributors' },
+      'base-sat':     { type: 'raster', tiles: tilesSat,     tileSize: 256, maxzoom: 19,
+        attribution: 'Imagery © Esri, Maxar, Earthstar Geographics' },
+      'terrain-dem':  { type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        encoding: 'terrarium', tileSize: 256, maxzoom: 15 },
+      'parcel': { type: 'geojson', data: parcelGeoJSON() },
+      'zones':  { type: 'geojson', data: zonesGeoJSON() },
+    },
+    layers: [
+      { id: 'l-contour', type: 'raster', source: 'base-contour',
+        layout: { visibility: baseSrc === 'contour' ? 'visible' : 'none' } },
+      { id: 'l-sat',     type: 'raster', source: 'base-sat',
+        layout: { visibility: baseSrc === 'satellite' ? 'visible' : 'none' } },
+      { id: 'l-hillshade', type: 'hillshade', source: 'terrain-dem',
+        paint: {
+          'hillshade-illumination-direction': 315,
+          'hillshade-exaggeration': 0.5,
+          'hillshade-shadow-color': '#3a2d18',
+          'hillshade-highlight-color': '#fff8e7',
+        } },
+      { id: 'l-zone-fill', type: 'fill', source: 'zones',
+        paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.35 } },
+      { id: 'l-zone-line', type: 'line', source: 'zones',
+        paint: { 'line-color': ['get', 'color'], 'line-width': 2.5 } },
+      { id: 'l-parcel-line', type: 'line', source: 'parcel',
+        paint: { 'line-color': '#ffd062', 'line-width': 3, 'line-dasharray': [3, 2] } },
+    ],
+    terrain: { source: 'terrain-dem', exaggeration: 2 },
+  };
+
+  const cLon = (bounds.minLon + bounds.maxLon) / 2;
+  const cLat = (bounds.minLat + bounds.maxLat) / 2;
+  map3d = new maplibregl.Map({
+    container: 'map3d',
+    style,
+    center: [cLon, cLat],
+    zoom: 14.6,
+    pitch: 60,
+    bearing: -20,
+    maxPitch: 80,
+    hash: false,
+  });
+  map3d.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+  map3d.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+
+  map3d.on('load', () => {
+    // Fit to parcel
+    const lons = bounds.polygon.map(p => p.lon);
+    const lats = bounds.polygon.map(p => p.lat);
+    map3d.fitBounds(
+      [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+      { padding: 80, pitch: 60, bearing: -20, duration: 0 }
+    );
+  });
+
+  // Wire UI
+  document.getElementById('exag').addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    document.getElementById('exagVal').textContent = v.toFixed(1) + '×';
+    if (map3d.getTerrain()) map3d.setTerrain({ source: 'terrain-dem', exaggeration: v });
+  });
+  document.getElementById('threed-base').addEventListener('change', e => {
+    const k = e.target.value;
+    map3d.setLayoutProperty('l-contour', 'visibility', k === 'contour' ? 'visible' : 'none');
+    map3d.setLayoutProperty('l-sat',     'visibility', k === 'satellite' ? 'visible' : 'none');
+  });
+}
+
+loadAll();
 
 // ==================== INIT ====================
+let initDone = false;
 function init() {
-  if (!mpLoaded) return;
+  if (!mpLoaded || !bounds) return;
+  if (initDone) { draw(); return; }   // a layer-switch reload — keep zones intact
+  try { _doInit(); initDone = true; }
+  catch (err) {
+    console.error('init failed:', err);
+    setStatus('init error: ' + err.message);
+    document.getElementById('site-info').textContent = 'init error: ' + err.message;
+  }
+}
+function _doInit() {
+  seedZonesFromInit();
+  // Site info readout
+  const info = document.getElementById('site-info');
+  let extra = '';
+  if (bounds.elevMin != null && bounds.elevMax != null) {
+    extra += `Elev ${bounds.elevMin.toFixed(0)}–${bounds.elevMax.toFixed(0)} m ` +
+             `(Δ ${(bounds.elevMax - bounds.elevMin).toFixed(0)} m)<br>`;
+  }
+  if (bounds.contourStep) extra += `Contours every ${bounds.contourStep} m<br>`;
+  if (bounds.layers) {
+    extra += `Layers: ${bounds.layers.map(l => l.key).join(', ')}<br>`;
+  }
+  info.innerHTML =
+    `<b style="color:#c8a96e">Riverland (rv1)</b><br>` +
+    `Lat ${bounds.minLat.toFixed(4)}…${bounds.maxLat.toFixed(4)}<br>` +
+    `Lon ${bounds.minLon.toFixed(4)}…${bounds.maxLon.toFixed(4)}<br>` +
+    `Span ${Math.round(bounds.spanXMeters)} × ${Math.round(bounds.spanYMeters)} m<br>` +
+    extra;
   buildZoneButtons();
   resize();
   window.addEventListener('resize', resize);
@@ -217,17 +517,28 @@ function resize() {
 }
 
 // ==================== COORDINATE TRANSFORMS ====================
+// Image-pixel <-> canvas-pixel
 function toCanvas(mx, my) {
   const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
   const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
   return [mx * displayScale + ox, my * displayScale + oy];
 }
-
 function toMasterplan(cx, cy) {
   const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
   const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
   return [(cx - ox) / displayScale, (cy - oy) / displayScale];
 }
+// Lat/lon <-> canvas-pixel
+function geoToCanvas(lon, lat) {
+  const [mx, my] = lonLatToPx(lon, lat);
+  return toCanvas(mx, my);
+}
+function canvasToGeo(cx, cy) {
+  const [mx, my] = toMasterplan(cx, cy);
+  return pxToLonLat(mx, my);
+}
+// Elevation lookup (bilinear on the original elevation grid would be ideal;
+// for now we just expose elev range so cursor readout shows context).
 
 // ==================== CATMULL-ROM SPLINE ====================
 function getCatmullRomPoint(p0, p1, p2, p3, t) {
@@ -238,12 +549,13 @@ function getCatmullRomPoint(p0, p1, p2, p3, t) {
   ];
 }
 
-function drawSmoothZone(pts, color, fillColor, fillOpacity, isActive) {
-  if (pts.length < 3) return;
+// pts here are [lon, lat]; we project to image-pixel space for spline math
+// then to canvas for rendering.
+function drawSmoothZone(geoPts, color, fillColor, fillOpacity, isActive) {
+  if (geoPts.length < 3) return;
+  const pts = geoPts.map(([lon, lat]) => lonLatToPx(lon, lat));
   const n = pts.length;
-  const steps = 12; // subdivisions between each pair
-
-  // Build smooth curve points
+  const steps = 12;
   const curvePoints = [];
   for (let i = 0; i < n; i++) {
     const p0 = pts[(i - 1 + n) % n];
@@ -255,7 +567,6 @@ function drawSmoothZone(pts, color, fillColor, fillOpacity, isActive) {
     }
   }
 
-  // Draw filled area
   const opacity = document.getElementById('fillOpacity').value / 100;
   ctx.beginPath();
   const [sx, sy] = toCanvas(curvePoints[0][0], curvePoints[0][1]);
@@ -268,7 +579,6 @@ function drawSmoothZone(pts, color, fillColor, fillOpacity, isActive) {
   ctx.fillStyle = fillColor + opacity + ')';
   ctx.fill();
 
-  // Draw outline
   ctx.strokeStyle = color;
   ctx.lineWidth = isActive ? 3 : 1.5;
   ctx.globalAlpha = isActive ? 1 : 0.7;
@@ -276,8 +586,9 @@ function drawSmoothZone(pts, color, fillColor, fillOpacity, isActive) {
   ctx.globalAlpha = 1;
 }
 
-function drawBoundaryZone(pts, isActive) {
-  if (pts.length < 3) return;
+function drawBoundaryZone(geoPts, isActive) {
+  if (geoPts.length < 3) return;
+  const pts = geoPts.map(([lon, lat]) => lonLatToPx(lon, lat));
   const n = pts.length;
   const steps = 12;
   const curvePoints = [];
@@ -330,26 +641,31 @@ function drawBoundaryZone(pts, isActive) {
 
 // ==================== DRAW ====================
 function draw() {
-  if (!mpLoaded) return;
+  if (!mpLoaded || !bounds) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   const ox = (canvas.width - mpImg.width * displayScale) / 2 + panX;
   const oy = (canvas.height - mpImg.height * displayScale) / 2 + panY;
 
-  // Masterplan
+  // Contour-rendered base
   ctx.drawImage(mpImg, ox, oy, mpImg.width * displayScale, mpImg.height * displayScale);
 
-  // Guide overlay
-  if (zdLoaded && document.getElementById('showGuide')?.checked) {
-    const ga = (document.getElementById('guideOpacity')?.value || 40) / 100;
-    ctx.globalAlpha = ga;
-    const gw = zdImg.width * guideSX * displayScale;
-    const gh = zdImg.height * guideSY * displayScale;
-    ctx.drawImage(zdImg, ox + guideOX * displayScale, oy + guideOY * displayScale, gw, gh);
-    ctx.globalAlpha = 1;
+  // Parcel polygon outline
+  if (document.getElementById('showParcel')?.checked) {
+    ctx.beginPath();
+    bounds.polygon.forEach((p, i) => {
+      const [cx, cy] = geoToCanvas(p.lon, p.lat);
+      if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,220,140,0.95)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 6]);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
-  // Draw all zones
+  // Zones
   const showHandles = document.getElementById('showHandles')?.checked;
   const fillOpacity = document.getElementById('fillOpacity').value / 100;
 
@@ -361,10 +677,10 @@ function draw() {
       drawSmoothZone(zone.points, zone.color, zone.fill, fillOpacity, isActive);
     }
 
-    // Draw control points
     if (showHandles || isActive) {
       for (let i = 0; i < zone.points.length; i++) {
-        const [px, py] = toCanvas(zone.points[i][0], zone.points[i][1]);
+        const [lon, lat] = zone.points[i];
+        const [px, py] = geoToCanvas(lon, lat);
         const isSelected = isActive && i === selectedPoint;
         const r = isSelected ? 7 : (isActive ? 5 : 3);
 
@@ -390,7 +706,6 @@ function draw() {
           ctx.globalAlpha = 1;
         }
 
-        // Point index label (only for active zone)
         if (isActive && displayScale > 0.5) {
           ctx.font = '9px Segoe UI';
           ctx.fillStyle = '#fff';
@@ -400,15 +715,18 @@ function draw() {
       }
     }
 
-    // Zone label
+    // Zone label (centroid in geo space)
     if (zone.points.length > 0) {
-      const cx = zone.points.reduce((s, p) => s + p[0], 0) / zone.points.length;
-      const cy = zone.points.reduce((s, p) => s + p[1], 0) / zone.points.length;
-      const [lx, ly] = toCanvas(cx, cy);
+      const clon = zone.points.reduce((s, p) => s + p[0], 0) / zone.points.length;
+      const clat = zone.points.reduce((s, p) => s + p[1], 0) / zone.points.length;
+      const [lx, ly] = geoToCanvas(clon, clat);
       ctx.font = `bold ${isActive ? 13 : 11}px Segoe UI`;
       ctx.fillStyle = zone.color;
       ctx.textAlign = 'center';
       ctx.globalAlpha = isActive ? 1 : 0.6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.lineWidth = 3;
+      ctx.strokeText(zone.label.toUpperCase(), lx, ly);
       ctx.fillText(zone.label.toUpperCase(), lx, ly);
       ctx.globalAlpha = 1;
     }
@@ -526,7 +844,7 @@ function findNearestPoint(cx, cy, maxDist = 15) {
   const pts = ZONES[activeZone].points;
   let best = -1, bestDist = maxDist;
   for (let i = 0; i < pts.length; i++) {
-    const [px, py] = toCanvas(pts[i][0], pts[i][1]);
+    const [px, py] = geoToCanvas(pts[i][0], pts[i][1]);
     const d = Math.hypot(cx - px, cy - py);
     if (d < bestDist) { bestDist = d; best = i; }
   }
@@ -534,18 +852,19 @@ function findNearestPoint(cx, cy, maxDist = 15) {
 }
 
 // ==================== FIND INSERT POSITION ====================
+// Work in image-pixel space so that x/y are in the same metric units.
 function findInsertIndex(mx, my) {
   if (!activeZone) return -1;
-  const pts = ZONES[activeZone].points;
-  const n = pts.length;
+  const geoPts = ZONES[activeZone].points;
+  const n = geoPts.length;
   if (n < 2) return n;
+  const pts = geoPts.map(([lon, lat]) => lonLatToPx(lon, lat));
 
   let bestIdx = 0, bestDist = Infinity;
   for (let i = 0; i < n; i++) {
     const j = (i + 1) % n;
     const ax = pts[i][0], ay = pts[i][1];
     const bx = pts[j][0], by = pts[j][1];
-    // Distance from point to line segment
     const dx = bx - ax, dy = by - ay;
     const len2 = dx * dx + dy * dy;
     let t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / len2));
@@ -574,7 +893,8 @@ canvas.addEventListener('mousedown', e => {
     const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
     const idx = findInsertIndex(mx, my);
     saveState();
-    ZONES[activeZone].points.splice(idx, 0, [Math.round(mx*10)/10, Math.round(my*10)/10]);
+    const [lon, lat] = pxToLonLat(mx, my);
+    ZONES[activeZone].points.splice(idx, 0, [lon, lat]);
     selectedPoint = idx;
     addPointMode = false;
     updateButtons();
@@ -584,8 +904,8 @@ canvas.addEventListener('mousedown', e => {
   }
 
   if (moveZoneMode) {
-    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
-    moveStartMP = [mx, my];
+    const [lon, lat] = canvasToGeo(e.offsetX, e.offsetY);
+    moveStartMP = [lon, lat];
     dragging = true;
     saveState();
     canvas.style.cursor = 'move';
@@ -618,40 +938,40 @@ canvas.addEventListener('mousemove', e => {
   }
 
   if (dragging && activeZone && moveZoneMode && moveStartMP) {
-    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
-    const dx = mx - moveStartMP[0];
-    const dy = my - moveStartMP[1];
-    moveStartMP = [mx, my];
+    const [lon, lat] = canvasToGeo(e.offsetX, e.offsetY);
+    const dLon = lon - moveStartMP[0];
+    const dLat = lat - moveStartMP[1];
+    moveStartMP = [lon, lat];
     for (const p of ZONES[activeZone].points) {
-      p[0] = Math.round((p[0] + dx) * 10) / 10;
-      p[1] = Math.round((p[1] + dy) * 10) / 10;
+      p[0] += dLon;
+      p[1] += dLat;
     }
     draw();
     return;
   }
 
   if (dragging && activeZone && selectedPoint >= 0) {
-    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
-    ZONES[activeZone].points[selectedPoint] = [Math.round(mx*10)/10, Math.round(my*10)/10];
+    const [lon, lat] = canvasToGeo(e.offsetX, e.offsetY);
+    ZONES[activeZone].points[selectedPoint] = [lon, lat];
     draw();
     return;
   }
 
-  // Update cursor based on hover
+  // Hover cursor
   if (activeZone && !addPointMode) {
     const idx = findNearestPoint(e.offsetX, e.offsetY);
     canvas.style.cursor = idx >= 0 ? 'move' : 'crosshair';
   }
 
-  // Status with coords
-  if (activeZone) {
-    const [mx, my] = toMasterplan(e.offsetX, e.offsetY);
-    const base = `${ZONES[activeZone].label}`;
-    if (selectedPoint >= 0) {
+  // Status — geographic readout
+  if (bounds) {
+    const [lon, lat] = canvasToGeo(e.offsetX, e.offsetY);
+    const base = activeZone ? ZONES[activeZone].label : 'No zone';
+    if (selectedPoint >= 0 && activeZone) {
       const p = ZONES[activeZone].points[selectedPoint];
-      setStatus(`${base} — Point ${selectedPoint}: (${p[0]}, ${p[1]})`);
+      setStatus(`${base} — Point ${selectedPoint}: ${p[1].toFixed(6)}, ${p[0].toFixed(6)}`);
     } else {
-      setStatus(`${base} — Cursor: (${Math.round(mx)}, ${Math.round(my)})`);
+      setStatus(`${base} — Cursor: ${lat.toFixed(6)}, ${lon.toFixed(6)}`);
     }
   }
 
@@ -720,12 +1040,23 @@ document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('redoBtn').addEventListener('click', redo);
 
 // View toggles
-['fillOpacity', 'showGuide', 'guideOpacity', 'showHandles'].forEach(id => {
+['fillOpacity', 'showParcel', 'showHandles'].forEach(id => {
   document.getElementById(id).addEventListener('input', draw);
+});
+document.querySelectorAll('.layer-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchLayer(btn.dataset.layer));
 });
 
 // ==================== EXPORT ====================
-function pointsToSVGPath(pts) {
+// geoPts -> image-pixel array, rounded to 1 decimal
+function geoToPx(geoPts) {
+  return geoPts.map(([lon, lat]) => {
+    const [x, y] = lonLatToPx(lon, lat);
+    return [+x.toFixed(1), +y.toFixed(1)];
+  });
+}
+function pointsToSVGPath(geoPts) {
+  const pts = geoToPx(geoPts);
   const n = pts.length;
   if (n < 3) return '';
   let d = `M ${pts[0][0]},${pts[0][1]}`;
@@ -800,13 +1131,75 @@ document.getElementById('exportPolyBtn').addEventListener('click', () => {
   let svg = '';
   for (const [name, zone] of Object.entries(ZONES)) {
     if (name === 'boundary' || zone.points.length < 3) continue;
-    const pts = zone.points.map(p => `${Math.round(p[0])},${Math.round(p[1])}`).join(' ');
+    const pts = geoToPx(zone.points)
+      .map(p => `${Math.round(p[0])},${Math.round(p[1])}`).join(' ');
     const dataZone = ZONE_DATA_NAMES[name] || name;
     svg += `      <!-- ${zone.label.toUpperCase()} -->\n`;
     svg += `      <polygon class="zone" data-zone="${dataZone}" fill="${ZONE_FILLS[name]}" stroke="${ZONE_STROKES[name]}" stroke-width="2"\n`;
     svg += `        points="${pts}"/>\n`;
   }
   showExport('SVG Polygons', svg);
+});
+
+document.getElementById('exportGeoBtn').addEventListener('click', () => {
+  const features = [];
+  // Parcel boundary
+  features.push({
+    type: 'Feature',
+    properties: { kind: 'parcel', name: 'rv1' },
+    geometry: { type: 'Polygon', coordinates: [
+      bounds.polygon.map(p => [p.lon, p.lat]).concat([[bounds.polygon[0].lon, bounds.polygon[0].lat]])
+    ] },
+  });
+  for (const [name, zone] of Object.entries(ZONES)) {
+    if (zone.points.length < 3) continue;
+    const ring = zone.points.map(p => [p[0], p[1]]);
+    ring.push(ring[0]); // close
+    features.push({
+      type: 'Feature',
+      properties: { kind: 'zone', id: name, label: zone.label, color: zone.color },
+      geometry: { type: 'Polygon', coordinates: [ring] },
+    });
+  }
+  const geo = { type: 'FeatureCollection', features };
+  showExport('GeoJSON (lat/lon)', JSON.stringify(geo, null, 2));
+});
+
+document.getElementById('saveZonesBtn').addEventListener('click', () => {
+  const out = {
+    kind: 'riverland-zones', version: 2, savedAt: new Date().toISOString(),
+    zones: Object.fromEntries(
+      Object.entries(ZONES).map(([k, z]) => [k, { label: z.label, color: z.color, fill: z.fill, points: z.points }])
+    ),
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `riverland-zones-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  setStatus('💾 Zones saved');
+});
+
+document.getElementById('loadZonesBtn').addEventListener('click', () => {
+  document.getElementById('loadZonesInput').click();
+});
+document.getElementById('loadZonesInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (data.kind !== 'riverland-zones') throw new Error('Not a zones file');
+      saveState();
+      for (const [k, z] of Object.entries(data.zones)) {
+        if (ZONES[k]) ZONES[k].points = z.points;
+      }
+      updateButtons();
+      draw();
+      setStatus('📂 Zones loaded');
+    } catch (err) { setStatus('❌ Load failed: ' + err.message); }
+  };
+  r.readAsText(f);
 });
 
 function showExport(title, content) {

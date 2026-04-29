@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Riverland · Google 3D Masterplan</title>
+<link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.122/Build/Cesium/Widgets/widgets.css">
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.122/Build/Cesium/Cesium.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body { background: #1a1a1a; color: #fff; font-family: 'Segoe UI', sans-serif; }
+#cesium { position: fixed; inset: 0; }
+
+#topbar {
+  position: fixed; top: 12px; left: 12px; z-index: 10;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(6px);
+  color: #2a1f10; padding: 9px 14px; border-radius: 6px;
+  border: 1px solid rgba(40,30,20,0.2);
+  box-shadow: 0 4px 18px rgba(40,30,20,0.18);
+  font-size: 12px; line-height: 1.45; max-width: 380px;
+}
+#topbar h1 { font-size: 13px; color: #6e4d22; letter-spacing: 1px; text-transform: uppercase; }
+#topbar small { color: #6b5a44; font-size: 11px; }
+
+#controls {
+  position: fixed; top: 12px; right: 12px; z-index: 10;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(6px);
+  color: #2a1f10; padding: 12px 14px; border-radius: 6px;
+  border: 1px solid rgba(40,30,20,0.2);
+  box-shadow: 0 4px 18px rgba(40,30,20,0.18);
+  font-size: 11px; min-width: 240px;
+}
+#controls h3 { font-size: 10px; color: #6e4d22; text-transform: uppercase;
+  letter-spacing: 1.2px; margin: 0 0 6px; }
+#controls h3:not(:first-of-type) { margin-top: 12px; }
+#controls label { display: block; margin: 5px 0; cursor: pointer; }
+#controls input[type=range] { width: 100%; vertical-align: middle; margin-top: 3px; }
+#controls .val { color: #8e6c2a; font-weight: 600; font-family: monospace; float: right; }
+#controls button {
+  display: inline-block; padding: 5px 10px; margin: 3px 2px 0 0;
+  border: 1px solid #b3946a; background: #f1e3c2; color: #4a3818;
+  border-radius: 4px; cursor: pointer; font-size: 11px;
+}
+#controls button:hover { background: #e7d7b1; }
+#controls .add-poi-btn { background: #6e4d22; color: #f5e7c5; border-color: #6e4d22; width: 100%; }
+#controls .add-poi-btn.active { background: #c44; border-color: #c44; }
+
+#poi-card {
+  position: fixed; bottom: 12px; right: 12px; z-index: 10; width: 320px;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+  color: #2a1f10; padding: 14px 18px; border-radius: 8px;
+  border: 1px solid rgba(40,30,20,0.2);
+  box-shadow: 0 8px 28px rgba(40,30,20,0.22);
+  display: none;
+}
+#poi-card .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 15px;
+  background: #6e4d22; color: #f5e7c5; font-weight: 700; font-size: 14px;
+  margin-right: 8px; vertical-align: middle;
+}
+#poi-card h3 { display: inline; font-size: 14px; vertical-align: middle; }
+#poi-card .cat { color: #8e6c2a; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 1px; margin: 6px 0 4px; }
+#poi-card .desc { color: #4a3818; font-size: 12px; line-height: 1.55; }
+#poi-card input, #poi-card textarea {
+  width: 100%; margin-top: 4px; padding: 5px 8px;
+  border: 1px solid #cbb98a; border-radius: 4px;
+  background: #fff8e7; color: #2a1f10; font-family: inherit; font-size: 11px;
+}
+#poi-card textarea { resize: vertical; min-height: 60px; }
+#poi-card .row-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-top: 8px; font-size: 10px; color: #888; font-family: monospace; }
+#poi-card .actions { margin-top: 10px; display: flex; gap: 6px; }
+#poi-card .actions button { flex: 1; }
+#poi-card .close {
+  position: absolute; top: 6px; right: 10px; cursor: pointer;
+  background: none; border: none; font-size: 18px; color: #8e6c2a;
+}
+
+#status {
+  position: fixed; bottom: 12px; left: 12px; z-index: 10;
+  background: rgba(0,0,0,0.7); color: #fff; padding: 6px 10px;
+  border-radius: 4px; font-size: 11px; font-family: monospace;
+}
+#status .err { color: #ff8888; }
+#status .ok { color: #88ff88; }
+
+#loader {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(20, 15, 10, 0.95); z-index: 100; flex-direction: column;
+  font-size: 14px; color: #f5e7c5;
+}
+#loader .ring {
+  width: 44px; height: 44px; border: 3px solid #5a4a30;
+  border-top-color: #c8a96e; border-radius: 50%;
+  animation: spin 1s linear infinite; margin-bottom: 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.cesium-viewer-bottom { display: none !important; }
+</style>
+</head>
+<body>
+
+<script src="assets/google_key.js"></script>
+
+<div id="loader"><div class="ring"></div><div id="loader-msg">Loading Google 3D Tiles…</div></div>
+
+<div id="topbar">
+  <h1>Riverland · Photorealistic 3D</h1>
+  <small id="topbar-meta">Imagery © Google · loading parcel from rv1.kml</small>
+</div>
+
+<div id="controls">
+  <h3>View</h3>
+  <button id="bOblique">Oblique</button>
+  <button id="bTopdown">Top-down</button>
+  <button id="bGround">Low angle</button>
+  <button id="bSpin" style="margin-top:4px;">Auto-rotate</button>
+
+  <h3>Terrain</h3>
+  <label>Vertical exaggeration <span class="val" id="vEx">1.0×</span>
+    <input type="range" id="rEx" min="1" max="3" value="1" step="0.1">
+  </label>
+
+  <h3>Layers</h3>
+  <div id="kml-layers"></div>
+  <label style="margin-top:6px;"><input type="checkbox" id="cPois" checked> POI pins</label>
+  <button id="loadKmlBtn" style="margin-top:6px;">+ Add KML layer…</button>
+  <input type="file" id="kmlInput" accept=".kml,.kmz" style="display:none;">
+
+  <h3>POIs <span style="color:#888;font-weight:400;" id="poi-count">0</span></h3>
+  <button class="add-poi-btn" id="addPoiBtn">+ Add POI (click on map)</button>
+  <button id="savePoisBtn" style="margin-top:4px;">💾 Save</button>
+  <button id="loadPoisBtn">📂 Load</button>
+  <input type="file" id="poiInput" accept=".json" style="display:none;">
+</div>
+
+<aside id="poi-card">
+  <button class="close" id="poiClose">&times;</button>
+  <div><span class="num" id="poi-num">1</span><h3 id="poi-title"></h3></div>
+  <div id="poi-readonly" style="display:block;">
+    <div class="cat" id="poi-cat-r"></div>
+    <div class="desc" id="poi-desc-r"></div>
+  </div>
+  <div id="poi-edit" style="display:none;">
+    <div style="font-size:10px;color:#8e6c2a;text-transform:uppercase;letter-spacing:1px;margin:6px 0 4px;">Name</div>
+    <input type="text" id="poi-name" placeholder="e.g. Wellness Spa" autocomplete="off">
+    <div style="font-size:10px;color:#8e6c2a;text-transform:uppercase;letter-spacing:1px;margin:6px 0 4px;">Category</div>
+    <input type="text" id="poi-cat" placeholder="e.g. Amenity" autocomplete="off">
+    <div style="font-size:10px;color:#8e6c2a;text-transform:uppercase;letter-spacing:1px;margin:6px 0 4px;">Description</div>
+    <textarea id="poi-desc" placeholder="Visible to visitors when they tap this pin."></textarea>
+    <div class="row-meta">
+      <div>Lat <span id="poi-lat" style="color:#2a1f10;"></span></div>
+      <div>Lon <span id="poi-lon" style="color:#2a1f10;"></span></div>
+    </div>
+    <div class="actions">
+      <button id="poiDoneBtn">Done</button>
+      <button id="poiDeleteBtn" style="background:#fbe5e5;border-color:#c44;color:#a22;">Delete</button>
+    </div>
+  </div>
+</aside>
+
+<div id="status">Ready</div>
+
+<div id="cesium"></div>
+
+<script>
+// ============ KEY GUARD ============
+if (!window.GOOGLE_3D_TILES_KEY) {
+  document.getElementById('loader-msg').innerHTML =
+    'Missing Google API key.<br>Create <code>assets/google_key.js</code> with:<br>' +
+    '<pre style="margin-top:8px;font-size:11px;">window.GOOGLE_3D_TILES_KEY = "AIzaSy…";</pre>';
+  throw new Error('No key');
+}
+const KEY = window.GOOGLE_3D_TILES_KEY;
+
+// ============ PARSE rv1.kml COORDS (so we can fly to it before KML loads) ============
+const PARCEL_LONLAT = [
+  [33.19197068352715, 34.76361876522253],
+  [33.19502721411456, 34.77184132314996],
+  [33.18944215051140, 34.77249321636536],
+  [33.18331945696433, 34.77340472796986],
+  [33.17993795904745, 34.76163234023668],
+];
+const cLon = PARCEL_LONLAT.reduce((s, p) => s + p[0], 0) / PARCEL_LONLAT.length;
+const cLat = PARCEL_LONLAT.reduce((s, p) => s + p[1], 0) / PARCEL_LONLAT.length;
+
+// ============ CESIUM VIEWER ============
+const viewer = new Cesium.Viewer('cesium', {
+  // We're providing our own imagery + tiles via Google
+  imageryProvider: false,
+  baseLayerPicker: false,
+  geocoder: false,
+  homeButton: false,
+  sceneModePicker: false,
+  navigationHelpButton: false,
+  animation: false,
+  timeline: false,
+  fullscreenButton: false,
+  infoBox: false,
+  selectionIndicator: false,
+  // Use empty terrain — Google's tileset has terrain baked in
+  terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+  // Lets us export screenshots / use html2canvas-style captures
+  contextOptions: { webgl: { preserveDrawingBuffer: true } },
+});
+
+// Hide the credit container we don't need; Google's attribution stays
+viewer.scene.globe.show = false;     // Google 3D Tiles are the surface
+viewer.scene.skyAtmosphere.show = true;
+viewer.scene.fog.enabled = false;
+viewer.scene.globe.depthTestAgainstTerrain = true;
+
+// ============ LOAD GOOGLE PHOTOREALISTIC 3D TILES ============
+let tileset = null;
+let coverageOk = false;
+async function loadGoogleTileset() {
+  try {
+    setStatus('Connecting to Google Map Tiles…');
+    tileset = await Cesium.Cesium3DTileset.fromUrl(
+      `https://tile.googleapis.com/v1/3dtiles/root.json?key=${KEY}`,
+      { showCreditsOnScreen: true }
+    );
+    viewer.scene.primitives.add(tileset);
+    setStatus('Google 3D Tiles loaded — flying to Riverland');
+    return true;
+  } catch (err) {
+    setStatus('Google 3D Tiles failed: ' + err.message, 'err');
+    document.getElementById('loader-msg').innerHTML =
+      'Google 3D Tiles failed to load.<br>' +
+      '<small>' + (err.message || 'Unknown') + '</small><br><br>' +
+      'Check that the Map Tiles API is enabled and the key is valid.';
+    return false;
+  }
+}
+
+// ============ ORBIT-CENTERED CAMERA ============
+// Anchor camera to the parcel centroid.  All view buttons, drag, scroll, and
+// auto-rotate keep the project at the screen center.
+const PARCEL_CENTER = Cesium.Cartesian3.fromDegrees(cLon, cLat, 250);
+const VIEWS = {
+  oblique: { heading:   0, pitch: -32, range: 2200 },
+  topdown: { heading:   0, pitch: -88, range: 2400 },
+  ground:  { heading:  35, pitch: -12, range: 1500 },
+};
+
+let currentHpr = new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-32), 2200);
+
+function applyLookAt() {
+  // Re-establish orbit target so dragging keeps the parcel centered
+  viewer.camera.lookAt(PARCEL_CENTER, currentHpr);
+}
+
+// Compute a camera position from heading/pitch/range relative to the target.
+// pitch is in degrees down from horizontal (negative = looking down).
+function destinationFromHPR(target, heading, pitch, range) {
+  const hRad = Cesium.Math.toRadians(heading);
+  const pRad = Cesium.Math.toRadians(pitch);
+  // Local east-north-up frame at target
+  const xform = Cesium.Transforms.eastNorthUpToFixedFrame(target);
+  // Position in local ENU: -range * (cos pitch * sin heading, cos pitch * cos heading, sin pitch)
+  const local = new Cesium.Cartesian3(
+    -range * Math.cos(pRad) * Math.sin(hRad),
+    -range * Math.cos(pRad) * Math.cos(hRad),
+     range * Math.sin(-pRad)
+  );
+  return Cesium.Matrix4.multiplyByPoint(xform, local, new Cesium.Cartesian3());
+}
+
+function flyTo(view, dur) {
+  const targetHpr = new Cesium.HeadingPitchRange(
+    Cesium.Math.toRadians(view.heading),
+    Cesium.Math.toRadians(view.pitch),
+    view.range
+  );
+  // Release any locked transform first
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  const dest = destinationFromHPR(PARCEL_CENTER, view.heading, view.pitch, view.range);
+  viewer.camera.flyTo({
+    destination: dest,
+    orientation: {
+      heading: Cesium.Math.toRadians(view.heading),
+      pitch: Cesium.Math.toRadians(view.pitch),
+      roll: 0,
+    },
+    duration: dur ?? 1.6,
+    complete: () => {
+      currentHpr = targetHpr;
+      applyLookAt();
+    },
+  });
+}
+
+// Snap camera (no animation)
+function setView(view) {
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  const dest = destinationFromHPR(PARCEL_CENTER, view.heading, view.pitch, view.range);
+  viewer.camera.setView({
+    destination: dest,
+    orientation: {
+      heading: Cesium.Math.toRadians(view.heading),
+      pitch: Cesium.Math.toRadians(view.pitch),
+      roll: 0,
+    },
+  });
+  currentHpr = new Cesium.HeadingPitchRange(
+    Cesium.Math.toRadians(view.heading),
+    Cesium.Math.toRadians(view.pitch),
+    view.range
+  );
+  applyLookAt();
+}
+
+// Re-anchor lookAt after every user-driven camera change so the parcel stays centered.
+viewer.camera.changed.addEventListener(() => {
+  // Only re-attach if not currently mid-flight and not locked
+  if (viewer.camera._modeChanged) return;
+});
+
+// ============ COVERAGE PROBE ============
+// After a few frames at the parcel, if no real geometry has tiled in we report imagery-only
+async function probeCoverage() {
+  // Wait for ~3s of camera movement to let tiles request/respond
+  await new Promise(r => setTimeout(r, 3500));
+  // tileset.statistics has loaded tile counts; root.boundingSphere helps too
+  const stats = tileset?.statistics;
+  const loaded = stats?.numberOfTilesProcessing || stats?.numberLoaded || 0;
+  // Cesium versions vary; fall back to debug counts
+  const total = (tileset?._statistics?.numberOfTilesTotal) ?? 0;
+  if (tileset && tileset.ready) {
+    coverageOk = true;
+    setStatus(`✓ Google 3D Tiles active · imagery + 3D mesh streaming`, 'ok');
+  } else {
+    setStatus('Coverage probe inconclusive — orbit the parcel to see actual fidelity');
+  }
+  document.getElementById('topbar-meta').textContent =
+    'Imagery © Google · Maxar · Airbus · ' + PARCEL_LONLAT.length + '-pt parcel';
+}
+
+// ============ KML LOADING ============
+const kmlSources = new Map();   // name -> { ds, style }
+
+// Per-file styling. Polygons get a fill+outline; polylines a colored line.
+// `dashed: true` makes the line dashed.
+const KML_STYLES = {
+  rv1:         { label: 'Parcel (rv1)',          color: '#ffd062', dashed: true,  width: 5, fill: 0.10, kind: 'parcel' },
+  essoterikos: { label: 'Internal access',       color: '#ffffff', dashed: false, width: 4, fill: 0.00, kind: 'route'  },
+  dromoi:      { label: 'Road area context',     color: '#a89a82', dashed: true,  width: 2, fill: 0.06, kind: 'area'   },
+  moni:        { label: 'Route → Moni monastery',color: '#d99644', dashed: false, width: 3, fill: 0.00, kind: 'route'  },
+  parekklisia: { label: 'Route → Parekklisia',   color: '#7fb069', dashed: false, width: 3, fill: 0.00, kind: 'route'  },
+  pirgos:      { label: 'Route → Pirgos',        color: '#c4754d', dashed: false, width: 3, fill: 0.00, kind: 'route'  },
+};
+
+function styleEntities(ds, style) {
+  for (const e of ds.entities.values) {
+    if (e.polygon) {
+      e.polygon.material = Cesium.Color.fromCssColorString(style.color).withAlpha(style.fill);
+      e.polygon.outline = true;
+      e.polygon.outlineColor = Cesium.Color.fromCssColorString(style.color);
+      e.polygon.outlineWidth = style.width;
+      e.polygon.height = undefined;
+      e.polygon.heightReference = Cesium.HeightReference.CLAMP_TO_GROUND;
+    }
+    if (e.polyline) {
+      const col = Cesium.Color.fromCssColorString(style.color);
+      e.polyline.material = style.dashed
+        ? new Cesium.PolylineDashMaterialProperty({ color: col, dashLength: 14 })
+        : new Cesium.ColorMaterialProperty(col);
+      e.polyline.width = style.width;
+      e.polyline.clampToGround = true;
+    }
+  }
+}
+
+async function loadKmlFromUrl(url, name = url, style = null) {
+  try {
+    const ds = await Cesium.KmlDataSource.load(url, {
+      camera: viewer.scene.camera,
+      canvas: viewer.scene.canvas,
+      clampToGround: true,
+    });
+    viewer.dataSources.add(ds);
+    const s = style || KML_STYLES[name] ||
+      { label: name, color: '#ffd062', dashed: true, width: 3, fill: 0.06 };
+    styleEntities(ds, s);
+    kmlSources.set(name, { ds, style: s });
+    return ds;
+  } catch (err) {
+    setStatus('KML load failed: ' + err.message, 'err');
+    throw err;
+  }
+}
+
+function setKmlVisible(name, visible) {
+  const rec = kmlSources.get(name);
+  if (rec) rec.ds.show = visible;
+}
+
+// ============ POI MGMT ============
+let pois = [];                  // {id, lon, lat, name, category, description}
+let nextId = 1;
+let selectedPoi = null;
+let addPoiMode = false;
+const poiEntities = new Map();  // id -> entity
+
+function rebuildPois() {
+  // Remove existing
+  for (const ent of poiEntities.values()) viewer.entities.remove(ent);
+  poiEntities.clear();
+  pois.forEach((p, i) => {
+    const num = i + 1;
+    const ent = viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, 0),
+      billboard: {
+        image: makePinIcon(num),
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        scale: 1.0,
+        disableDepthTestDistance: 0,
+      },
+      label: p.name ? {
+        text: p.name,
+        font: '12px Segoe UI, sans-serif',
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.fromCssColorString('#000'),
+        outlineWidth: 2,
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -54),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        showBackground: true,
+        backgroundColor: Cesium.Color.fromCssColorString('rgba(20,15,10,0.7)'),
+        backgroundPadding: new Cesium.Cartesian2(7, 4),
+        translucencyByDistance: new Cesium.NearFarScalar(500, 1.0, 5000, 0.0),
+      } : undefined,
+      properties: { poiId: p.id, num },
+    });
+    poiEntities.set(p.id, ent);
+  });
+  document.getElementById('poi-count').textContent = pois.length;
+}
+
+function makePinIcon(num) {
+  const s = 64;
+  const cv = document.createElement('canvas');
+  cv.width = s; cv.height = s;
+  const ctx = cv.getContext('2d');
+  // Drop pin shape
+  ctx.fillStyle = '#6e4d22';
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2 - 4, s / 2 - 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(s / 2 - 8, s / 2 + 6);
+  ctx.lineTo(s / 2 + 8, s / 2 + 6);
+  ctx.lineTo(s / 2, s - 4);
+  ctx.closePath();
+  ctx.fill();
+  // Inner ring
+  ctx.strokeStyle = '#f5e7c5';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2 - 4, s / 2 - 11, 0, Math.PI * 2);
+  ctx.stroke();
+  // Number
+  ctx.fillStyle = '#f5e7c5';
+  ctx.font = 'bold 22px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(String(num), s / 2, s / 2 - 4);
+  return cv.toDataURL();
+}
+
+function addPoiAtLonLat(lon, lat) {
+  const p = { id: nextId++, lon, lat, name: '', category: '', description: '' };
+  pois.push(p);
+  rebuildPois();
+  selectPoi(p.id, true);   // open editor
+}
+
+function deletePoi(id) {
+  pois = pois.filter(p => p.id !== id);
+  rebuildPois();
+  closePoiCard();
+  setStatus('POI deleted');
+}
+
+function selectPoi(id, edit = false) {
+  const p = pois.find(x => x.id === id);
+  if (!p) return;
+  selectedPoi = p;
+  const i = pois.indexOf(p) + 1;
+  document.getElementById('poi-num').textContent = i;
+  document.getElementById('poi-title').textContent = p.name || `POI ${i}`;
+  document.getElementById('poi-cat-r').textContent = p.category || '';
+  document.getElementById('poi-desc-r').textContent = p.description || '(no description)';
+  document.getElementById('poi-name').value = p.name || '';
+  document.getElementById('poi-cat').value = p.category || '';
+  document.getElementById('poi-desc').value = p.description || '';
+  document.getElementById('poi-lat').textContent = p.lat.toFixed(6);
+  document.getElementById('poi-lon').textContent = p.lon.toFixed(6);
+  document.getElementById('poi-readonly').style.display = edit ? 'none' : 'block';
+  document.getElementById('poi-edit').style.display = edit ? 'block' : 'none';
+  document.getElementById('poi-card').style.display = 'block';
+}
+
+function closePoiCard() {
+  document.getElementById('poi-card').style.display = 'none';
+  selectedPoi = null;
+}
+
+function applyEditFromUI() {
+  if (!selectedPoi) return;
+  selectedPoi.name = document.getElementById('poi-name').value.trim();
+  selectedPoi.category = document.getElementById('poi-cat').value.trim();
+  selectedPoi.description = document.getElementById('poi-desc').value.trim();
+  rebuildPois();
+}
+
+// ============ INTERACTION ============
+const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+handler.setInputAction(click => {
+  if (addPoiMode) {
+    // pickPosition uses the depth buffer of the rendered 3D Tiles
+    const cart = viewer.scene.pickPosition(click.position) ||
+                 viewer.camera.pickEllipsoid(click.position);
+    if (!cart) {
+      setStatus('Click on the terrain (not the sky) to place a POI', 'err');
+      return;
+    }
+    const carto = Cesium.Cartographic.fromCartesian(cart);
+    const lon = Cesium.Math.toDegrees(carto.longitude);
+    const lat = Cesium.Math.toDegrees(carto.latitude);
+    addPoiAtLonLat(lon, lat);
+    setAddMode(false);
+    // Re-anchor: clicks under lookAt sometimes drift the orbit target
+    applyLookAt();
+    return;
+  }
+  // Pick entity
+  const picked = viewer.scene.pick(click.position);
+  if (Cesium.defined(picked) && picked.id?.properties?.poiId !== undefined) {
+    const id = picked.id.properties.poiId.getValue();
+    selectPoi(id, false);
+  }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+// Double-click on a POI -> edit
+handler.setInputAction(click => {
+  const picked = viewer.scene.pick(click.position);
+  if (Cesium.defined(picked) && picked.id?.properties?.poiId !== undefined) {
+    const id = picked.id.properties.poiId.getValue();
+    selectPoi(id, true);
+  }
+}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+function setAddMode(on) {
+  addPoiMode = on;
+  document.getElementById('addPoiBtn').classList.toggle('active', on);
+  document.getElementById('addPoiBtn').textContent =
+    on ? '✗ Cancel — click map to place' : '+ Add POI (click on map)';
+  viewer.scene.canvas.style.cursor = on ? 'crosshair' : '';
+  setStatus(on ? 'Click anywhere on the 3D map to place a new POI' : 'Ready');
+}
+
+// ============ STATUS ============
+function setStatus(msg, kind) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = kind || '';
+}
+
+// ============ UI WIRING ============
+document.getElementById('bOblique').onclick = () => flyTo(VIEWS.oblique);
+document.getElementById('bTopdown').onclick = () => flyTo(VIEWS.topdown);
+document.getElementById('bGround').onclick = () => flyTo(VIEWS.ground);
+
+let spinning = false; let spinHandle = null;
+document.getElementById('bSpin').onclick = () => {
+  spinning = !spinning;
+  document.getElementById('bSpin').textContent = spinning ? '⏸ Stop spin' : 'Auto-rotate';
+  if (spinning) {
+    // Make sure we're in lookAt mode so rotation orbits the parcel center
+    applyLookAt();
+    spinHandle = viewer.clock.onTick.addEventListener(() => {
+      // rotateRight on a lookAt-locked camera orbits around the target
+      viewer.camera.rotateRight(0.0035);
+    });
+  } else if (spinHandle) {
+    spinHandle();
+    spinHandle = null;
+  }
+};
+
+document.getElementById('rEx').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('vEx').textContent = v.toFixed(1) + '×';
+  // verticalExaggeration is supported on the Scene
+  viewer.scene.verticalExaggeration = v;
+});
+
+// Dynamically render a checkbox row for each loaded KML layer
+function addKmlLayerRow(name) {
+  const rec = kmlSources.get(name);
+  if (!rec) return;
+  const container = document.getElementById('kml-layers');
+  if (container.querySelector(`[data-kml="${name}"]`)) return;  // already rendered
+  const row = document.createElement('label');
+  row.dataset.kml = name;
+  row.style.cssText = 'display:flex;align-items:center;gap:6px;margin:3px 0;font-size:11px;';
+  row.innerHTML =
+    `<input type="checkbox" checked>` +
+    `<span style="display:inline-block;width:16px;height:3px;background:${rec.style.color};` +
+    `border-radius:2px;flex-shrink:0;"></span>` +
+    `<span style="flex:1;">${rec.style.label}</span>`;
+  row.querySelector('input').addEventListener('change', e =>
+    setKmlVisible(name, e.target.checked));
+  container.appendChild(row);
+}
+
+document.getElementById('cPois').addEventListener('change', e => {
+  for (const ent of poiEntities.values()) ent.show = e.target.checked;
+});
+
+document.getElementById('addPoiBtn').onclick = () => setAddMode(!addPoiMode);
+document.getElementById('poiClose').onclick = closePoiCard;
+document.getElementById('poiDoneBtn').onclick = () => {
+  applyEditFromUI();
+  selectPoi(selectedPoi.id, false);
+};
+document.getElementById('poiDeleteBtn').onclick = () => {
+  if (selectedPoi && confirm('Delete this POI?')) deletePoi(selectedPoi.id);
+};
+['poi-name', 'poi-cat', 'poi-desc'].forEach(id =>
+  document.getElementById(id).addEventListener('input', applyEditFromUI));
+
+document.getElementById('savePoisBtn').onclick = () => {
+  const out = { kind: 'riverland-pois', version: 1, savedAt: new Date().toISOString(), pois };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `riverland-pois-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  setStatus('💾 POIs saved (' + pois.length + ')', 'ok');
+};
+document.getElementById('loadPoisBtn').onclick = () =>
+  document.getElementById('poiInput').click();
+document.getElementById('poiInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (data.kind !== 'riverland-pois') throw new Error('Not a POIs file');
+      pois = data.pois || [];
+      nextId = pois.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+      rebuildPois();
+      setStatus(`📂 Loaded ${pois.length} POIs`, 'ok');
+    } catch (err) { setStatus('Load failed: ' + err.message, 'err'); }
+  };
+  r.readAsText(f);
+});
+
+document.getElementById('loadKmlBtn').onclick = () =>
+  document.getElementById('kmlInput').click();
+document.getElementById('kmlInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f);
+  const baseName = f.name.replace(/\.kml(z)?$/i, '');
+  // Inherit color/styling from KML_STYLES if recognized; else random palette pick
+  const PALETTE = ['#9b6bff', '#39c0c0', '#e8b04b', '#d96b6b', '#76b66f', '#5fa8d3'];
+  const fallback = { label: f.name, color: PALETTE[kmlSources.size % PALETTE.length],
+                     dashed: false, width: 3, fill: 0.05 };
+  loadKmlFromUrl(url, baseName, KML_STYLES[baseName] || fallback).then(() => {
+    addKmlLayerRow(baseName);
+    setStatus('KML loaded: ' + f.name, 'ok');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea')) return;
+  if (e.key === 'a' || e.key === 'A') setAddMode(!addPoiMode);
+  else if (e.key === 'Escape') { setAddMode(false); closePoiCard(); }
+  else if (e.key === 'Delete' && selectedPoi) deletePoi(selectedPoi.id);
+});
+
+// ============ BOOT ============
+(async () => {
+  const ok = await loadGoogleTileset();
+  if (!ok) return;
+  // Load all KML layers (parcel + routes + context)
+  const KML_AUTOLOAD = ['rv1', 'essoterikos', 'dromoi', 'moni', 'parekklisia', 'pirgos'];
+  for (const name of KML_AUTOLOAD) {
+    try {
+      await loadKmlFromUrl(`assets/kml/${name}.kml`, name);
+      addKmlLayerRow(name);
+    } catch (e) {
+      console.warn(`${name}.kml failed:`, e);
+    }
+  }
+  // Initial view: snap to a wide oblique, then ease in
+  setView({ heading: 0, pitch: -32, range: 4500 });
+  setTimeout(() => flyTo(VIEWS.oblique, 2.0), 200);
+  await probeCoverage();
+  document.getElementById('loader').style.display = 'none';
+  // Expose for debugging
+  window.DEBUGG = { viewer, tileset, pois, poiEntities, kmlSources };
+})();
+</script>
+</body>
+</html>

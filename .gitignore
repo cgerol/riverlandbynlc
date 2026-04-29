@@ -1,0 +1,42 @@
+# --- Secrets (NEVER commit) -----------------------------------------------
+assets/google_key.js
+.env
+.env.local
+.env.*.local
+
+# --- Generated assets (regenerate via build_*.py) -------------------------
+# Hypsometric / contour / satellite renders (large; regenerated locally)
+assets/masterplan/
+
+# --- Python tooling --------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# --- Editor / IDE / OS -----------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# Office temp lock files
+*.~lock*
+~$*
+
+# --- Local-only Claude config --------------------------------------------
+.claude/launch.json
+.claude/settings.local.json
+.claude/plan.md
+.claude/.session/
+
+# --- Working / dev artifacts ---------------------------------------------
+_ai_outputs/
+*.tmp
+*.bak
+
+# --- Bulky source archives (keep extracted versions in assets/kml/) -------
+assets/Gmail.zip
