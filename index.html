@@ -1333,23 +1333,23 @@ footer {
     <div class="masterplan-stats">
       <div class="mp-stat">
         <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2L4 9v11h6v-7h4v7h6V9z"/><circle cx="12" cy="13" r="2.5"/></svg>
-        <div class="mp-num"><span class="mp-counter" data-count="70000" data-locale="el-GR">0</span><em>τμ</em></div>
-        <div class="mp-lbl">οργανωμένου<br>χώρου πρασίνου</div>
+        <div class="mp-num"><span class="mp-counter" data-count="70000">0</span><em data-i18n="masterplan.stats.unit.sqm">τμ</em></div>
+        <div class="mp-lbl" data-i18n-html="masterplan.stats.green">οργανωμένου<br>χώρου πρασίνου</div>
       </div>
       <div class="mp-stat">
         <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17l3-7h6l3 7"/><path d="M9 10L12 5h3"/></svg>
-        <div class="mp-num"><span class="mp-counter" data-count="7000" data-locale="el-GR">0</span><em>μ</em></div>
-        <div class="mp-lbl">ποδηλατο­δρόμων<br>&amp; πεζοδρόμων</div>
+        <div class="mp-num"><span class="mp-counter" data-count="7000">0</span><em data-i18n="masterplan.stats.unit.m">μ</em></div>
+        <div class="mp-lbl" data-i18n-html="masterplan.stats.paths">ποδηλατο­δρόμων<br>&amp; πεζοδρόμων</div>
       </div>
       <div class="mp-stat">
         <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5 5l14 14M19 5L5 19"/></svg>
         <div class="mp-num"><span class="mp-counter" data-count="9">0</span></div>
-        <div class="mp-lbl">γήπεδα &amp; εξωτ.<br>δραστηριότητες</div>
+        <div class="mp-lbl" data-i18n-html="masterplan.stats.sports">γήπεδα &amp; εξωτ.<br>δραστηριότητες</div>
       </div>
       <div class="mp-stat">
         <svg class="mp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 21h18M3 12h18M3 12V7l9-5 9 5v5M9 21v-7M15 21v-7"/></svg>
         <div class="mp-num"><span class="mp-counter" data-count="8">0</span></div>
-        <div class="mp-lbl">υπηρεσίες resort<br>στο σπίτι σας</div>
+        <div class="mp-lbl" data-i18n-html="masterplan.stats.services">υπηρεσίες resort<br>στο σπίτι σας</div>
       </div>
     </div>
   </aside>
@@ -2367,6 +2367,12 @@ const translations = {
     'masterplan.basemap.osm': 'OpenStreetMap',
     'masterplan.basemap.cyclo': 'Ποδηλατικός',
     'masterplan.indexLabel': 'Ευρετήριο',
+    'masterplan.stats.unit.sqm': 'τμ',
+    'masterplan.stats.unit.m': 'μ',
+    'masterplan.stats.green': 'οργανωμένου<br>χώρου πρασίνου',
+    'masterplan.stats.paths': 'ποδηλατοδρόμων<br>&amp; πεζοδρόμων',
+    'masterplan.stats.sports': 'γήπεδα &amp; εξωτ.<br>δραστηριότητες',
+    'masterplan.stats.services': 'υπηρεσίες resort<br>στο σπίτι σας',
     // Difference
     'difference.label': 'Η Διαφορά Μας',
     'difference.heading': 'Τα «ΔΕΝ» στο <em style="color:var(--gold);font-style:italic;">Σχέδιό Μας</em>',
@@ -2546,6 +2552,12 @@ const translations = {
     'masterplan.basemap.osm': 'OpenStreetMap',
     'masterplan.basemap.cyclo': 'Cycle / outdoor',
     'masterplan.indexLabel': 'Index',
+    'masterplan.stats.unit.sqm': 'm²',
+    'masterplan.stats.unit.m': 'm',
+    'masterplan.stats.green': 'of organised<br>green space',
+    'masterplan.stats.paths': 'of cycling &amp;<br>pedestrian paths',
+    'masterplan.stats.sports': 'sports facilities &amp;<br>outdoor activities',
+    'masterplan.stats.services': 'in-home<br>resort services',
     // Difference
     'difference.label': 'Our Difference',
     'difference.heading': 'The \u201cDON\'Ts\u201d in <em style="color:var(--gold);font-style:italic;">Our Plan</em>',
@@ -3275,26 +3287,43 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }).observe(langBtn, { attributes: true, attributeFilter: ['data-lang'] });
   }
 
-  // ---------- Counter animation (Greek-locale formatted) ----------
+  // ---------- Counter animation (locale-aware) ----------
+  // Number format follows the active language: 70.000 (EL) ↔ 70,000 (EN).
+  function counterLocale() {
+    const lang = document.getElementById('lang-toggle')?.dataset?.lang || 'el';
+    return lang === 'en' ? 'en-US' : 'el-GR';
+  }
   function animateCounter(el) {
     if (el.dataset.animated) return;
     el.dataset.animated = '1';
     const target = parseInt(el.dataset.count, 10) || 0;
-    const locale = el.dataset.locale || 'en-US';
     const dur = target < 50 ? 1100 : 1900;
     const start = performance.now();
     function tick(now) {
       const t = Math.min((now - start) / dur, 1);
       const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = Math.round(target * eased).toLocaleString(locale);
+      el.textContent = Math.round(target * eased).toLocaleString(counterLocale());
       if (t < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
+  }
+  // Re-format the (already-animated) counters when EL/EN toggles.
+  function refreshCounterLocale() {
+    document.querySelectorAll('.mp-counter').forEach(el => {
+      const target = parseInt(el.dataset.count, 10) || 0;
+      if (el.dataset.animated) el.textContent = target.toLocaleString(counterLocale());
+    });
   }
   const cobs = new IntersectionObserver(es => {
     es.forEach(e => { if (e.isIntersecting) animateCounter(e.target); });
   }, { threshold: 0.3 });
   document.querySelectorAll('.mp-counter').forEach(el => cobs.observe(el));
+  // Watch the language toggle's data-lang attribute and re-format.
+  const _langBtn = document.getElementById('lang-toggle');
+  if (_langBtn) {
+    new MutationObserver(refreshCounterLocale).observe(_langBtn,
+      { attributes: true, attributeFilter: ['data-lang'] });
+  }
 
   // ---------- Modal open/close ----------
   function openModal(id) {
