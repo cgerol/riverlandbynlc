@@ -1468,22 +1468,22 @@ footer {
       <div class="pins-head" data-i18n="masterplan.indexLabel">Ευρετήριο</div>
       <div class="pin-row legend-item" data-zone="family"   style="--zone-color:#FF8C00;">
         <span class="pin-num">1</span>
-        <span class="pin-label" data-i18n="masterplan.legend.family">Οικογενειακές</span>
+        <span class="pin-label" data-i18n="masterplan.legend.family">Οικογενειακές Κατοικίες</span>
         <span class="pin-dot"></span>
       </div>
       <div class="pin-row legend-item" data-zone="together" style="--zone-color:#999999;">
         <span class="pin-num">2</span>
-        <span class="pin-label" data-i18n="masterplan.legend.together">Μαζί</span>
+        <span class="pin-label" data-i18n="masterplan.legend.together">Deluxe Κατοικίες</span>
         <span class="pin-dot"></span>
       </div>
       <div class="pin-row legend-item" data-zone="premium"  style="--zone-color:#B86BB8;">
         <span class="pin-num">3</span>
-        <span class="pin-label" data-i18n="masterplan.legend.premium">Προνομιακές</span>
+        <span class="pin-label" data-i18n="masterplan.legend.premium">Προνομιακές Κατοικίες</span>
         <span class="pin-dot"></span>
       </div>
       <div class="pin-row legend-item" data-zone="luxury"   style="--zone-color:#DAA520;">
         <span class="pin-num">4</span>
-        <span class="pin-label" data-i18n="masterplan.legend.luxury">Πολυτελείς</span>
+        <span class="pin-label" data-i18n="masterplan.legend.luxury">Πολυτελείς Κατοικίες</span>
         <span class="pin-dot"></span>
       </div>
       <div class="pin-row legend-item" data-zone="green-area" style="--zone-color:#5BA3E5;">
@@ -2406,10 +2406,10 @@ const translations = {
     'masterplan.label': 'Ο Σχεδιασμός',
     'masterplan.heading': 'Διαδραστικό <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
     'masterplan.body': 'Εξερευνήστε τις ζώνες του έργου. Τοποθετήστε τον δείκτη πάνω σε κάθε περιοχή για λεπτομέρειες.',
-    'masterplan.legend.family': 'Οικογενειακές',
-    'masterplan.legend.together': 'Μαζί',
-    'masterplan.legend.premium': 'Προνομιακές',
-    'masterplan.legend.luxury': 'Πολυτελείς',
+    'masterplan.legend.family': 'Οικογενειακές Κατοικίες',
+    'masterplan.legend.together': 'Deluxe Κατοικίες',
+    'masterplan.legend.premium': 'Προνομιακές Κατοικίες',
+    'masterplan.legend.luxury': 'Πολυτελείς Κατοικίες',
     'masterplan.legend.green': 'Χώροι Πρασίνου',
     'masterplan.legend.wellness': 'Κέντρο Ευεξίας',
     'masterplan.legend.strategic': 'Στρατηγικές Αναπτύξεις',
@@ -2605,10 +2605,10 @@ const translations = {
     'masterplan.label': 'The Design',
     'masterplan.heading': 'Interactive <em style="color:var(--gold);font-style:italic;">Master Plan</em>',
     'masterplan.body': 'Explore the project zones. Hover over each area for details.',
-    'masterplan.legend.family': 'Family',
-    'masterplan.legend.together': 'Together',
-    'masterplan.legend.premium': 'Premium',
-    'masterplan.legend.luxury': 'Luxury',
+    'masterplan.legend.family': 'Family Residences',
+    'masterplan.legend.together': 'Deluxe Residences',
+    'masterplan.legend.premium': 'Premium Residences',
+    'masterplan.legend.luxury': 'Luxury Residences',
     'masterplan.legend.green': 'Green Area',
     'masterplan.legend.wellness': 'Wellness Center',
     'masterplan.legend.strategic': 'Strategic Developments',
@@ -2778,7 +2778,7 @@ const zoneDataBilingual = {
     },
     'together': {
       label: 'Οικιστική Ζώνη',
-      title: 'Μαζί',
+      title: 'Deluxe Κατοικίες',
       desc: 'Οικογενειακό Συγκρότημα με κτίσματα των 95τμ. 3ων υπνοδωματίων με ιδιωτικούς χώρους στάθμευσης και κοινές υπηρεσίες.'
     },
     'premium': {
@@ -2815,7 +2815,7 @@ const zoneDataBilingual = {
     },
     'together': {
       label: 'Residential Zone',
-      title: 'Together',
+      title: 'Deluxe Residences',
       desc: 'Family complex with 95 sq.m. units, 3 bedrooms, private parking and shared amenities.'
     },
     'premium': {
@@ -2937,13 +2937,16 @@ const zoneData = {
 // Refine these with pin-editor.html, OR have the client place them on
 // pin-placer.html and paste the resulting URL hash here.
 const PIN_DEFAULTS = {
-  'family':     { x: 33.3, y: 44.4, n: 1 },
-  'together':   { x: 19.9, y: 23.0, n: 2 },
-  'premium':    { x: 75.5, y: 25.7, n: 3 },
-  'luxury':     { x: 67.3, y: 40.1, n: 4 },
-  'green-area': { x: 48.1, y: 14.7, n: 5 },
-  'wellness':   { x: 55.5, y: 26.2, n: 6 },
-  'strategic':  { x: 87.8, y: 74.5, n: 7 },
+  'family':       { x: 33.3, y: 44.4, n: 1 },
+  'together':     { x: 19.9, y: 23.0, n: 2 },                         // user will relocate
+  'premium':      { x: 55.5, y: 26.2, n: 3 },                         // moved to former #6
+  'luxury':       { x: 75.5, y: 25.7, n: 4 },                         // moved to former #3
+  'green-area':   { x: 67.3, y: 40.1, n: 5 },                         // moved to former #4
+  'wellness':     { x: 48.1, y: 14.7, n: 6 },                         // user will relocate
+  'strategic':    { x: 87.8, y: 74.5, n: 7 },
+  // Second strategic pin — same number, same description, separate position.
+  // Suffix `-2` is stripped at render time so it shares the legend/zone copy.
+  'strategic-2':  { x: 50.0, y: 50.0, n: 7 },                         // user will relocate
 };
 // Optionally override from URL hash:  #pins=family@32,48;together@23,38;...
 function loadPinPositions() {
@@ -2966,30 +2969,39 @@ const pinHost = document.getElementById('masterplan-pins');
 let lockedZone = null;
 const pinElements = {};
 
+// Allow duplicate pins (e.g., 'strategic-2') that share the legend / description
+// of a base zone. Strip a trailing `-N` to find the base.
+function basePinZone(id) { return id.replace(/-\d+$/, ''); }
+
 function buildPins() {
   if (!pinHost) return;
   pinHost.innerHTML = '';
   Object.entries(PIN_POSITIONS).forEach(([id, p]) => {
-    const row = document.querySelector(`.legend-item[data-zone="${id}"]`);
+    const baseZone = basePinZone(id);
+    const row = document.querySelector(`.legend-item[data-zone="${baseZone}"]`);
     const color = row?.style?.getPropertyValue('--zone-color')?.trim() || '#C4A86B';
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'mp-pin';
-    btn.dataset.zone = id;
+    btn.dataset.zone = baseZone;   // legend / description matching
+    btn.dataset.pin = id;          // unique per-pin id (for editor)
     btn.style.left = p.x + '%';
     btn.style.top = p.y + '%';
     btn.style.setProperty('--pin-color', color);
     btn.innerHTML = `<span class="mp-pin-num">${p.n}</span>`;
-    btn.setAttribute('aria-label', id);
+    btn.setAttribute('aria-label', baseZone);
     pinHost.appendChild(btn);
     pinElements[id] = btn;
   });
 }
 
 function highlightZone(zoneName) {
-  Object.entries(pinElements).forEach(([id, btn]) => {
-    btn.classList.toggle('active', id === zoneName);
-    btn.classList.toggle('dimmed', !!zoneName && id !== zoneName);
+  // Match by dataset.zone so duplicate pins (e.g., the two #7 strategic pins)
+  // light up together when their shared zone is hovered.
+  Object.values(pinElements).forEach(btn => {
+    const isMatch = !!zoneName && btn.dataset.zone === zoneName;
+    btn.classList.toggle('active', isMatch);
+    btn.classList.toggle('dimmed', !!zoneName && !isMatch);
   });
   document.querySelectorAll('.legend-item[data-zone]').forEach(li => {
     li.classList.toggle('active', li.dataset.zone === zoneName);
@@ -3004,14 +3016,16 @@ function clearHighlight() {
 
 buildPins();
 
-// Pin hover + click
-Object.entries(pinElements).forEach(([id, btn]) => {
-  btn.addEventListener('mouseenter', () => { if (!lockedZone) highlightZone(id); });
+// Pin hover + click — drive by dataset.zone so duplicate pins share the
+// highlight and locking with their base zone.
+Object.values(pinElements).forEach(btn => {
+  const zone = btn.dataset.zone;
+  btn.addEventListener('mouseenter', () => { if (!lockedZone) highlightZone(zone); });
   btn.addEventListener('mouseleave', () => { if (!lockedZone) clearHighlight(); });
   btn.addEventListener('click', e => {
     e.stopPropagation();
-    if (lockedZone === id) { lockedZone = null; clearHighlight(); }
-    else { lockedZone = id; highlightZone(id); }
+    if (lockedZone === zone) { lockedZone = null; clearHighlight(); }
+    else { lockedZone = zone; highlightZone(zone); }
   });
 });
 
@@ -3530,10 +3544,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   // Real distances + drive times (client-confirmed) for the legend.  The
   // KML traces are still drawn as the visual paths.
   const ROUTE_STATS = {
-    moni:        { km: 6.8, min: 8 },
-    parekklisia: { km: 9.4, min: 9 },
-    pirgos:      { km: 8.9, min: 9 },
-    essoterikos: { km: 8.0, min: 8 },
+    moni:        { km: 6.8, min: 9 },
+    parekklisia: { km: 9.4, min: 10 },
+    pirgos:      { km: 8.9, min: 10 },
+    essoterikos: { km: 8.0, min: 9 },
   };
 
   // The 3 southern routes all converge at the Pyrgos highway exit — make
