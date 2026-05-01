@@ -293,15 +293,32 @@ nav .nav-links a:hover::after { width: 100%; }
 .mp-pin:hover, .mp-pin.active {
   opacity: 1;
   background: var(--pin-color);          /* full saturation on focus */
-  transform: translate(-50%, -50%) scale(1.25);
+  transform: translate(-50%, -50%) scale(1.4);
   box-shadow:
-    0 0 0 4px rgba(196, 168, 107, 0.32),
+    0 0 0 4px color-mix(in srgb, var(--pin-color) 35%, transparent),
     0 4px 14px rgba(0, 0, 0, 0.65);
   z-index: 4;
 }
 .mp-pin:hover::before,
 .mp-pin.active::before { opacity: 0.42; transform: scale(1.4); }
-.mp-pin.dimmed { opacity: 0.4; }
+.mp-pin.dimmed { opacity: 0.35; filter: saturate(0.6); }
+/* Pulsing ring drawn via ::after — only active when the pin is focused.
+   Helps the user visually track which map pin matches the hovered legend. */
+.mp-pin::after {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--pin-color);
+  opacity: 0; pointer-events: none;
+  z-index: -1;
+}
+.mp-pin:hover::after,
+.mp-pin.active::after {
+  animation: pinPulse 1.4s ease-out infinite;
+}
+@keyframes pinPulse {
+  0%   { opacity: 0.65; transform: scale(1); }
+  100% { opacity: 0;    transform: scale(2.2); }
+}
 .masterplan-wrapper {
   position: relative; max-width: 800px; margin: 3rem auto 0;
   background: transparent; border-radius: 4px; overflow: hidden;
@@ -3338,7 +3355,32 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       });
     });
   }
+
+  // ---- Hovering a numbered pin on the masterplan render drives the panel ----
+  function wireMapPinsToDescriptions() {
+    const pins = document.querySelectorAll('.mp-pin[data-zone]');
+    if (!pins.length) return setTimeout(wireMapPinsToDescriptions, 50);
+    pins.forEach(pin => {
+      if (pin.dataset.descWired) return;
+      pin.dataset.descWired = '1';
+      const zone = pin.dataset.zone;
+      pin.addEventListener('mouseenter', () => {
+        if (_lockedZone) return;
+        showZoneInPanel(zone);
+      });
+      pin.addEventListener('mouseleave', () => {
+        if (_lockedZone) return;
+        hidePanel();
+      });
+      pin.addEventListener('click', () => {
+        if (_lockedZone === zone) { _lockedZone = null; hidePanel(); }
+        else { _lockedZone = zone; showZoneInPanel(zone); }
+      });
+    });
+  }
+
   wrapPinsWithDescriptions();
+  wireMapPinsToDescriptions();
 
   // Refresh descriptions when the user toggles language. The lang-toggle button
   // flips its data-lang attribute on click; we observe that.
