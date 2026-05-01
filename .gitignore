@@ -5,8 +5,13 @@ assets/google_key.js
 .env.*.local
 
 # --- Generated assets (regenerate via build_*.py) -------------------------
-# Hypsometric / contour / satellite renders (large; regenerated locally)
-assets/masterplan/
+# Hypsometric / contour / satellite renders (large; regenerated locally).
+# Note: ignore folder *contents*, not the folder itself, so the GLB whitelist
+# below actually applies (Git skips negations inside a fully-ignored dir).
+assets/masterplan/*
+assets/masterplan/3d/
+# The web-ready GLB ships — needed by masterplan_clay.html
+!assets/masterplan/masterplan.glb
 
 # --- Python tooling --------------------------------------------------------
 __pycache__/
