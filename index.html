@@ -1275,13 +1275,20 @@ footer {
 .mp-video-card:hover .play { background: var(--gold); color: var(--bg-deep); }
 #mp-video-stage {
   position: absolute; inset: 0; display: none; background: #000;
-  flex-direction: column;
 }
-#mp-video-stage.shown { display: flex; }
+/* Grid (player row + fixed photo-strip row) is more robust than flex —
+   guarantees the strip its space even when the video tries to fill the
+   stage from edge to edge. */
+#mp-video-stage.shown {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 96px;
+}
 .mp-video-stage-player {
-  flex: 1 1 auto; min-height: 0;
   display: flex; align-items: center; justify-content: center;
+  min-height: 0; min-width: 0;
   padding: 6px;
+  overflow: hidden;
 }
 /* Use aspect-ratio so the element matches the video's natural shape — avoids
    iOS Safari pinning the first-frame preview to the top of an oversized box
@@ -1374,6 +1381,7 @@ footer {
   border-color: var(--gold); color: var(--gold); transform: rotate(90deg);
 }
 @media (max-width: 700px) {
+  #mp-video-stage.shown { grid-template-rows: 1fr 80px; }
   .mp-video-photos { padding: 8px 10px 10px; }
   .mp-video-photo { width: 80px; height: 50px; }
   .mp-photo-lightbox-title { font-size: 1.05rem; }
@@ -4143,9 +4151,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       [Math.max(...wideLats), Math.max(...wideLngs)],
     ];
 
-    // Start the zoom-out at t=0 of the modal open (no delay).
+    // Start the zoom-out at t=0 of the modal open (no delay).  Asymmetric
+    // padding nudges the framing so the parcel + villages cluster sits up
+    // and to the right of centre — leaves more of the highway / SW
+    // landscape visible below and to the left.  Total padding (x and y)
+    // matches the previous symmetric value, so the zoom level is unchanged.
     routesMap.flyToBounds(wideBounds, {
-      padding: [40, 40],
+      paddingTopLeft:     [70, 10],
+      paddingBottomRight: [10, 80],
       duration: 2.4,
       maxZoom: 15,
       easeLinearity: 0.32,
