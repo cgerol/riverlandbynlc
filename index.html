@@ -985,8 +985,19 @@ footer {
   .mp-modal-frame { width: 100%; height: 96vh; max-height: 96vh; border-radius: 4px; }
   .mp-modal-head { padding: 0.7rem 1rem; }
   .mp-modal-head h3 { font-size: 1.05rem; }
-  .mp-video-options { grid-template-columns: 1fr; gap: 0.7rem; padding: 1rem; }
+  /* On mobile let cards size to their content + scroll within the modal,
+     instead of squashing 4 cards into 1/4 of the modal body each (which
+     was clipping the description text). */
+  .mp-modal-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .mp-video-options {
+    grid-template-columns: 1fr; gap: 0.7rem; padding: 1rem;
+    height: auto; align-items: start;
+  }
   .mp-video-card { padding: 1.1rem; }
+  .mp-video-card p { flex: 0 0 auto; }
+  /* Video stage needs to remain absolutely-positioned so it can overlay
+     the (now scrollable) options list when a video is opened. */
+  #mp-video-stage { overflow: hidden; }
   #mp-routes-toolbar, #mp-routes-legend { font-size: 0.65rem; padding: 0.5rem 0.7rem; }
   #mp-routes-legend { left: 8px; bottom: 8px; }
   #mp-routes-toolbar { top: 8px; right: 8px; }
@@ -1259,9 +1270,17 @@ footer {
 #mp-video-stage {
   position: absolute; inset: 0; display: none; background: #000;
   align-items: center; justify-content: center;
+  padding: 0;
 }
 #mp-video-stage.shown { display: flex; }
-#mp-video-stage video { max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain; }
+/* Use aspect-ratio so the element matches the video's natural shape — avoids
+   iOS Safari pinning the first-frame preview to the top of an oversized box
+   and leaving empty space below. The flex parent centers it. */
+#mp-video-stage video {
+  width: 100%; max-width: 100%; max-height: 100%;
+  aspect-ratio: 16 / 9; height: auto;
+  object-fit: contain; background: #000;
+}
 .mp-video-back {
   position: absolute; top: 12px; left: 12px; z-index: 5;
   display: inline-flex; align-items: center; gap: 6px;
@@ -3244,7 +3263,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           </svg>
           <span data-i18n="videos.back">Πίσω στα βίντεο</span>
         </button>
-        <video id="mp-video-player" controls preload="metadata"></video>
+        <video id="mp-video-player" controls preload="metadata" playsinline webkit-playsinline></video>
       </div>
     </div>
   </div>
