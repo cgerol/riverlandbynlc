@@ -1065,17 +1065,23 @@ footer {
 .mp-modal-close:hover { border-color: var(--gold); color: var(--gold); transform: rotate(90deg); }
 .mp-modal-body { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
 
-/* Routes appear via opacity fade-in (not stroke-dasharray) so the line styling
-   — including the dashed pattern on the internal-access route — survives
-   intact through the zoom-out animation.  A stroke-dasharray-based draw
-   would jitter and snap because Leaflet re-projects each path while the
-   map zooms (path pixel-length changes mid-animation). */
+/* Route line-draw animation.  The trick that fixes the earlier "pause then
+   snap" bug is that the dasharray is computed AFTER the zoom-out flight
+   completes (see JS), so path lengths are stable while the keyframes run.
+   `mp-route-anim` is added during the animation phase only; it's pulled off
+   on animationend so the colored line returns to its native styling
+   (including the `6 5` dashed pattern on the internal-access route). */
+@keyframes mpDrawRoute { to { stroke-dashoffset: 0; } }
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route {
   stroke-linecap: round; stroke-linejoin: round; fill: none;
-  opacity: 0;
-  transition: opacity 0.9s ease-out;
 }
-#mp-routes-map .leaflet-overlay-pane svg path.mp-route.drawing { opacity: 1; }
+#mp-routes-map .leaflet-overlay-pane svg path.mp-route.mp-route-anim {
+  stroke-dasharray: 9999;
+  stroke-dashoffset: 9999;
+}
+#mp-routes-map .leaflet-overlay-pane svg path.mp-route.mp-route-anim.drawing {
+  animation: mpDrawRoute 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 /* Place markers fade in like community-boundary in #location section */
 @keyframes mpPlaceIn { from { opacity: 0; transform: translateY(6px); }
                        to   { opacity: 1; transform: translateY(0); } }
@@ -1269,10 +1275,14 @@ footer {
 .mp-video-card:hover .play { background: var(--gold); color: var(--bg-deep); }
 #mp-video-stage {
   position: absolute; inset: 0; display: none; background: #000;
-  align-items: center; justify-content: center;
-  padding: 0;
+  flex-direction: column;
 }
 #mp-video-stage.shown { display: flex; }
+.mp-video-stage-player {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px;
+}
 /* Use aspect-ratio so the element matches the video's natural shape — avoids
    iOS Safari pinning the first-frame preview to the top of an oversized box
    and leaving empty space below. The flex parent centers it. */
@@ -1280,6 +1290,94 @@ footer {
   width: 100%; max-width: 100%; max-height: 100%;
   aspect-ratio: 16 / 9; height: auto;
   object-fit: contain; background: #000;
+}
+/* Photo strip below the video player.  Horizontal scroll when there are
+   more thumbs than fit. */
+.mp-video-photos {
+  flex: 0 0 auto;
+  display: flex; gap: 8px;
+  overflow-x: auto; overflow-y: hidden;
+  padding: 10px 14px 12px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.55));
+  border-top: 1px solid rgba(196, 168, 107, 0.18);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196,168,107,0.35) transparent;
+}
+.mp-video-photos:empty { display: none; }
+.mp-video-photo {
+  flex: 0 0 auto;
+  width: 96px; height: 60px;
+  border-radius: 4px;
+  background: var(--bg-card) center/cover no-repeat;
+  border: 1px solid rgba(196, 168, 107, 0.28);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+}
+.mp-video-photo:hover {
+  border-color: var(--gold); transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.mp-video-photo .num {
+  position: absolute; bottom: 3px; right: 5px;
+  font: 600 0.6rem/1 'Outfit', sans-serif;
+  color: var(--cream); letter-spacing: 0.06em;
+  background: rgba(14, 26, 14, 0.7);
+  padding: 2px 5px; border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Fullscreen photo lightbox */
+.mp-photo-lightbox {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0, 0, 0, 0.94);
+  display: none;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 4vh 4vw;
+  cursor: zoom-out;
+  opacity: 0; transition: opacity 0.25s ease-out;
+}
+.mp-photo-lightbox.shown { display: flex; opacity: 1; }
+.mp-photo-lightbox img {
+  max-width: 100%; max-height: calc(100% - 110px);
+  object-fit: contain; border-radius: 4px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
+  cursor: default;
+}
+.mp-photo-lightbox-cap {
+  margin-top: 18px; max-width: 760px;
+  text-align: center; cursor: default;
+}
+.mp-photo-lightbox-title {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold); font-size: 1.2rem; letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.mp-photo-lightbox-desc {
+  font-family: 'Outfit', sans-serif;
+  color: var(--cream); font-size: 0.82rem; line-height: 1.55;
+  letter-spacing: 0.02em;
+}
+.mp-photo-lightbox-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 38px; height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(196, 168, 107, 0.4);
+  color: var(--cream);
+  border-radius: 50%; cursor: pointer;
+  font-size: 22px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: 0.2s;
+}
+.mp-photo-lightbox-close:hover {
+  border-color: var(--gold); color: var(--gold); transform: rotate(90deg);
+}
+@media (max-width: 700px) {
+  .mp-video-photos { padding: 8px 10px 10px; }
+  .mp-video-photo { width: 80px; height: 50px; }
+  .mp-photo-lightbox-title { font-size: 1.05rem; }
+  .mp-photo-lightbox-desc { font-size: 0.76rem; }
 }
 .mp-video-back {
   position: absolute; top: 12px; left: 12px; z-index: 5;
@@ -3277,9 +3375,24 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
           </svg>
           <span data-i18n="videos.back">Πίσω στα βίντεο</span>
         </button>
-        <video id="mp-video-player" controls preload="metadata" playsinline webkit-playsinline></video>
+        <div class="mp-video-stage-player">
+          <video id="mp-video-player" controls preload="metadata" playsinline webkit-playsinline></video>
+        </div>
+        <!-- Photos from the same flight (drone stills at this altitude tier).
+             Populated by JS when the user picks a video. -->
+        <div class="mp-video-photos" id="mp-video-photos"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== PHOTO LIGHTBOX (overlays everything when a thumbnail is tapped) ===== -->
+<div class="mp-photo-lightbox" id="mp-photo-lightbox" aria-hidden="true">
+  <button class="mp-photo-lightbox-close" aria-label="Close" type="button">×</button>
+  <img alt="">
+  <div class="mp-photo-lightbox-cap">
+    <div class="mp-photo-lightbox-title"></div>
+    <div class="mp-photo-lightbox-desc"></div>
   </div>
 </div>
 
@@ -3473,6 +3586,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   function closeModal(m) {
     m.classList.remove('open'); m.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    // Closing the videos modal also dismisses the photo lightbox if it
+    // was left open on top.
+    if (m.id === 'mp-videos-modal' && typeof closeLightbox === 'function') {
+      closeLightbox();
+      const v = document.getElementById('mp-video-player');
+      if (v) { v.pause(); v.removeAttribute('src'); v.load(); }
+      const strip = document.getElementById('mp-video-photos');
+      if (strip) strip.innerHTML = '';
+    }
   }
   document.querySelectorAll('.mp-modal-backdrop').forEach(b => {
     b.addEventListener('click', e => { if (e.target === b) closeModal(b); });
@@ -3496,15 +3618,91 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     showVideoGrid();
     openModal('mp-videos-modal');
   };
-  document.getElementById('mp-video-back').addEventListener('click', showVideoGrid);
+  document.getElementById('mp-video-back').addEventListener('click', () => {
+    showVideoGrid();
+    document.getElementById('mp-video-photos').innerHTML = '';
+  });
+
+  // ---------- Photo gallery (drone stills paired to each video tier) ----------
+  // The architect/photographer delivered photos alongside each aerial video,
+  // grouped by altitude.  When the user picks a video we show the matching
+  // thumbnails below the player; tapping one opens the fullscreen lightbox.
+  const TIER_PHOTOS = {
+    ground:    ['g1', 'g2', 'g3'],
+    mid:       ['m1', 'm2', 'm3'],
+    high:      ['h1', 'h2', 'h3', 'h4'],
+    panoramic: ['p1', 'p2'],
+  };
+  // The data-i18n keys use 'pano' for panoramic — keep them in sync.
+  const tierKey = t => t === 'panoramic' ? 'pano' : t;
+
+  function buildPhotoStrip(tier) {
+    const strip = document.getElementById('mp-video-photos');
+    if (!strip) return;
+    strip.innerHTML = '';
+    const names = TIER_PHOTOS[tier] || [];
+    const total = names.length;
+    names.forEach((name, idx) => {
+      const src = `assets/videos/photos/${tier}/${name}.jpg`;
+      const div = document.createElement('div');
+      div.className = 'mp-video-photo';
+      div.style.backgroundImage = `url('${src}')`;
+      div.dataset.src = src;
+      div.dataset.tier = tier;
+      div.dataset.idx = idx + 1;
+      div.dataset.total = total;
+      div.setAttribute('role', 'button');
+      div.setAttribute('aria-label', `Photo ${idx + 1} of ${total}`);
+      div.innerHTML = `<span class="num">${idx + 1}/${total}</span>`;
+      div.addEventListener('click', () => openLightbox(src, tier, idx + 1, total));
+      strip.appendChild(div);
+    });
+  }
+
+  function openLightbox(src, tier, n, total) {
+    const lb = document.getElementById('mp-photo-lightbox');
+    if (!lb) return;
+    const lang = document.getElementById('lang-toggle')?.dataset?.lang || 'el';
+    const t = (typeof translations !== 'undefined' && translations[lang]) || {};
+    const k = tierKey(tier);
+    lb.querySelector('img').src = src;
+    lb.querySelector('.mp-photo-lightbox-title').textContent =
+      `${t[`videos.${k}.title`] || ''} · ${n}/${total}`;
+    lb.querySelector('.mp-photo-lightbox-desc').textContent  = t[`videos.${k}.desc`] || '';
+    lb.classList.add('shown');
+    lb.setAttribute('aria-hidden', 'false');
+  }
+  function closeLightbox() {
+    const lb = document.getElementById('mp-photo-lightbox');
+    if (!lb) return;
+    lb.classList.remove('shown');
+    lb.setAttribute('aria-hidden', 'true');
+    const img = lb.querySelector('img');
+    if (img) img.src = '';
+  }
+  // Click outside the image (on the backdrop) closes; clicks on image/caption
+  // pass through.
+  document.getElementById('mp-photo-lightbox').addEventListener('click', e => {
+    if (e.target.closest('img, .mp-photo-lightbox-cap')) return;
+    closeLightbox();
+  });
+  document.querySelector('.mp-photo-lightbox-close')?.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' &&
+        document.getElementById('mp-photo-lightbox')?.classList.contains('shown')) {
+      closeLightbox();
+    }
+  });
 
   // ---------- Videos: pick → play ----------
   document.querySelectorAll('.mp-video-card').forEach(card => {
     card.addEventListener('click', () => {
       const src = card.dataset.src || '';
+      const tier = card.dataset.alt || '';
       const player = document.getElementById('mp-video-player');
       document.getElementById('mp-video-options').style.display = 'none';
       document.getElementById('mp-video-stage').classList.add('shown');
+      buildPhotoStrip(tier);
       if (src) { player.src = src; player.play().catch(() => {}); }
       else {
         document.getElementById('mp-videos-title').textContent =
@@ -3907,14 +4105,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       drawableLines.push({ id: route.id, polyline: line, casing });
     });
 
-    // Stagger the route opacity fade-ins so they appear one after another
-    // while the map is zooming out (no stroke-dasharray gymnastics → no
-    // jitter when Leaflet re-projects the paths during the zoom).
-    drawableLines.forEach((d, i) => {
-      setTimeout(() => {
-        d.polyline.getElement?.()?.classList.add('drawing');
-        d.casing.getElement?.()?.classList.add('drawing');
-      }, 180 + i * 220);
+    // Hide the routes (via dasharray) until after the fly-to-bounds completes,
+    // then trigger the line-draw animation. Doing the draw post-zoom is the
+    // key — Leaflet re-projects each path during the flight, which would
+    // make a mid-zoom dasharray transition jitter and snap.
+    const routePaths = [];
+    drawableLines.forEach(d => {
+      [d.polyline, d.casing].forEach(p => {
+        const path = p.getElement?.();
+        if (!path) return;
+        path.classList.add('mp-route-anim');
+        routePaths.push(path);
+      });
     });
 
     // Real distances + drive times — client-confirmed.  Re-render whenever
@@ -3947,6 +4149,26 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       duration: 2.4,
       maxZoom: 15,
       easeLinearity: 0.32,
+    });
+
+    // Once the flight settles, run the line-draw stagger.  We listen for the
+    // first moveend after the flight starts.  After each path's animation
+    // finishes we strip the .mp-route-anim and .drawing classes so the
+    // line returns to its natural styling (incl. the dashed pattern on the
+    // internal-access route).
+    routesMap.once('moveend', () => {
+      drawableLines.forEach((d, i) => {
+        setTimeout(() => {
+          [d.polyline, d.casing].forEach(p => {
+            const path = p.getElement?.();
+            if (!path) return;
+            path.classList.add('drawing');
+            path.addEventListener('animationend', () => {
+              path.classList.remove('drawing', 'mp-route-anim');
+            }, { once: true });
+          });
+        }, i * 200);
+      });
     });
   }
 
