@@ -3820,10 +3820,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       preferCanvas: false,
       minZoom: 11, maxZoom: 18,
     });
-    // Center on the parcel.  Zoom 14 frames the project + immediate
-    // surroundings without the routes overpowering the view; visitor zooms
-    // out to follow the routes to the villages.
-    routesMap.setView([PARCEL_CENTER[1], PARCEL_CENTER[0]], 14);
+    // Open at a tight closeup of the project.  The wide-frame zoom-out is
+    // kicked off below — it starts at t=0 (no delay) and ends with every
+    // route fully in frame.
+    routesMap.setView([PARCEL_CENTER[1], PARCEL_CENTER[0]], 15);
     setBasemap('brand');
 
     routedFeatures = { layerGroup: L.layerGroup().addTo(routesMap) };
@@ -3922,27 +3922,36 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     // the language toggles so the decimal separator and "min" unit follow
     // the active locale (6.8 km · 8 min ↔ 6,8 km · 8 λεπ).
     refreshLegendStats();
-    // Default view stays on the project (set above) so the masterplan is the
-    // focus; the visitor zooms out to follow the routes if they want.
     document.getElementById('mp-routes-loading').classList.remove('shown');
 
-    // After the routes finish drawing (last route ends ~3.6 s in, see the
-    // 180 + i*220 ms stagger and 2.8 s draw), ease out to a wider frame
-    // that includes the surrounding landmarks.  Triggering this earlier
-    // interrupts the stroke animation and makes routes look glitchy.
-    setTimeout(() => {
-      const pts = [
-        ...PARCEL_RV1,
-        ...NEARBY_PLACES.map(p => p.lonlat),
-        ...Object.values(VILLAGE_CENTERS),
-      ];
-      const lats = pts.map(p => p[1]);
-      const lngs = pts.map(p => p[0]);
-      routesMap.flyToBounds([
-        [Math.min(...lats), Math.min(...lngs)],
-        [Math.max(...lats), Math.max(...lngs)],
-      ], { padding: [60, 60], duration: 1.8, maxZoom: 14, easeLinearity: 0.35 });
-    }, 3700);
+    // Wide bounds: include every point on every route shape (not just village
+    // centers) so the final view is guaranteed to fit all routes from start
+    // to end, with a bit of breathing room.
+    const allRoutePts = ROUTE_KMLS.flatMap(r => KML_ROUTES_DATA[r.id] || []);
+    const widePts = [
+      ...allRoutePts,
+      ...PARCEL_RV1,
+      ...NEARBY_PLACES.map(p => p.lonlat),
+      ...Object.values(VILLAGE_CENTERS),
+    ];
+    const wideLats = widePts.map(p => p[1]);
+    const wideLngs = widePts.map(p => p[0]);
+    const wideBounds = [
+      [Math.min(...wideLats), Math.min(...wideLngs)],
+      [Math.max(...wideLats), Math.max(...wideLngs)],
+    ];
+
+    // Start the zoom-out at t=0 of the modal open (no delay).  Duration is
+    // tuned to land just as the last route finishes drawing (~3.6 s in)
+    // so the visitor sees the project fly out into the full route map.
+    // padding + lower maxZoom make sure every route fits with a comfortable
+    // margin around the edge.
+    routesMap.flyToBounds(wideBounds, {
+      padding: [80, 80],
+      duration: 3.4,
+      maxZoom: 13,
+      easeLinearity: 0.32,
+    });
   }
 
   document.getElementById('mp-routes-basemap').addEventListener('change',
