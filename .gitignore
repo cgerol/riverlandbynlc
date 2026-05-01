@@ -47,6 +47,9 @@ assets/260430.jpg
 assets/3d export.obj
 assets/3d export.mtl
 
+# --- Internal-only utilities (never deployed) ---
+_internal/
+
 # --- Investor / confidential materials (NEVER public) ---------------------
 *Inv_*.pptx
 *PRELIMINARY*
