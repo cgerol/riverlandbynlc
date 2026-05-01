@@ -41,6 +41,12 @@ _ai_outputs/
 # --- Bulky source archives (keep extracted versions in assets/kml/) -------
 assets/Gmail.zip
 
+# --- Architect deliverables: keep compressed JPGs in repo, big sources out ---
+assets/260430.png
+assets/260430.jpg
+assets/3d export.obj
+assets/3d export.mtl
+
 # --- Investor / confidential materials (NEVER public) ---------------------
 *Inv_*.pptx
 *PRELIMINARY*

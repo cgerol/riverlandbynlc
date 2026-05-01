@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Riverland · Stylized 3D Masterplan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg-deep:   #0e1a0e;
+  --bg-warm:   #1a2516;
+  --cream:     #E8DFC4;
+  --cream-light:#F5EFD8;
+  --gold:      #C4A86B;
+  --gold-light:#D9C089;
+  --sage:      #7a8a5e;
+  --terracotta:#a64a2c;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, #1f2c1d 0%, #0e1a0e 60%, #07120a 100%);
+  color: var(--cream);
+}
+#scene { position: fixed; inset: 0; }
+
+#topbar {
+  position: fixed; top: 14px; left: 14px; z-index: 10;
+  background: rgba(14,26,14,0.78); backdrop-filter: blur(8px);
+  border: 1px solid rgba(196,168,107,0.25); border-radius: 6px;
+  padding: 9px 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+}
+#topbar h1 { font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+  color: var(--gold); letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 500; margin: 0 0 2px 0; }
+#topbar small { color: var(--cream-light); opacity: 0.65; font-size: 0.7rem;
+  letter-spacing: 0.04em; }
+
+#controls {
+  position: fixed; top: 14px; right: 14px; z-index: 10;
+  background: rgba(14,26,14,0.85); backdrop-filter: blur(8px);
+  color: var(--cream); padding: 12px 14px; border-radius: 6px;
+  border: 1px solid rgba(196,168,107,0.25); min-width: 200px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4); font-size: 11px;
+}
+#controls h3 { font-size: 0.6rem; color: var(--gold); text-transform: uppercase;
+  letter-spacing: 0.18em; margin: 0 0 6px; font-weight: 500; }
+#controls h3:not(:first-of-type) { margin-top: 12px; }
+#controls button {
+  display: inline-block; padding: 5px 9px; margin: 3px 2px 0 0;
+  border: 1px solid rgba(196,168,107,0.45);
+  background: rgba(14,26,14,0.6); color: var(--gold-light);
+  border-radius: 4px; cursor: pointer; font-size: 11px;
+  font-family: inherit; transition: 0.18s;
+}
+#controls button:hover { background: var(--gold); color: var(--bg-deep);
+  border-color: var(--gold); }
+#controls button.active { background: var(--gold); color: var(--bg-deep); }
+#controls label { display: block; margin: 5px 0; cursor: pointer; }
+#controls input[type=range] { width: 100%; margin-top: 2px;
+  accent-color: var(--gold); }
+
+#hud {
+  position: fixed; bottom: 12px; left: 12px; z-index: 10;
+  background: rgba(14,26,14,0.78); backdrop-filter: blur(6px);
+  color: var(--cream-light); padding: 6px 10px;
+  border-radius: 4px; font-size: 10px;
+  border: 1px solid rgba(196,168,107,0.2);
+}
+#hud .key { color: var(--gold); font-weight: 600; }
+
+#loader {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #1f2c1d 0%, #0e1a0e 60%, #07120a 100%);
+  z-index: 100; flex-direction: column;
+  font-family: 'Cormorant Garamond', serif; color: var(--gold);
+}
+#loader .ring { width: 50px; height: 50px;
+  border: 3px solid rgba(196,168,107,0.2); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 0.9s linear infinite;
+  margin-bottom: 18px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#loader-msg { font-size: 0.95rem; letter-spacing: 0.18em; text-transform: uppercase; }
+#loader-progress { font-size: 0.75rem; color: var(--cream-light); opacity: 0.7;
+  margin-top: 6px; font-family: 'Outfit', sans-serif; letter-spacing: 0.1em; }
+
+#info-card {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(14,26,14,0.85); backdrop-filter: blur(8px);
+  border: 1px solid rgba(196,168,107,0.25);
+  color: var(--cream); padding: 10px 16px; border-radius: 6px;
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 500; opacity: 0; transition: opacity 0.4s;
+  pointer-events: none; z-index: 5;
+}
+#info-card.shown { opacity: 1; }
+#info-card .gold { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="ring"></div>
+  <div id="loader-msg">Loading masterplan</div>
+  <div id="loader-progress">0%</div>
+</div>
+
+<div id="topbar">
+  <h1>Riverland · 3D Masterplan</h1>
+  <small id="topbar-meta">Stylized clay model · architect's geometry</small>
+</div>
+
+<div id="controls">
+  <h3>Camera</h3>
+  <button data-view="oblique" class="active">Oblique</button>
+  <button data-view="topdown">Top-down</button>
+  <button data-view="approach">Approach</button>
+  <button data-view="orbit" id="bSpin" style="margin-top:4px;">Auto-rotate</button>
+  <h3>Lighting</h3>
+  <button data-style="clay" class="active">Clay</button>
+  <button data-style="warm">Warm</button>
+  <button data-style="moonlit">Moonlit</button>
+  <h3>Overlay</h3>
+  <button id="bZones" class="active">Show zones</button>
+  <h3>Vertical scale
+    <span id="vScale" style="float:right;color:var(--gold);">1.0×</span>
+  </h3>
+  <input type="range" id="rScale" min="0.5" max="2.5" step="0.1" value="1">
+</div>
+
+<div id="hud">
+  <span class="key">Drag</span> rotate · <span class="key">Right-drag</span> pan · <span class="key">Scroll</span> zoom
+</div>
+
+<div id="info-card">
+  <span class="gold">Riverland</span> · 1.5 km × 1.7 km · architect render geometry
+</div>
+
+<div id="scene"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.166.1/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.166.1/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+
+// ===== RENDERER + SCENE =====
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x1f2c1d, 1500, 4500);
+
+const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 1, 8000);
+
+// ===== LIGHTING (palette swappable) =====
+const sun = new THREE.DirectionalLight(0xfff2cf, 1.6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0004;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -1500;
+sun.shadow.camera.right = sun.shadow.camera.top = 1500;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 5000;
+scene.add(sun, sun.target);
+
+const sky = new THREE.HemisphereLight(0xfaf2dd, 0xa89473, 0.55);
+scene.add(sky);
+const fill = new THREE.AmbientLight(0xffe7be, 0.18);
+scene.add(fill);
+
+const STYLES = {
+  clay:    { sun: 0xfff8e0, sky: 0xfaf2dd, ground: 0xa89473,
+             villa: 0xefe6cf, wall: 0xd9c8a3, ground_c: 0x7a8a5e,
+             water: 0x6b8aa3, sun_int: 1.5, sky_int: 0.6,
+             bgTop: 0x2a3829, bgBot: 0x0e1a0e },
+  warm:    { sun: 0xffd9a0, sky: 0xffe5b8, ground: 0x8c6a4a,
+             villa: 0xf3dcb6, wall: 0xc8a36e, ground_c: 0x96885e,
+             water: 0x6f9ab2, sun_int: 1.7, sky_int: 0.5,
+             bgTop: 0x3a2818, bgBot: 0x1a0e08 },
+  moonlit: { sun: 0xb8c9e0, sky: 0xc8d4e8, ground: 0x4d5e6e,
+             villa: 0xd0d8e0, wall: 0x8a96a6, ground_c: 0x4f5d4e,
+             water: 0x4f7088, sun_int: 0.8, sky_int: 0.5,
+             bgTop: 0x182030, bgBot: 0x080e16 },
+};
+let currentStyle = 'clay';
+
+function applyStyle(key) {
+  const s = STYLES[key]; if (!s) return;
+  currentStyle = key;
+  sun.color.setHex(s.sun);  sun.intensity = s.sun_int;
+  sky.color.setHex(s.sky);  sky.groundColor.setHex(s.ground);
+  sky.intensity = s.sky_int;
+  scene.traverse(o => {
+    if (!o.isMesh || !o.userData._kind) return;
+    const k = o.userData._kind;
+    if (k === 'villa')   o.material.color.setHex(s.villa);
+    if (k === 'wall')    o.material.color.setHex(s.wall);
+    if (k === 'water')   o.material.color.setHex(s.water);
+    if (k === 'ground')  o.material.color.setHex(s.ground_c);
+  });
+  document.body.style.background =
+    `linear-gradient(180deg, #${s.bgTop.toString(16).padStart(6,'0')} 0%,
+                            #${s.bgBot.toString(16).padStart(6,'0')} 100%)`;
+  document.querySelectorAll('[data-style]').forEach(b =>
+    b.classList.toggle('active', b.dataset.style === key));
+}
+
+
+// ===== ZONE OVERLAYS (projected from the 2D masterplan SVG) =====
+// Translucent colored polygons drawn at the project's ground elevation,
+// so the visitor can see which zone each part of the model belongs to.
+// Coordinates come from the existing 1024×1424 watercolor SVG and are
+// scaled linearly to the 3D model's world bounds — close enough for an
+// at-a-glance overlay, can be re-traced later for pixel-perfect accuracy.
+
+const ZONES = {
+  family:    { color: 0xFF8C00, label: 'Family',
+    d: 'M 383.3,298.5 C 362.2,318.1 300,405.7 276.1,445.6 C 252.2,485.5 254,508.4 240.1,538 C 226.2,567.6 207.7,599.6 192.6,623.2 C 177.5,646.8 162.6,656.6 149.7,679.6 C 136.8,702.6 120.7,734.2 114.9,761.2 C 109.1,788.2 106.4,806.2 114.9,841.6 C 123.4,877 144.5,935.2 165.9,973.6 C 187.3,1012 222.5,1050.4 243.6,1072 C 264.7,1093.6 250.4,1098 292.3,1103.2 C 334.3,1108.4 446.8,1110 495.3,1103.2 C 543.8,1096.4 568.8,1074.8 583.5,1062.4 C 598.2,1050 586.2,1038.8 583.5,1028.8 C 580.8,1018.8 577.9,1013.2 567.3,1002.4 C 556.7,991.6 532.2,973.1 519.7,964 C 507.2,954.9 501.3,958.1 492.5,948 C 483.7,937.9 476.3,914.7 467.1,903.2 C 457.9,891.7 446.1,887.3 437.3,878.8 C 428.5,870.3 419.5,861.8 414.1,852.4 C 408.7,843 411.1,833.2 404.9,822.4 C 398.7,811.6 384.2,819.6 377,787.6 C 369.8,755.6 369.2,666.8 361.8,630.1 C 354.4,593.4 333.4,596.1 332.5,567.6 C 331.6,539.1 341.5,489.7 356.1,458.8 C 370.7,427.9 406.9,399 419.9,382 C 432.9,365 436.9,366.1 434,357 C 431.1,347.9 411.3,337.4 402.8,327.7 C 394.4,317.9 404.4,278.9 383.3,298.5 Z' },
+  premium:   { color: 0x8B008B, label: 'Premium',
+    d: 'M 561.2,317.8 C 548.1,316.6 538.7,313.9 526,317.8 C 513.3,321.7 506.2,321.6 485.1,341.2 C 464,360.8 419.8,414 399.3,435.3 C 378.8,456.6 370.6,446.1 362.1,468.9 C 353.6,491.7 346.8,547.5 348.2,572.1 C 349.6,596.7 365.1,584.9 370.3,616.5 C 375.5,648.1 368.3,717.7 379.5,761.7 C 390.7,805.7 421.8,855.9 437.5,880.5 C 453.2,905.1 461.3,896.3 473.5,909.3 C 485.7,922.3 492,944.3 510.6,958.5 C 529.2,972.7 568.7,989.4 584.9,994.5 C 601.1,999.6 603.5,999 607.6,989 C 611.7,979 606,948.6 609.2,934.5 C 611.7,911.3 623.7,917.1 626.6,904.5 C 629.5,891.9 629.5,869.3 626.6,858.9 C 623.7,848.5 616.4,845.3 609.2,842.1 C 602.1,838.9 599,853.3 583.7,839.7 C 568.4,826.1 528.8,781.5 517.6,760.5 C 506.4,739.5 522.4,726.1 516.4,713.7 C 510.4,701.3 484.9,698.1 481.6,686.1 C 478.3,674.1 480.1,657.3 496.7,641.7 C 513.3,626.1 568.4,604.9 581.4,592.5 C 594.4,580.1 583.9,573.9 574.4,567.3 C 564.9,560.7 536.7,559.7 524.5,552.9 C 512.3,546.1 504.8,532.5 501.3,526.5 C 497.8,520.5 494.6,522.3 503.7,516.9 C 512.8,511.5 539.1,508.3 555.9,494.1 C 572.7,479.9 596.5,459.9 604.6,431.7 C 612.7,403.5 611.8,343.9 604.6,324.9 C 597.4,305.9 574.3,319 561.2,317.8 Z' },
+  premium2:  { color: 0x8B008B, label: 'Premium',
+    d: 'M 634.9,179.6 C 632,185.9 635.5,195.8 638.8,204.9 C 642,214 648.9,224.4 654.4,234.2 C 659.9,243.9 665.5,253.3 672,263.4 C 678.5,273.5 688.1,284.5 693.5,294.7 C 698.9,304.9 695.5,312.6 704.6,324.3 C 713.7,336 732.4,354.9 748.1,364.9 C 763.8,374.9 784.2,375.6 798.8,384.4 C 813.4,393.2 819.6,409.7 835.9,417.5 C 852.1,425.3 877.4,432.2 896.3,431.2 C 915.1,430.2 945.1,422.8 949,411.7 C 952.9,400.6 927.2,378.5 919.7,364.9 C 912.2,351.3 910,342.5 904.1,329.8 C 898.3,317.1 895.3,307.7 884.6,288.8 C 873.9,269.9 861.9,231.5 839.8,216.6 C 817.7,201.7 774.7,207.3 752.2,199.5 C 729.7,191.7 720.7,174.9 704.6,169.5 C 688.5,164.1 667.5,165.4 655.9,167.1 C 644.3,168.8 637.8,173.3 634.9,179.6 Z' },
+  greenarea: { color: 0x4FA3D9, label: 'Green Area',
+    d: 'M 246.7,89.7 C 218.1,106.6 210.3,129.1 225.2,152.2 C 240.1,175.3 286.6,230 336.4,228.2 C 386.2,226.4 487.3,151.5 524,141.4 C 560.7,131.3 547.4,148.2 556.5,167.8 C 565.6,187.4 566.1,228.8 578.5,259 C 590.9,289.2 618.9,325 630.7,349 C 642.5,373 644.3,392.4 649.3,403 C 654.3,413.6 656.3,404.6 660.9,412.6 C 665.5,420.6 672.6,443.2 677.1,451 C 681.6,458.8 684.7,450.8 687.6,459.4 C 690.5,468 691.4,494.2 694.5,502.6 C 697.6,511 691.8,508.6 706.1,509.8 C 720.4,511 761.3,506.6 780.4,509.8 C 799.5,513 807.7,518.4 821,529 C 834.3,539.6 844.8,566 860.4,573.4 C 876,580.8 904.4,574.6 914.9,573.4 C 925.4,572.2 921.7,570.2 923.1,566.2 C 924.5,562.2 925.2,553.6 923.1,549.4 C 921,545.2 913,544.8 910.3,541 C 907.6,537.2 912.2,531.2 906.8,526.6 C 901.4,522 888.8,521.4 877.8,513.4 C 866.8,505.4 851.9,487.4 840.7,478.6 C 829.5,469.8 821.7,475.8 810.5,460.6 C 799.3,445.4 788.3,404 773.4,387.4 C 758.5,370.8 732,367.8 721.2,361 C 710.4,354.2 712.4,353.4 708.5,346.6 C 704.6,339.8 705.5,331.8 698,320.2 C 690.5,308.6 673.1,292.6 663.2,277 C 653.4,261.4 646.3,246.6 638.9,226.6 C 631.5,206.6 620.3,171 619.1,157 C 617.9,143 625.9,145.4 631.9,142.6 C 637.9,139.8 647.2,139 655.1,140.2 C 663,141.4 662.1,141 679.5,149.8 C 696.9,158.6 741.9,188.1 759.7,193.1 C 777.5,198.1 785.6,186 786.2,179.8 C 786.9,173.6 777.1,165.6 763.6,156.1 C 750.1,146.6 721.1,131.2 705.1,122.9 C 689.1,114.7 675.3,111.5 667.9,106.6 C 660.5,101.7 668.3,104 660.9,93.4 C 653.5,82.8 648,52.9 623.2,42.9 C 598.4,32.9 549.7,31.9 512,33.2 C 474.3,34.5 441.1,41.3 396.9,50.7 C 352.7,60.1 275.3,72.8 246.7,89.7 Z' },
+  luxury:    { color: 0xDAA520, label: 'Luxury',
+    d: 'M 629.5,457.7 C 623.5,463.3 612.7,482.7 601.7,491.3 C 590.7,499.9 571.9,503.9 563.4,509.3 C 554.9,514.7 551.5,516.9 550.7,523.7 C 549.9,530.5 552,539.9 558.8,550.1 C 565.6,560.3 584.3,575.5 591.3,584.9 C 598.3,594.3 599.9,596.9 600.5,606.5 C 601.1,616.1 603,631.5 594.7,642.5 C 586.4,653.5 558,660.3 550.7,672.5 C 543.4,684.7 548.4,703.1 550.7,715.7 C 553,728.3 558.2,737.9 564.6,748.1 C 571,758.3 577.1,766.9 588.9,776.9 C 600.7,786.9 619.4,790.9 635.3,808.1 C 651.2,825.3 675.8,862.9 684.1,880.1 C 692.4,897.3 687.5,904.3 685.2,911.3 C 682.9,918.3 673.8,916.7 670.1,922.1 C 666.4,927.5 658.4,929.3 663.2,943.7 C 668,958.1 687.5,993.1 699.1,1008.5 C 710.7,1023.9 721,1031.5 732.8,1036.1 C 744.6,1040.7 757.1,1041.3 769.9,1036.1 C 782.6,1030.9 802.7,1015.1 809.3,1004.9 C 815.9,994.7 812.8,986.7 809.3,974.9 C 805.8,963.1 797.2,960.7 788.5,934.1 C 779.8,907.5 776.8,852.3 757.1,815.3 C 737.4,778.3 685.2,739.3 670.1,712.1 C 655,684.9 665.3,670.7 666.7,652.1 C 668.1,633.5 676.8,618.1 678.3,600.5 C 679.8,582.9 679,563.9 675.9,546.5 C 672.8,529.1 666.1,510.9 659.7,496.1 C 653.3,481.3 642.7,464.1 637.7,457.7 C 632.7,451.3 635.5,452.1 629.5,457.7 Z' },
+  together:  { color: 0xAAAAAA, label: 'Together',
+    d: 'M 369,234.3 C 362.6,227.7 353.3,228.3 330.7,229.5 C 308.1,230.7 258.7,243.5 233.2,241.5 C 207.7,239.5 195,221.5 177.6,217.5 C 160.2,213.5 147.8,208.1 128.8,217.5 C 109.9,226.9 76.8,260.9 63.9,273.9 C 50.9,286.9 54,286.5 51.1,295.5 C 48.2,304.5 44,316.5 46.5,327.9 C 49,339.3 62.5,346.1 66.2,363.9 C 69.9,381.7 70.6,418.5 68.5,434.7 C 66.4,450.9 59.4,454.3 53.4,461.1 C 47.4,467.9 39.2,468.5 32.6,475.5 C 26,482.5 17.1,489.9 14,503.1 C 10.9,516.3 11.7,540.1 14,554.7 C 16.3,569.3 25.2,578.5 27.9,590.7 C 30.6,602.9 27.9,616.9 30.2,627.9 C 32.5,638.9 33.9,650.9 41.8,656.7 C 49.7,662.5 66.8,661.9 77.8,662.7 C 88.8,663.5 102.8,660.1 108,661.5 C 113.2,662.9 106.2,669.5 109.1,671.1 C 112,672.7 118.3,677.5 125.4,671.1 C 132.6,664.7 141.8,650.5 152,632.7 C 162.2,614.9 173.7,586.5 186.8,564.3 C 200,542.1 221.8,516.5 230.9,499.5 C 240,482.5 235.6,477.9 241.4,462.3 C 247.2,446.7 258.6,420.1 265.7,405.9 C 272.8,391.7 268.4,397.3 284.3,377.1 C 300.2,356.9 346.7,302.7 360.8,284.7 C 374.9,266.7 367.6,277.5 369,269.1 C 370.4,260.7 375.4,240.9 369,234.3 Z' },
+  wellness:  { color: 0xDC143C, label: 'Wellness',
+    d: 'M 501.1,176.8 C 493.6,172.2 478.3,176 473.3,176.8 C 468.3,177.6 473.9,179.2 471,181.6 C 468.1,184 460,184.8 455.9,191.2 C 451.8,197.6 450.1,213.4 446.6,220 C 443.1,226.6 437.3,227.6 435,230.8 C 432.7,234 434.6,236.8 432.7,239.2 C 430.8,241.6 424.9,243.2 423.4,245.2 C 421.8,247.2 424.4,248.2 423.4,251.2 C 422.4,254.2 419.3,261 417.6,263.2 C 415.9,265.4 414.2,262.8 413,264.4 C 411.8,266 412.2,270.6 410.6,272.8 C 409.1,275 405.8,275.4 403.7,277.6 C 401.6,279.8 399.3,284.6 397.9,286 C 396.5,287.4 396,282.4 395.6,286 C 395.2,289.6 395.2,304 395.6,307.6 C 396,311.2 396.5,306 397.9,307.6 C 399.3,309.2 399.6,312.8 403.7,317.2 C 407.8,321.6 418.1,329.4 422.2,334 C 426.3,338.6 420.1,343 428,344.8 C 435.9,346.6 462.8,345.2 469.8,344.8 C 476.8,344.4 468.3,344.2 469.8,342.4 C 471.4,340.6 477,337 479.1,334 C 481.2,331 471.4,326.6 482.6,324.4 C 493.8,322.2 535.8,323.4 546.4,320.8 C 557,318.2 547,311 546.4,308.8 C 545.8,306.6 543.9,308.8 542.9,307.6 C 541.9,306.4 541.6,306.4 540.6,301.6 C 539.6,296.8 538.9,286.4 537.1,278.8 C 535.4,271.2 531.5,263.6 530.1,256 C 528.8,248.4 530.9,241.8 529,233.2 C 527.1,224.6 523.1,213.8 518.5,204.4 C 513.9,195 508.6,181.4 501.1,176.8 Z' },
+  strategic: { color: 0x666666, label: 'Strategic',
+    d: 'M 689.6,520.1 C 674.3,523.1 679.9,524.7 678,538.1 C 676.1,551.5 675.5,586.5 678,600.5 C 680.5,614.5 690.7,613.9 693,622.1 C 695.3,630.3 693.8,639.5 691.9,649.7 C 690,659.9 682.8,673.5 681.4,683.3 C 680,693.1 678.2,698.5 683.8,708.5 C 689.4,718.5 702.9,722.1 715.1,743.3 C 727.3,764.5 747.7,818.5 756.8,835.7 C 765.9,852.9 765,840.1 769.6,846.5 C 774.3,852.9 777.7,854.7 784.7,874.1 C 791.7,893.5 802.7,940.1 811.4,962.9 C 820.1,985.7 826.3,998.9 836.9,1010.9 C 847.5,1022.9 862.6,1030.9 875.2,1034.9 C 887.8,1038.9 896.4,1044.1 912.3,1034.9 C 928.1,1025.7 954.6,997.3 970.3,979.7 C 985.9,962.1 998.3,942.1 1006.2,929.3 C 1014.1,916.5 1015.9,923.7 1017.8,902.9 C 1019.7,882.1 1020.1,827.9 1017.8,804.5 C 1015.5,781.1 1007.4,789.9 1003.9,762.5 C 1000.4,735.1 999.3,665.5 997,640.1 C 994.7,614.7 994.1,619.9 990,610.1 C 985.9,600.3 977.6,587.7 972.6,581.3 C 967.6,574.9 968.9,574.1 959.8,571.7 C 950.7,569.3 930.9,565.7 918.1,566.9 C 905.4,568.1 893.9,577.1 883.3,578.9 C 872.7,580.7 864.2,581.3 854.3,577.7 C 844.4,574.1 830.3,562.9 824.1,557.3 C 817.9,551.7 824.2,548.3 817.2,544.1 C 810.3,539.9 790.3,536.1 782.4,532.1 C 774.5,528.1 785.1,522.1 769.6,520.1 C 754.1,518.1 704.9,517.1 689.6,520.1 Z' },
+};
+
+// 1024 × 1424 watercolor → world XZ.  Z is flipped because the watercolor's
+// top edge is north of the project (negative Z in the 3D world frame).
+function svgToWorld(svgX, svgY, modelW, modelD) {
+  const x = (svgX / 1024 - 0.5) * modelW;
+  const z = (svgY / 1424 - 0.5) * modelD;
+  return [x, z];
+}
+
+const zoneGroup = new THREE.Group();
+zoneGroup.visible = true;
+scene.add(zoneGroup);
+
+function buildZoneOverlays(modelBBox) {
+  zoneGroup.clear();
+
+  // Find the actual project bbox by aggregating just the "villa" meshes
+  // (the OBJ contains hundreds of m² of surrounding terrain that pushes
+  // the model bbox far past where the buildings actually are).
+  const projBox = new THREE.Box3();
+  let villaCount = 0;
+  if (model) {
+    model.traverse(o => {
+      if (o.isMesh && o.userData._kind === 'villa') {
+        projBox.expandByObject(o);
+        villaCount++;
+      }
+    });
+  }
+  const fallback = villaCount === 0;
+  const box = fallback ? modelBBox : projBox;
+  const center = box.getCenter(new THREE.Vector3());
+  const span = box.getSize(new THREE.Vector3());
+  // Pad a touch so zones extend slightly beyond the villas (catches green
+  // areas, strategic, etc. which don't have buildings).
+  const W = span.x * 1.30;
+  const D = span.z * 1.30;
+  const cx = center.x;
+  const cz = center.z;
+  // Place at the project's ground elevation (the average villa base) +1 m
+  const groundY = box.min.y + 1;
+
+  // Use a hidden inline SVG path element so the browser does the bezier
+  // sampling for us (works for any cubic-bezier path string).
+  const ns = 'http://www.w3.org/2000/svg';
+  const tmpSvg = document.createElementNS(ns, 'svg');
+  const tmpPath = document.createElementNS(ns, 'path');
+  tmpSvg.setAttribute('width', '0'); tmpSvg.setAttribute('height', '0');
+  tmpSvg.style.position = 'absolute'; tmpSvg.style.visibility = 'hidden';
+  tmpSvg.appendChild(tmpPath);
+  document.body.appendChild(tmpSvg);
+
+  Object.entries(ZONES).forEach(([id, z]) => {
+    tmpPath.setAttribute('d', z.d);
+    const len = tmpPath.getTotalLength();
+    const N = 140;
+    const shape = new THREE.Shape();
+    for (let i = 0; i < N; i++) {
+      const p = tmpPath.getPointAtLength(i / N * len);
+      const [xRel, zRel] = svgToWorld(p.x, p.y, W, D);
+      // Shift to the project's actual centroid (not world origin)
+      const x = xRel + cx;
+      const world_z = zRel + cz;
+      if (i === 0) shape.moveTo(x, world_z); else shape.lineTo(x, world_z);
+    }
+
+    // Filled translucent polygon
+    const fillGeom = new THREE.ShapeGeometry(shape);
+    fillGeom.rotateX(-Math.PI / 2);
+    const fillMat = new THREE.MeshBasicMaterial({
+      color: z.color, transparent: true, opacity: 0.22,
+      side: THREE.DoubleSide, depthWrite: false,
+    });
+    const fillMesh = new THREE.Mesh(fillGeom, fillMat);
+    fillMesh.position.y = groundY;
+    fillMesh.userData = { zoneId: id };
+    zoneGroup.add(fillMesh);
+
+    // Outline (use the shape's points as a closed line)
+    const outlinePts = shape.getPoints(0).map(p =>
+      new THREE.Vector3(p.x, groundY + 1, p.y));
+    outlinePts.push(outlinePts[0]);
+    const lineGeom = new THREE.BufferGeometry().setFromPoints(outlinePts);
+    const lineMat = new THREE.LineBasicMaterial({
+      color: z.color, transparent: true, opacity: 0.85,
+    });
+    zoneGroup.add(new THREE.Line(lineGeom, lineMat));
+  });
+
+  document.body.removeChild(tmpSvg);
+}
+
+// ===== ORBIT CONTROLS =====
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.minDistance = 200;
+controls.maxDistance = 4000;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.target.set(0, 100, 0);
+
+// (Photo-ground experimentation removed — the OBJ's own terrain mesh is
+// the source of truth.  We just stylise its materials via the lighting
+// modes below.)
+
+// ===== LOAD GLB =====
+const SCALE_M = 1;   // 1 unit = 1 metre
+let model = null;
+let modelExaggerationGroup = new THREE.Group();
+scene.add(modelExaggerationGroup);
+
+const loader = new GLTFLoader();
+loader.load(
+  'assets/masterplan/masterplan.glb',
+  (gltf) => {
+    document.getElementById('loader-progress').textContent = 'Optimising…';
+    model = gltf.scene;
+
+    // Stylize materials.  We don't have textures from the architect, so we
+    // assign colors based on simple heuristics: tall thin = villa walls,
+    // flat large = ground, etc.
+    const cream      = STYLES.clay.villa;
+    const wall       = STYLES.clay.wall;
+    const ground     = STYLES.clay.ground_c;
+    const roof       = 0xa64a2c;
+
+    let bbox = new THREE.Box3().setFromObject(model);
+    const size = bbox.getSize(new THREE.Vector3());
+
+    model.traverse(o => {
+      if (!o.isMesh) return;
+      const obb = new THREE.Box3().setFromObject(o);
+      const sz = obb.getSize(new THREE.Vector3());
+      const flatness = sz.y / Math.max(sz.x, sz.z, 1);     // flat = small Y
+      const area = sz.x * sz.z;
+      let kind = 'wall', col = wall;
+      if (flatness < 0.05 && area > 1500) { kind = 'ground'; col = ground; }
+      else if (sz.y > 3 && area < 200)    { kind = 'villa';  col = cream; }
+      else if (sz.y < 0.6)                { kind = 'ground'; col = ground; }
+      o.userData._kind = kind;
+      o.material = new THREE.MeshStandardMaterial({
+        color: col, roughness: 0.92, metalness: 0,
+        flatShading: false, side: THREE.DoubleSide,
+      });
+      o.castShadow = true; o.receiveShadow = true;
+    });
+
+    // Place into the exaggeration group so we can scale Y for relief
+    modelExaggerationGroup.add(model);
+
+    // Compute model bounds and frame the camera
+    bbox = new THREE.Box3().setFromObject(model);
+    const center = bbox.getCenter(new THREE.Vector3());
+    const span = bbox.getSize(new THREE.Vector3());
+
+    controls.target.set(center.x, center.y + span.y * 0.1, center.z);
+
+    // Sun position based on bbox
+    sun.position.set(center.x + span.x * 0.6, center.y + span.y * 1.4,
+                     center.z - span.z * 0.4);
+    sun.target.position.copy(center);
+
+    // Default oblique camera
+    flyToView('oblique', { instant: true });
+
+    applyStyle('clay');
+    // Build zone overlays from the 2D watercolor SVG → 3D world coords,
+    // anchored to the project bbox (not the whole-model bbox).
+    buildZoneOverlays(focusBox);
+    setTimeout(() => document.getElementById('loader').style.display = 'none', 200);
+    setTimeout(() => {
+      const card = document.getElementById('info-card');
+      card.classList.add('shown');
+      setTimeout(() => card.classList.remove('shown'), 4000);
+    }, 800);
+
+    window.DEBUG3D = { renderer, scene, camera, controls, model };
+  },
+  (xhr) => {
+    if (xhr.total) {
+      const pct = Math.round(xhr.loaded / xhr.total * 100);
+      document.getElementById('loader-progress').textContent = pct + '%';
+    } else {
+      document.getElementById('loader-progress').textContent =
+        Math.round(xhr.loaded / 1024) + ' KB';
+    }
+  },
+  (err) => {
+    document.getElementById('loader-msg').textContent = 'Load failed';
+    let hint = err.message || 'unknown';
+    if (location.protocol === 'file:') {
+      hint = 'Browsers block binary fetch on file://. ' +
+             'Open via http://localhost:8090/masterplan_clay.html instead, ' +
+             'or deploy to GitHub Pages.';
+    }
+    document.getElementById('loader-progress').textContent = hint;
+    document.getElementById('loader-progress').style.maxWidth = '420px';
+    document.getElementById('loader-progress').style.textAlign = 'center';
+    document.getElementById('loader-progress').style.lineHeight = '1.5';
+  }
+);
+
+// ===== CAMERA VIEW PRESETS =====
+const VIEWS = {
+  oblique:  { polar: 1.05, az: -0.45, dist: 1700 },
+  topdown:  { polar: 0.05, az: 0,     dist: 1900 },
+  approach: { polar: 1.35, az: -1.1,  dist: 1100 },
+};
+function flyToView(name, opts = {}) {
+  const v = VIEWS[name]; if (!v || !model) return;
+  const target = controls.target.clone();
+  const r = v.dist;
+  const x = target.x + r * Math.sin(v.polar) * Math.sin(v.az);
+  const y = target.y + r * Math.cos(v.polar);
+  const z = target.z + r * Math.sin(v.polar) * Math.cos(v.az);
+  if (opts.instant) {
+    camera.position.set(x, y, z);
+    camera.lookAt(target);
+  } else {
+    const start = camera.position.clone();
+    const end = new THREE.Vector3(x, y, z);
+    const t0 = performance.now(), dur = 800;
+    function tick() {
+      const k = Math.min(1, (performance.now() - t0) / dur);
+      const ee = 1 - Math.pow(1 - k, 3);
+      camera.position.lerpVectors(start, end, ee);
+      camera.lookAt(target);
+      if (k < 1) requestAnimationFrame(tick);
+    }
+    tick();
+  }
+  document.querySelectorAll('[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === name));
+}
+
+// ===== UI WIRING =====
+document.querySelectorAll('[data-view]').forEach(b =>
+  b.addEventListener('click', () => flyToView(b.dataset.view)));
+
+document.querySelectorAll('[data-style]').forEach(b =>
+  b.addEventListener('click', () => applyStyle(b.dataset.style)));
+
+// Zones overlay toggle
+let zonesOn = true;
+document.getElementById('bZones').addEventListener('click', () => {
+  zonesOn = !zonesOn;
+  zoneGroup.visible = zonesOn;
+  document.getElementById('bZones').classList.toggle('active', zonesOn);
+  document.getElementById('bZones').textContent = zonesOn ? 'Show zones' : 'Show zones';
+});
+
+let spinning = false;
+document.getElementById('bSpin').addEventListener('click', () => {
+  spinning = !spinning;
+  controls.autoRotate = spinning;
+  controls.autoRotateSpeed = 0.6;
+  document.getElementById('bSpin').textContent =
+    spinning ? '⏸ Stop' : 'Auto-rotate';
+});
+
+document.getElementById('rScale').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('vScale').textContent = v.toFixed(1) + '×';
+  modelExaggerationGroup.scale.y = v;
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ===== RENDER LOOP =====
+function tick() {
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
