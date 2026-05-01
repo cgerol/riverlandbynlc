@@ -1381,9 +1381,10 @@ footer {
   border-color: var(--gold); color: var(--gold); transform: rotate(90deg);
 }
 @media (max-width: 700px) {
-  #mp-video-stage.shown { grid-template-rows: 1fr 80px; }
-  .mp-video-photos { padding: 8px 10px 10px; }
-  .mp-video-photo { width: 80px; height: 50px; }
+  #mp-video-stage.shown { grid-template-rows: 1fr 90px; }
+  .mp-video-photos { padding: 10px 12px; gap: 8px; }
+  .mp-video-photo { width: 102px; height: 62px; }
+  .mp-video-photo .num { font-size: 0.58rem; padding: 2px 4px; }
   .mp-photo-lightbox-title { font-size: 1.05rem; }
   .mp-photo-lightbox-desc { font-size: 0.76rem; }
 }
@@ -4153,12 +4154,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
     // Start the zoom-out at t=0 of the modal open (no delay).  Asymmetric
     // padding nudges the framing so the parcel + villages cluster sits up
-    // and to the right of centre — leaves more of the highway / SW
-    // landscape visible below and to the left.  Total padding (x and y)
-    // matches the previous symmetric value, so the zoom level is unchanged.
+    // and to the right of centre — more of the highway / SW landscape
+    // shows below and to the left.  Mobile gets smaller paddings so a
+    // narrow screen doesn't eat too much of the bounds area.
+    const _isNarrow = window.innerWidth < 700;
     routesMap.flyToBounds(wideBounds, {
-      paddingTopLeft:     [70, 10],
-      paddingBottomRight: [10, 80],
+      paddingTopLeft:     _isNarrow ? [40, 6]  : [70, 10],
+      paddingBottomRight: _isNarrow ? [6, 50]  : [10, 80],
       duration: 2.4,
       maxZoom: 15,
       easeLinearity: 0.32,
