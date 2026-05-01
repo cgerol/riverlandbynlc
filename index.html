@@ -1065,17 +1065,17 @@ footer {
 .mp-modal-close:hover { border-color: var(--gold); color: var(--gold); transform: rotate(90deg); }
 .mp-modal-body { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
 
-/* Modal route-draw animation — matched to the #location map's
-   .map-route timing (2.8s ease-in-out) so both maps feel like the same
-   piece of design. */
-@keyframes mpDrawRoute { to { stroke-dashoffset: 0; } }
+/* Routes appear via opacity fade-in (not stroke-dasharray) so the line styling
+   — including the dashed pattern on the internal-access route — survives
+   intact through the zoom-out animation.  A stroke-dasharray-based draw
+   would jitter and snap because Leaflet re-projects each path while the
+   map zooms (path pixel-length changes mid-animation). */
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route {
   stroke-linecap: round; stroke-linejoin: round; fill: none;
-  /* dasharray + offset are set via JS once we know the path length */
+  opacity: 0;
+  transition: opacity 0.9s ease-out;
 }
-#mp-routes-map .leaflet-overlay-pane svg path.mp-route.drawing {
-  animation: mpDrawRoute 2.8s ease-in-out forwards;
-}
+#mp-routes-map .leaflet-overlay-pane svg path.mp-route.drawing { opacity: 1; }
 /* Place markers fade in like community-boundary in #location section */
 @keyframes mpPlaceIn { from { opacity: 0; transform: translateY(6px); }
                        to   { opacity: 1; transform: translateY(0); } }
@@ -3889,10 +3889,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       const km = polylineLengthKm(rawPts);
       routeStats[route.id] = { km };
       const isInternal = route.id === 'essoterikos';
-      // Dark casing under the colored highlight for legibility
-      L.polyline(latlngs, {
+      // Dark casing under the colored highlight for legibility — gets the
+      // same fade-in class as the colored line so they appear together.
+      const casing = L.polyline(latlngs, {
         color: '#0E1A0E', weight: isInternal ? 3.5 : 4.5,
         opacity: 0.55, lineCap: 'round', lineJoin: 'round',
+        className: 'mp-route mp-route-casing',
       }).addTo(routedFeatures.layerGroup);
       const line = L.polyline(latlngs, {
         color: route.color, weight: isInternal ? 1.5 : 2.5,
@@ -3902,20 +3904,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       })
       .bindTooltip(`${route.label} — ${km.toFixed(1)} km`, { sticky: true })
       .addTo(routedFeatures.layerGroup);
-      drawableLines.push({ id: route.id, polyline: line });
+      drawableLines.push({ id: route.id, polyline: line, casing });
     });
 
-    // Animate the route strokes drawing in, staggered.  We grab Leaflet's
-    // generated <path> for each polyline, set stroke-dasharray to its actual
-    // length, then trigger the CSS animation by adding the .drawing class.
+    // Stagger the route opacity fade-ins so they appear one after another
+    // while the map is zooming out (no stroke-dasharray gymnastics → no
+    // jitter when Leaflet re-projects the paths during the zoom).
     drawableLines.forEach((d, i) => {
-      const path = d.polyline.getElement?.();
-      if (!path || !path.getTotalLength) return;
-      const len = path.getTotalLength();
-      path.style.strokeDasharray = len;
-      path.style.strokeDashoffset = len;
-      // stagger
-      setTimeout(() => path.classList.add('drawing'), 180 + i * 220);
+      setTimeout(() => {
+        d.polyline.getElement?.()?.classList.add('drawing');
+        d.casing.getElement?.()?.classList.add('drawing');
+      }, 180 + i * 220);
     });
 
     // Real distances + drive times — client-confirmed.  Re-render whenever
@@ -3947,9 +3946,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     // padding + lower maxZoom make sure every route fits with a comfortable
     // margin around the edge.
     routesMap.flyToBounds(wideBounds, {
-      padding: [80, 80],
-      duration: 3.4,
-      maxZoom: 13,
+      padding: [60, 60],
+      duration: 2.6,
+      maxZoom: 14,        // one zoom-level closer than before — client preferred this
       easeLinearity: 0.32,
     });
   }
