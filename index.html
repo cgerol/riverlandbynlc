@@ -3923,12 +3923,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     refreshLegendStats();
     document.getElementById('mp-routes-loading').classList.remove('shown');
 
-    // Wide bounds: include every point on every route shape (not just village
-    // centers) so the final view is guaranteed to fit all routes from start
-    // to end, with a bit of breathing room.
-    const allRoutePts = ROUTE_KMLS.flatMap(r => KML_ROUTES_DATA[r.id] || []);
+    // Wide bounds — the project parcel + the destination village centres
+    // and the nearby places.  We DON'T include every point of every route
+    // polyline here on purpose: route curves can swing wide (especially
+    // Pyrgos) and would force Leaflet down a zoom level. The villages are
+    // the meaningful endpoints, so framing them keeps the zoom one level
+    // tighter (~15 instead of ~13) — exactly the framing the client wants.
     const widePts = [
-      ...allRoutePts,
       ...PARCEL_RV1,
       ...NEARBY_PLACES.map(p => p.lonlat),
       ...Object.values(VILLAGE_CENTERS),
@@ -3940,15 +3941,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       [Math.max(...wideLats), Math.max(...wideLngs)],
     ];
 
-    // Start the zoom-out at t=0 of the modal open (no delay).  Duration is
-    // tuned to land just as the last route finishes drawing (~3.6 s in)
-    // so the visitor sees the project fly out into the full route map.
-    // padding + lower maxZoom make sure every route fits with a comfortable
-    // margin around the edge.
+    // Start the zoom-out at t=0 of the modal open (no delay).
     routesMap.flyToBounds(wideBounds, {
-      padding: [60, 60],
-      duration: 2.6,
-      maxZoom: 14,        // one zoom-level closer than before — client preferred this
+      padding: [40, 40],
+      duration: 2.4,
+      maxZoom: 15,
       easeLinearity: 0.32,
     });
   }
