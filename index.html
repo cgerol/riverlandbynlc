@@ -1079,6 +1079,11 @@ footer {
 }
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route {
   stroke-linecap: round; stroke-linejoin: round; fill: none;
+  /* Keep stroke width constant in screen pixels regardless of the CSS
+     transform Leaflet applies to the SVG layer during flyTo.  Without
+     this, strokes visibly shrink as the map zooms out and snap back to
+     their true weight only when the flight ends. */
+  vector-effect: non-scaling-stroke;
 }
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route.mp-route-anim {
   stroke-dasharray: 1;
@@ -1279,17 +1284,15 @@ footer {
 #mp-video-stage {
   position: absolute; inset: 0; display: none; background: #000;
 }
-/* Grid (player row + fixed photo-strip row) is more robust than flex —
-   guarantees the strip its space even when the video tries to fill the
-   stage from edge to edge. */
-#mp-video-stage.shown {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 96px;
-}
+#mp-video-stage.shown { display: block; }
+/* Pin the player to the top portion of the stage and the photo strip to
+   the bottom 96px — absolute positioning is the only layout that truly
+   guarantees the strip's space at every zoom level (grid + flex were
+   getting outflanked by the video's intrinsic sizing on some viewports). */
 .mp-video-stage-player {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 96px;
   display: flex; align-items: center; justify-content: center;
-  min-height: 0; min-width: 0;
   padding: 6px;
   overflow: hidden;
 }
@@ -1301,19 +1304,19 @@ footer {
   aspect-ratio: 16 / 9; height: auto;
   object-fit: contain; background: #000;
 }
-/* Photo strip below the video player.  Horizontal scroll when there are
-   more thumbs than fit. */
+/* Photo strip pinned to the bottom of the stage, always 96px tall. */
 .mp-video-photos {
-  flex: 0 0 auto;
-  display: flex; gap: 8px;
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 96px;
+  display: flex; gap: 8px; align-items: center;
   overflow-x: auto; overflow-y: hidden;
-  padding: 10px 14px 12px;
+  padding: 0 14px;
   background: linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.55));
   border-top: 1px solid rgba(196, 168, 107, 0.18);
   scrollbar-width: thin;
   scrollbar-color: rgba(196,168,107,0.35) transparent;
 }
-.mp-video-photos:empty { display: none; }
 .mp-video-photo {
   flex: 0 0 auto;
   width: 96px; height: 60px;
@@ -1384,8 +1387,8 @@ footer {
   border-color: var(--gold); color: var(--gold); transform: rotate(90deg);
 }
 @media (max-width: 700px) {
-  #mp-video-stage.shown { grid-template-rows: 1fr 90px; }
-  .mp-video-photos { padding: 10px 12px; gap: 8px; }
+  .mp-video-stage-player { bottom: 90px; }
+  .mp-video-photos { height: 90px; padding: 0 12px; gap: 8px; }
   .mp-video-photo { width: 102px; height: 62px; }
   .mp-video-photo .num { font-size: 0.58rem; padding: 2px 4px; }
   .mp-photo-lightbox-title { font-size: 1.05rem; }
