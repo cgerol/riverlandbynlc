@@ -1065,22 +1065,25 @@ footer {
 .mp-modal-close:hover { border-color: var(--gold); color: var(--gold); transform: rotate(90deg); }
 .mp-modal-body { flex: 1; position: relative; overflow: hidden; background: var(--bg-deep); }
 
-/* Route line-draw animation.  The trick that fixes the earlier "pause then
-   snap" bug is that the dasharray is computed AFTER the zoom-out flight
-   completes (see JS), so path lengths are stable while the keyframes run.
-   `mp-route-anim` is added during the animation phase only; it's pulled off
-   on animationend so the colored line returns to its native styling
-   (including the `6 5` dashed pattern on the internal-access route). */
-@keyframes mpDrawRoute { to { stroke-dashoffset: 0; } }
+/* Route line-draw animation.  Keyframes animate stroke-dashoffset against
+   a pathLength="1" SVG attribute (set by JS) — normalising the offset so
+   the draw progress stays in sync even as Leaflet re-projects each path
+   during the concurrent fly-to-bounds.  All 4 routes start simultaneously
+   at modal-open and finish exactly when the zoom-out settles.
+   `mp-route-anim` is removed at animation end so the colored line returns
+   to its native styling (including the `6 5` dashed pattern on the
+   internal-access route). */
+@keyframes mpDrawRoute {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route {
   stroke-linecap: round; stroke-linejoin: round; fill: none;
 }
 #mp-routes-map .leaflet-overlay-pane svg path.mp-route.mp-route-anim {
-  stroke-dasharray: 9999;
-  stroke-dashoffset: 9999;
-}
-#mp-routes-map .leaflet-overlay-pane svg path.mp-route.mp-route-anim.drawing {
-  animation: mpDrawRoute 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mpDrawRoute 3.6s ease-in-out forwards;
 }
 /* Place markers fade in like community-boundary in #location section */
 @keyframes mpPlaceIn { from { opacity: 0; transform: translateY(6px); }
@@ -4114,17 +4117,23 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       drawableLines.push({ id: route.id, polyline: line, casing });
     });
 
-    // Hide the routes (via dasharray) until after the fly-to-bounds completes,
-    // then trigger the line-draw animation. Doing the draw post-zoom is the
-    // key — Leaflet re-projects each path during the flight, which would
-    // make a mid-zoom dasharray transition jitter and snap.
-    const routePaths = [];
+    // Kick off the line-draw animation NOW — all 4 routes start together at
+    // modal-open and finish exactly when the zoom-out settles.
+    // The pathLength="1" attribute normalises stroke-dasharray so the draw
+    // progress stays in sync as Leaflet re-projects each path during the
+    // concurrent fly-to-bounds (no jitter, no snap).
     drawableLines.forEach(d => {
       [d.polyline, d.casing].forEach(p => {
         const path = p.getElement?.();
         if (!path) return;
+        path.setAttribute('pathLength', '1');
         path.classList.add('mp-route-anim');
-        routePaths.push(path);
+        // Restore native styling once the keyframes finish so the dashed
+        // pattern on the internal-access route reappears.
+        path.addEventListener('animationend', () => {
+          path.classList.remove('mp-route-anim');
+          path.removeAttribute('pathLength');
+        }, { once: true });
       });
     });
 
@@ -4161,32 +4170,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     // right corner.  Mobile gets smaller paddings so a narrow screen
     // doesn't eat too much of the bounds area.
     const _isNarrow = window.innerWidth < 700;
+    // Fly duration matches the route-draw animation so they land on the
+    // same beat — map reaches its final framing the instant the last
+    // pixel of every route is drawn.
     routesMap.flyToBounds(wideBounds, {
       paddingTopLeft:     _isNarrow ? [12, 6]  : [40, 10],
       paddingBottomRight: _isNarrow ? [12, 50] : [40, 80],
-      duration: 2.4,
+      duration: 3.6,
       maxZoom: 15,
       easeLinearity: 0.32,
-    });
-
-    // Once the flight settles, run the line-draw stagger.  We listen for the
-    // first moveend after the flight starts.  After each path's animation
-    // finishes we strip the .mp-route-anim and .drawing classes so the
-    // line returns to its natural styling (incl. the dashed pattern on the
-    // internal-access route).
-    routesMap.once('moveend', () => {
-      drawableLines.forEach((d, i) => {
-        setTimeout(() => {
-          [d.polyline, d.casing].forEach(p => {
-            const path = p.getElement?.();
-            if (!path) return;
-            path.classList.add('drawing');
-            path.addEventListener('animationend', () => {
-              path.classList.remove('drawing', 'mp-route-anim');
-            }, { once: true });
-          });
-        }, i * 200);
-      });
     });
   }
 
