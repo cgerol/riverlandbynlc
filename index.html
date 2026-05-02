@@ -1284,16 +1284,20 @@ footer {
 #mp-video-stage {
   position: absolute; inset: 0; display: none; background: #000;
 }
-#mp-video-stage.shown { display: block; }
-/* Desktop: photos in a column on the RIGHT of the video so the video
-   keeps its full 16:9 framing while the thumbs remain visible.
-   Mobile (overridden below) keeps the strip pinned to the bottom. */
+#mp-video-stage.shown {
+  display: flex;
+  flex-direction: row;   /* desktop: video left, thumbs column right */
+}
+/* Desktop: video player on the left, photos column on the right.
+   Mobile (overridden below) flips to a vertical stack with the strip
+   at the bottom. */
 .mp-video-stage-player {
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 144px;
+  flex: 1 1 0;
+  min-width: 0; min-height: 0;
   display: flex; align-items: center; justify-content: center;
   padding: 6px;
   overflow: hidden;
+  position: relative;   /* containing block for the back button */
 }
 /* Use aspect-ratio so the element matches the video's natural shape — avoids
    iOS Safari pinning the first-frame preview to the top of an oversized box
@@ -1306,9 +1310,7 @@ footer {
 /* Desktop: vertical column of thumbnails on the right side of the player.
    Mobile (overridden below) flips back to a horizontal strip at the bottom. */
 .mp-video-photos {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 144px;
+  flex: 0 0 144px;
   display: flex; flex-direction: column; gap: 10px;
   align-items: center; justify-content: flex-start;
   overflow-y: auto; overflow-x: hidden;
@@ -1388,12 +1390,11 @@ footer {
   border-color: var(--gold); color: var(--gold); transform: rotate(90deg);
 }
 @media (max-width: 700px) {
-  /* Mobile: undo desktop's side-by-side and put the strip back at the
-     bottom (portrait phones don't have spare horizontal width). */
-  .mp-video-stage-player { top: 0; left: 0; right: 0; bottom: 90px; }
+  /* Mobile: stack vertically — video on top, strip at the bottom
+     (portrait phones don't have spare horizontal width for a side column). */
+  #mp-video-stage.shown { flex-direction: column; }
   .mp-video-photos {
-    top: auto; left: 0; right: 0; bottom: 0;
-    width: auto; height: 90px;
+    flex: 0 0 90px;
     flex-direction: row; align-items: center;
     overflow-x: auto; overflow-y: hidden;
     padding: 0 12px; gap: 8px;
