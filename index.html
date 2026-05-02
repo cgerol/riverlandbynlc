@@ -4152,15 +4152,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       [Math.max(...wideLats), Math.max(...wideLngs)],
     ];
 
-    // Start the zoom-out at t=0 of the modal open (no delay).  Asymmetric
-    // padding nudges the framing so the parcel + villages cluster sits up
-    // and to the right of centre — more of the highway / SW landscape
-    // shows below and to the left.  Mobile gets smaller paddings so a
-    // narrow screen doesn't eat too much of the bounds area.
+    // Start the zoom-out at t=0 of the modal open (no delay).
+    // Padding asymmetry only on the vertical axis (extra at the bottom)
+    // so the parcel + villages cluster sits in the upper portion of the
+    // map, with more highway / SW landscape visible below.  Horizontal
+    // padding stays balanced — on a wide desktop modal the previous
+    // left/right asymmetry pushed the cluster jarringly into the upper
+    // right corner.  Mobile gets smaller paddings so a narrow screen
+    // doesn't eat too much of the bounds area.
     const _isNarrow = window.innerWidth < 700;
     routesMap.flyToBounds(wideBounds, {
-      paddingTopLeft:     _isNarrow ? [40, 6]  : [70, 10],
-      paddingBottomRight: _isNarrow ? [6, 50]  : [10, 80],
+      paddingTopLeft:     _isNarrow ? [12, 6]  : [40, 10],
+      paddingBottomRight: _isNarrow ? [12, 50] : [40, 80],
       duration: 2.4,
       maxZoom: 15,
       easeLinearity: 0.32,
